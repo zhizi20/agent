@@ -50,6 +50,7 @@
 | /api/voices | PUT | 更新 AI 回复 |
 | /api/stats | GET | 获取统计数据 |
 | /api/ai-reply | POST | AI 流式回复（SSE） |
+| /api/analysis | POST | AI 深度分析（高频问题摘要、紧急程度、处理建议，SSE） |
 
 ## 核心组件
 

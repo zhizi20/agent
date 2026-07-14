@@ -1,9 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Header } from '@/components/header';
 import { CATEGORY_MAP } from '@/lib/types';
 import type { VoiceCategory } from '@/lib/types';
+import { cn } from '@/lib/utils';
 
 interface Stats {
   total: number;
@@ -13,9 +14,25 @@ interface Stats {
   recentWeek: number;
 }
 
+interface AnalysisIssue {
+  title: string;
+  urgency: string;
+  description: string;
+  relatedCount: number;
+  suggestions: string[];
+}
+
+interface AnalysisResult {
+  summary: string;
+  issues: AnalysisIssue[];
+}
+
 export default function DashboardPage() {
   const [stats, setStats] = useState<Stats | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [rawAnalysisText, setRawAnalysisText] = useState('');
 
   useEffect(() => {
     async function fetchStats() {
@@ -33,6 +50,75 @@ export default function DashboardPage() {
     }
     fetchStats();
   }, []);
+
+  const runAnalysis = useCallback(async () => {
+    if (isAnalyzing) return;
+    setIsAnalyzing(true);
+    setAnalysis(null);
+    setRawAnalysisText('');
+
+    try {
+      const response = await fetch('/api/analysis', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      });
+
+      if (!response.ok) {
+        const errData = await response.json();
+        setRawAnalysisText(errData.error || '分析失败');
+        setIsAnalyzing(false);
+        return;
+      }
+
+      const reader = response.body?.getReader();
+      if (!reader) {
+        setIsAnalyzing(false);
+        return;
+      }
+
+      const decoder = new TextDecoder();
+      let buffer = '';
+      let accumulated = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || '';
+
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            try {
+              const data = JSON.parse(line.slice(6));
+              if (data.content) {
+                accumulated += data.content;
+                setRawAnalysisText(accumulated);
+              }
+              if (data.done) {
+                // Try to parse the final result
+                const parsed = parseAnalysisResult(accumulated);
+                if (parsed) {
+                  setAnalysis(parsed);
+                }
+                setIsAnalyzing(false);
+              }
+              if (data.error) {
+                setRawAnalysisText(data.error);
+                setIsAnalyzing(false);
+              }
+            } catch {
+              // skip malformed JSON
+            }
+          }
+        }
+      }
+    } catch {
+      setRawAnalysisText('网络异常，请稍后重试');
+      setIsAnalyzing(false);
+    }
+  }, [isAnalyzing]);
 
   const categories = Object.entries(CATEGORY_MAP) as [
     VoiceCategory,
@@ -114,7 +200,7 @@ export default function DashboardPage() {
             </div>
 
             {/* Category distribution */}
-            <div className="rounded-2xl border border-border/60 bg-card p-6 shadow-sm">
+            <div className="mb-8 rounded-2xl border border-border/60 bg-card p-6 shadow-sm">
               <h2 className="mb-6 text-base font-semibold text-foreground">
                 分类分布
               </h2>
@@ -153,8 +239,75 @@ export default function DashboardPage() {
               </div>
             </div>
 
+            {/* AI Analysis Section */}
+            <div className="mb-8 rounded-2xl border border-border/60 bg-card p-6 shadow-sm">
+              <div className="mb-4 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent/10">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-accent">
+                      <path d="M12 2a4 4 0 0 0-4 4v2H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V10a2 2 0 0 0-2-2h-2V6a4 4 0 0 0-4-4z" />
+                      <circle cx="12" cy="15" r="2" />
+                    </svg>
+                  </div>
+                  <h2 className="text-base font-semibold text-foreground">
+                    AI 深度分析
+                  </h2>
+                </div>
+                <button
+                  onClick={runAnalysis}
+                  disabled={isAnalyzing}
+                  className={cn(
+                    'inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-xs font-medium transition-all',
+                    isAnalyzing
+                      ? 'bg-muted text-muted-foreground cursor-not-allowed'
+                      : 'bg-accent/10 text-accent hover:bg-accent/20 active:scale-[0.97]'
+                  )}
+                >
+                  {isAnalyzing ? (
+                    <>
+                      <span className="h-3 w-3 animate-spin rounded-full border-2 border-accent/30 border-t-accent" />
+                      分析中...
+                    </>
+                  ) : analysis ? (
+                    <>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="23 4 23 10 17 10" />
+                        <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
+                      </svg>
+                      重新分析
+                    </>
+                  ) : (
+                    <>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+                      </svg>
+                      生成分析
+                    </>
+                  )}
+                </button>
+              </div>
+
+              {/* Analysis content */}
+              {analysis ? (
+                <AnalysisDisplay result={analysis} />
+              ) : isAnalyzing ? (
+                <StreamingAnalysis rawText={rawAnalysisText} />
+              ) : rawAnalysisText ? (
+                <div className="rounded-xl bg-destructive/5 p-4 text-sm text-destructive">
+                  {rawAnalysisText}
+                </div>
+              ) : (
+                <div className="py-8 text-center">
+                  <div className="mb-2 text-3xl opacity-40">🔍</div>
+                  <p className="text-sm text-muted-foreground">
+                    点击「生成分析」，AI 将基于所有心声数据生成深度分析报告
+                  </p>
+                </div>
+              )}
+            </div>
+
             {/* Insights */}
-            <div className="mt-8 rounded-2xl border border-border/60 bg-card p-6 shadow-sm">
+            <div className="rounded-2xl border border-border/60 bg-card p-6 shadow-sm">
               <h2 className="mb-4 text-base font-semibold text-foreground">
                 洞察小结
               </h2>
@@ -180,6 +333,101 @@ export default function DashboardPage() {
           </div>
         )}
       </main>
+    </div>
+  );
+}
+
+function AnalysisDisplay({ result }: { result: AnalysisResult }) {
+  return (
+    <div className="space-y-5">
+      {/* Summary */}
+      <div className="rounded-xl bg-secondary/40 p-4">
+        <div className="mb-1.5 flex items-center gap-1.5">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+            <polyline points="14 2 14 8 20 8" />
+            <line x1="16" y1="13" x2="8" y2="13" />
+            <line x1="16" y1="17" x2="8" y2="17" />
+          </svg>
+          <span className="text-xs font-medium text-primary">整体态势</span>
+        </div>
+        <p className="text-sm leading-relaxed text-foreground/85">{result.summary}</p>
+      </div>
+
+      {/* Issues list */}
+      <div className="space-y-3">
+        <h3 className="text-sm font-medium text-foreground">高频问题与处理建议</h3>
+        {result.issues.map((issue, idx) => (
+          <IssueCard key={idx} issue={issue} index={idx} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function IssueCard({ issue, index }: { issue: AnalysisIssue; index: number }) {
+  const urgencyConfig = getUrgencyConfig(issue.urgency);
+
+  return (
+    <div
+      className="animate-fade-in-up opacity-0 rounded-xl border border-border/50 bg-card p-4"
+      style={{ animationDelay: `${index * 0.1}s` }}
+    >
+      <div className="mb-2 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-medium text-foreground">{issue.title}</span>
+          <span
+            className="inline-flex items-center gap-0.5 rounded-full px-2 py-0.5 text-[10px] font-semibold"
+            style={{
+              backgroundColor: urgencyConfig.bgColor,
+              color: urgencyConfig.textColor,
+            }}
+          >
+            {urgencyConfig.dot}
+            {issue.urgency}
+          </span>
+        </div>
+        <span className="text-xs text-muted-foreground">
+          涉及 {issue.relatedCount} 条心声
+        </span>
+      </div>
+
+      <p className="mb-3 text-sm leading-relaxed text-foreground/75">
+        {issue.description}
+      </p>
+
+      <div className="space-y-1.5">
+        <span className="text-xs font-medium text-muted-foreground">处理建议：</span>
+        {issue.suggestions.map((suggestion, i) => (
+          <div key={i} className="flex items-start gap-2 text-sm text-foreground/80">
+            <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-primary/60" />
+            <span>{suggestion}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function StreamingAnalysis({ rawText }: { rawText: string }) {
+  // Try to parse partial JSON for progressive display
+  const parsed = parseAnalysisResult(rawText);
+
+  if (parsed) {
+    return <AnalysisDisplay result={parsed} />;
+  }
+
+  // Show raw streaming text with a nice container
+  return (
+    <div className="rounded-xl bg-secondary/30 p-4">
+      <div className="mb-2 flex items-center gap-1.5">
+        <span className="h-2 w-2 animate-pulse rounded-full bg-accent" />
+        <span className="text-xs font-medium text-accent">AI 正在分析中...</span>
+      </div>
+      <pre className="whitespace-pre-wrap text-xs leading-relaxed text-foreground/60 font-mono">
+        {rawText}
+        <span className="ml-0.5 inline-block h-3 w-0.5 animate-pulse bg-accent align-middle" />
+      </pre>
     </div>
   );
 }
@@ -218,6 +466,78 @@ function InsightItem({ emoji, text }: { emoji: string; text: string }) {
       <p>{text}</p>
     </div>
   );
+}
+
+function getUrgencyConfig(urgency: string): {
+  bgColor: string;
+  textColor: string;
+  dot: React.ReactNode;
+} {
+  switch (urgency) {
+    case '高':
+      return {
+        bgColor: '#FEE2E2',
+        textColor: '#DC2626',
+        dot: <span className="mr-0.5 inline-block h-1.5 w-1.5 rounded-full bg-red-500" />,
+      };
+    case '中':
+      return {
+        bgColor: '#FEF3C7',
+        textColor: '#D97706',
+        dot: <span className="mr-0.5 inline-block h-1.5 w-1.5 rounded-full bg-amber-500" />,
+      };
+    case '低':
+      return {
+        bgColor: '#D1FAE5',
+        textColor: '#059669',
+        dot: <span className="mr-0.5 inline-block h-1.5 w-1.5 rounded-full bg-emerald-500" />,
+      };
+    default:
+      return {
+        bgColor: '#F3F4F6',
+        textColor: '#6B7280',
+        dot: <span className="mr-0.5 inline-block h-1.5 w-1.5 rounded-full bg-gray-400" />,
+      };
+  }
+}
+
+function parseAnalysisResult(text: string): AnalysisResult | null {
+  try {
+    // Extract JSON from markdown code block or raw text
+    let jsonStr = text;
+
+    // Try to find JSON in code block
+    const codeBlockMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/);
+    if (codeBlockMatch) {
+      jsonStr = codeBlockMatch[1].trim();
+    } else {
+      // Try to find JSON object directly
+      const jsonMatch = text.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        jsonStr = jsonMatch[0];
+      }
+    }
+
+    const parsed = JSON.parse(jsonStr);
+
+    if (parsed.summary && Array.isArray(parsed.issues)) {
+      return {
+        summary: parsed.summary,
+        issues: parsed.issues.map((issue: Record<string, unknown>) => ({
+          title: String(issue.title || ''),
+          urgency: String(issue.urgency || '中'),
+          description: String(issue.description || ''),
+          relatedCount: Number(issue.relatedCount || 0),
+          suggestions: Array.isArray(issue.suggestions)
+            ? issue.suggestions.map(String)
+            : [],
+        })),
+      };
+    }
+    return null;
+  } catch {
+    return null;
+  }
 }
 
 function getTopCategory(byCategory: Record<string, number>): string {
