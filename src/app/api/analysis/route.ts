@@ -46,8 +46,8 @@ export async function POST(request: NextRequest) {
 - 中：影响工作效率或满意度、多人共同关注
 - 低：改善型建议、长期规划类
 
-### 任务三：处理建议
-针对每个问题给出 1-2 条具体可执行的处理建议。
+### 任务三：处理建议与责任部门
+针对每个问题给出 1-2 条具体可执行的处理建议，并指定建议的责任部门（如：人力资源部、行政部、IT 部、财务部、业务管理部、企业文化部等）。
 
 ## 输出格式（严格遵循）
 
@@ -62,6 +62,7 @@ export async function POST(request: NextRequest) {
       "urgency": "高|中|低",
       "description": "问题描述（结合具体心声内容说明）",
       "relatedCount": 相关心声数量（数字）,
+      "department": "建议责任部门名称",
       "suggestions": ["建议1", "建议2"]
     }
   ]

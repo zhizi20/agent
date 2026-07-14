@@ -19,6 +19,7 @@ interface AnalysisIssue {
   urgency: string;
   description: string;
   relatedCount: number;
+  department: string;
   suggestions: string[];
 }
 
@@ -396,6 +397,22 @@ function IssueCard({ issue, index }: { issue: AnalysisIssue; index: number }) {
         {issue.description}
       </p>
 
+      {/* Responsible department */}
+      {issue.department && (
+        <div className="mb-3 flex items-center gap-1.5">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-chart-4">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+            <circle cx="9" cy="7" r="4" />
+            <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+            <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+          </svg>
+          <span className="text-xs text-muted-foreground">建议责任部门：</span>
+          <span className="inline-flex items-center rounded-md bg-chart-4/10 px-2 py-0.5 text-xs font-medium text-chart-4">
+            {issue.department}
+          </span>
+        </div>
+      )}
+
       <div className="space-y-1.5">
         <span className="text-xs font-medium text-muted-foreground">处理建议：</span>
         {issue.suggestions.map((suggestion, i) => (
@@ -528,6 +545,7 @@ function parseAnalysisResult(text: string): AnalysisResult | null {
           urgency: String(issue.urgency || '中'),
           description: String(issue.description || ''),
           relatedCount: Number(issue.relatedCount || 0),
+          department: String(issue.department || ''),
           suggestions: Array.isArray(issue.suggestions)
             ? issue.suggestions.map(String)
             : [],
