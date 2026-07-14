@@ -1,5 +1,15 @@
 # 项目上下文
 
+## 项目概览
+
+**员工心声助手** - 一个温暖的员工心声平台，让每个声音都被听见、被理解、被回应。
+
+核心功能：
+- 心声墙：展示员工心声，支持分类筛选、点赞
+- 发布心声：支持匿名/实名，6种分类（建议/吐槽/感恩/困惑/灵感/其他）
+- AI 暖心回复：通过 LLM 流式生成温暖回应
+- 数据看板：统计总心声数、分类分布、本周趋势等
+
 ### 版本技术栈
 
 - **Framework**: Next.js 16 (App Router)
@@ -30,6 +40,29 @@
 ```
 
 - 项目文件（如 app 目录、pages 目录、components 等）默认初始化到 `src/` 目录下。
+
+## API 接口
+
+| 路径 | 方法 | 功能 |
+|------|------|------|
+| /api/voices | GET | 获取心声列表，支持 ?category= 筛选 |
+| /api/voices | POST | 创建心声 / 点赞（action: 'like'） |
+| /api/voices | PUT | 更新 AI 回复 |
+| /api/stats | GET | 获取统计数据 |
+| /api/ai-reply | POST | AI 流式回复（SSE） |
+
+## 核心组件
+
+| 组件 | 路径 | 说明 |
+|------|------|------|
+| Header | src/components/header.tsx | 顶部导航 |
+| VoiceCard | src/components/voice-card.tsx | 心声卡片（含AI回复流式渲染） |
+| VoiceForm | src/components/voice-form.tsx | 发布心声表单 |
+| CategoryFilter | src/components/category-filter.tsx | 分类筛选 |
+
+## 数据存储
+
+当前使用内存存储（src/lib/store.ts），服务重启后数据重置。如需持久化可接入数据库。
 
 ## 包管理规范
 
