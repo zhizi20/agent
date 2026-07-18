@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import './globals.css';
+import { Header } from '@/components/header';
 
 export const metadata: Metadata = {
   title: '员工心声助手 - 茂佳科技',
@@ -13,7 +14,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="zh-CN">
-      <body className="antialiased min-h-screen">{children}</body>
+      <body className="antialiased min-h-screen bg-[#FAF8F5]">
+        <Header />
+        <main className="container mx-auto px-4 py-6 max-w-6xl">{children}</main>
+      </body>
     </html>
   );
 }
