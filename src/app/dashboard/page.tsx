@@ -12,6 +12,8 @@ interface Stats {
   total: number;
   byCategory: Record<string, number>;
   byDepartment?: Record<string, number>;
+  byStatus?: Record<string, number>;
+  weeklyTrend?: { week: string; count: number }[];
   totalLikes: number;
   anonymousCount: number;
   recentWeek: number;
@@ -74,6 +76,173 @@ function StatCard({ label, value, sub, icon, accent }: {
         </div>
         <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center text-lg", accent)}>
           {icon}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function WeeklyTrendChart({ data }: { data: { week: string; count: number }[] }) {
+  const chartData = useMemo(() => {
+    if (data.length === 0) return [];
+    const maxCount = Math.max(...data.map(d => d.count));
+    const w = 560;
+    const h = 200;
+    const padL = 40;
+    const padR = 20;
+    const padT = 20;
+    const padB = 40;
+    const plotW = w - padL - padR;
+    const plotH = h - padT - padB;
+
+    return data.map((d, i) => {
+      const x = padL + (data.length > 1 ? (i / (data.length - 1)) * plotW : plotW / 2);
+      const y = padT + plotH - (maxCount > 0 ? (d.count / maxCount) * plotH : 0);
+      const isMax = d.count === maxCount && maxCount > 0;
+      return { ...d, x, y, isMax, index: i };
+    });
+  }, [data]);
+
+  if (data.length === 0) {
+    return <div className="h-48 flex items-center justify-center text-stone-400 text-sm">暂无趋势数据</div>;
+  }
+
+  const maxCount = Math.max(...data.map(d => d.count));
+  const w = 560;
+  const h = 200;
+  const padL = 40;
+  const padR = 20;
+  const padT = 20;
+  const padB = 40;
+  const plotH = h - padT - padB;
+
+  // Build line path
+  const linePath = chartData.map((d, i) => `${i === 0 ? 'M' : 'L'}${d.x},${d.y}`).join(' ');
+  // Build area path
+  const areaPath = `${linePath} L${chartData[chartData.length - 1].x},${padT + plotH} L${chartData[0].x},${padT + plotH} Z`;
+
+  // Y-axis ticks
+  const yTicks = [0, Math.round(maxCount / 2), maxCount];
+
+  return (
+    <div className="w-full overflow-x-auto">
+      <svg viewBox={`0 0 ${w} ${h}`} className="w-full min-w-[400px]" preserveAspectRatio="xMidYMid meet">
+        {/* Grid lines */}
+        {yTicks.map((tick) => {
+          const y = padT + plotH - (maxCount > 0 ? (tick / maxCount) * plotH : 0);
+          return (
+            <g key={tick}>
+              <line x1={padL} y1={y} x2={w - padR} y2={y} stroke="#e7e5e4" strokeWidth="1" strokeDasharray="4 2" />
+              <text x={padL - 6} y={y + 4} textAnchor="end" className="text-[10px] fill-stone-400">{tick}</text>
+            </g>
+          );
+        })}
+        {/* Area fill */}
+        <path d={areaPath} fill="url(#trendGradient)" opacity="0.3" />
+        <defs>
+          <linearGradient id="trendGradient" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#f59e0b" />
+            <stop offset="100%" stopColor="#f59e0b" stopOpacity="0" />
+          </linearGradient>
+        </defs>
+        {/* Line */}
+        <path d={linePath} fill="none" stroke="#f59e0b" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+        {/* Data points */}
+        {chartData.map((d) => (
+          <g key={d.week}>
+            <circle
+              cx={d.x} cy={d.y}
+              r={d.isMax ? 6 : 3.5}
+              fill={d.isMax ? '#DC2626' : '#f59e0b'}
+              stroke="white"
+              strokeWidth={d.isMax ? 2.5 : 1.5}
+            />
+            {d.isMax && (
+              <text x={d.x} y={d.y - 12} textAnchor="middle" className="text-[10px] font-bold fill-red-600">
+                {d.count}条
+              </text>
+            )}
+          </g>
+        ))}
+        {/* X-axis labels */}
+        {chartData.map((d) => (
+          <text
+            key={`label-${d.week}`}
+            x={d.x}
+            y={h - 8}
+            textAnchor="middle"
+            className="text-[9px] fill-stone-400"
+          >
+            {d.week.replace(/^\d+-/, '')}
+          </text>
+        ))}
+      </svg>
+      {/* Legend */}
+      <div className="flex items-center gap-4 mt-2 justify-center">
+        <div className="flex items-center gap-1.5">
+          <span className="w-3 h-3 rounded-full bg-amber-500" />
+          <span className="text-xs text-stone-500">周反馈量</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <span className="w-3 h-3 rounded-full bg-red-600" />
+          <span className="text-xs text-stone-500">峰值（最高周）</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function StatusChart({ byStatus, total }: { byStatus: Record<string, number>; total: number }) {
+  const resolved = byStatus.resolved || 0;
+  const unresolved = byStatus.unresolved || 0;
+  const resolvedPct = total > 0 ? ((resolved / total) * 100).toFixed(1) : '0';
+  const unresolvedPct = total > 0 ? ((unresolved / total) * 100).toFixed(1) : '0';
+
+  // Donut chart
+  const size = 140;
+  const cx = size / 2;
+  const cy = size / 2;
+  const r = 52;
+  const strokeW = 18;
+
+  const resolvedAngle = total > 0 ? (resolved / total) * 360 : 0;
+  const resolvedRad = (resolvedAngle * Math.PI) / 180;
+  const largeArc = resolvedAngle > 180 ? 1 : 0;
+
+  const resolvedX = cx + r * Math.sin(resolvedRad);
+  const resolvedY = cy - r * Math.cos(resolvedRad);
+
+  const resolvedPath = resolvedAngle >= 360
+    ? `M ${cx} ${cy - r} A ${r} ${r} 0 1 1 ${cx - 0.01} ${cy - r}`
+    : `M ${cx} ${cy - r} A ${r} ${r} 0 ${largeArc} 1 ${resolvedX} ${resolvedY}`;
+
+  return (
+    <div className="flex flex-col items-center">
+      <svg viewBox={`0 0 ${size} ${size}`} className="w-32 h-32">
+        {/* Background ring */}
+        <circle cx={cx} cy={cy} r={r} fill="none" stroke="#e7e5e4" strokeWidth={strokeW} />
+        {/* Resolved arc */}
+        {resolved > 0 && (
+          <path d={resolvedPath} fill="none" stroke="#059669" strokeWidth={strokeW} strokeLinecap="round" />
+        )}
+        {/* Center text */}
+        <text x={cx} y={cy - 6} textAnchor="middle" className="text-lg font-bold fill-stone-800">{total}</text>
+        <text x={cx} y={cy + 10} textAnchor="middle" className="text-[9px] fill-stone-400">总计</text>
+      </svg>
+      <div className="flex gap-6 mt-3">
+        <div className="flex items-center gap-2">
+          <span className="w-3 h-3 rounded-full bg-emerald-600" />
+          <div>
+            <p className="text-sm font-bold text-stone-800">{resolved} <span className="text-xs font-normal text-stone-400">({resolvedPct}%)</span></p>
+            <p className="text-xs text-stone-500">已解决</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="w-3 h-3 rounded-full bg-stone-300" />
+          <div>
+            <p className="text-sm font-bold text-stone-800">{unresolved} <span className="text-xs font-normal text-stone-400">({unresolvedPct}%)</span></p>
+            <p className="text-xs text-stone-500">未解决</p>
+          </div>
         </div>
       </div>
     </div>
@@ -377,6 +546,21 @@ export default function DashboardPage() {
                     </div>
                   );
                 })}
+              </div>
+            </div>
+            {/* 反馈活跃趋势 + 问题处理状态 */}
+            <div className="mt-4 grid grid-cols-1 lg:grid-cols-5 gap-6">
+              {/* 折线图：反馈活跃趋势 */}
+              <div className="lg:col-span-3 bg-white rounded-2xl p-5 border border-stone-200/60 shadow-sm">
+                <h3 className="text-sm font-semibold text-stone-700 mb-1">反馈活跃趋势</h3>
+                <p className="text-xs text-stone-400 mb-4">按周统计反馈数量，判断员工反馈意愿与集中爆发点</p>
+                <WeeklyTrendChart data={stats.weeklyTrend || []} />
+              </div>
+              {/* 问题处理状态分布 */}
+              <div className="lg:col-span-2 bg-white rounded-2xl p-5 border border-stone-200/60 shadow-sm">
+                <h3 className="text-sm font-semibold text-stone-700 mb-1">问题处理状态</h3>
+                <p className="text-xs text-stone-400 mb-4">已解决与未解决问题占比</p>
+                <StatusChart byStatus={stats.byStatus || {}} total={stats.total} />
               </div>
             </div>
           </section>

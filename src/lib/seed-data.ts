@@ -1,4 +1,4 @@
-import type { Voice, VoiceCategory } from './types';
+import type { Voice, VoiceCategory, VoiceStatus } from './types';
 
 export const SEED_VOICES: Voice[] = [
   {
@@ -11,6 +11,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-10T08:10:00Z').toISOString(),
   },
   {
@@ -23,6 +24,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'unresolved' as VoiceStatus,
     createdAt: new Date('2026-07-11T09:11:00Z').toISOString(),
   },
   {
@@ -35,6 +37,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'unresolved' as VoiceStatus,
     createdAt: new Date('2026-07-12T10:12:00Z').toISOString(),
   },
   {
@@ -47,6 +50,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'unresolved' as VoiceStatus,
     createdAt: new Date('2026-07-10T11:13:00Z').toISOString(),
   },
   {
@@ -59,6 +63,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-11T12:14:00Z').toISOString(),
   },
   {
@@ -71,6 +76,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-12T13:15:00Z').toISOString(),
   },
   {
@@ -83,6 +89,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-10T14:16:00Z').toISOString(),
   },
   {
@@ -95,6 +102,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'unresolved' as VoiceStatus,
     createdAt: new Date('2026-07-11T15:17:00Z').toISOString(),
   },
   {
@@ -107,6 +115,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-12T16:18:00Z').toISOString(),
   },
   {
@@ -119,6 +128,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'unresolved' as VoiceStatus,
     createdAt: new Date('2026-07-10T17:19:00Z').toISOString(),
   },
   {
@@ -131,6 +141,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'unresolved' as VoiceStatus,
     createdAt: new Date('2026-07-11T18:20:00Z').toISOString(),
   },
   {
@@ -143,6 +154,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'unresolved' as VoiceStatus,
     createdAt: new Date('2026-07-12T19:21:00Z').toISOString(),
   },
   {
@@ -155,6 +167,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'unresolved' as VoiceStatus,
     createdAt: new Date('2026-07-10T08:22:00Z').toISOString(),
   },
   {
@@ -167,6 +180,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'unresolved' as VoiceStatus,
     createdAt: new Date('2026-07-11T09:23:00Z').toISOString(),
   },
   {
@@ -179,6 +193,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'unresolved' as VoiceStatus,
     createdAt: new Date('2026-07-12T10:24:00Z').toISOString(),
   },
   {
@@ -191,6 +206,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'unresolved' as VoiceStatus,
     createdAt: new Date('2026-07-10T11:25:00Z').toISOString(),
   },
   {
@@ -203,6 +219,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'unresolved' as VoiceStatus,
     createdAt: new Date('2026-07-11T12:26:00Z').toISOString(),
   },
   {
@@ -215,6 +232,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'unresolved' as VoiceStatus,
     createdAt: new Date('2026-07-12T13:27:00Z').toISOString(),
   },
   {
@@ -227,6 +245,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'unresolved' as VoiceStatus,
     createdAt: new Date('2026-07-10T14:28:00Z').toISOString(),
   },
   {
@@ -239,6 +258,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-11T15:29:00Z').toISOString(),
   },
   {
@@ -251,6 +271,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-12T16:30:00Z').toISOString(),
   },
   {
@@ -263,6 +284,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-10T17:31:00Z').toISOString(),
   },
   {
@@ -275,6 +297,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-11T18:32:00Z').toISOString(),
   },
   {
@@ -287,6 +310,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-12T19:33:00Z').toISOString(),
   },
   {
@@ -299,6 +323,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-10T08:34:00Z').toISOString(),
   },
   {
@@ -311,6 +336,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-11T09:35:00Z').toISOString(),
   },
   {
@@ -323,6 +349,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-12T10:36:00Z').toISOString(),
   },
   {
@@ -335,6 +362,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-10T11:37:00Z').toISOString(),
   },
   {
@@ -347,6 +375,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-11T12:38:00Z').toISOString(),
   },
   {
@@ -359,6 +388,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-12T13:39:00Z').toISOString(),
   },
   {
@@ -371,6 +401,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-10T14:40:00Z').toISOString(),
   },
   {
@@ -383,6 +414,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'unresolved' as VoiceStatus,
     createdAt: new Date('2026-07-11T15:41:00Z').toISOString(),
   },
   {
@@ -395,6 +427,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-12T16:42:00Z').toISOString(),
   },
   {
@@ -407,6 +440,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-10T17:43:00Z').toISOString(),
   },
   {
@@ -419,6 +453,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-11T18:44:00Z').toISOString(),
   },
   {
@@ -431,6 +466,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-12T19:45:00Z').toISOString(),
   },
   {
@@ -443,6 +479,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-10T08:46:00Z').toISOString(),
   },
   {
@@ -455,6 +492,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-11T09:47:00Z').toISOString(),
   },
   {
@@ -467,6 +505,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-12T10:48:00Z').toISOString(),
   },
   {
@@ -479,6 +518,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-10T11:49:00Z').toISOString(),
   },
   {
@@ -491,6 +531,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-11T12:50:00Z').toISOString(),
   },
   {
@@ -503,6 +544,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-12T13:51:00Z').toISOString(),
   },
   {
@@ -515,6 +557,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-10T14:52:00Z').toISOString(),
   },
   {
@@ -527,6 +570,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-11T15:53:00Z').toISOString(),
   },
   {
@@ -539,6 +583,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-12T16:54:00Z').toISOString(),
   },
   {
@@ -551,6 +596,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-10T17:55:00Z').toISOString(),
   },
   {
@@ -563,6 +609,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-11T18:56:00Z').toISOString(),
   },
   {
@@ -575,6 +622,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'unresolved' as VoiceStatus,
     createdAt: new Date('2026-07-12T19:57:00Z').toISOString(),
   },
   {
@@ -587,6 +635,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-10T08:58:00Z').toISOString(),
   },
   {
@@ -599,6 +648,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-11T09:59:00Z').toISOString(),
   },
   {
@@ -611,6 +661,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-12T10:10:00Z').toISOString(),
   },
   {
@@ -623,6 +674,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-10T11:11:00Z').toISOString(),
   },
   {
@@ -635,6 +687,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-11T12:12:00Z').toISOString(),
   },
   {
@@ -647,6 +700,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-12T13:13:00Z').toISOString(),
   },
   {
@@ -659,6 +713,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-10T14:14:00Z').toISOString(),
   },
   {
@@ -671,6 +726,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-11T15:15:00Z').toISOString(),
   },
   {
@@ -683,6 +739,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-12T16:16:00Z').toISOString(),
   },
   {
@@ -695,6 +752,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-10T17:17:00Z').toISOString(),
   },
   {
@@ -707,6 +765,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-11T18:18:00Z').toISOString(),
   },
   {
@@ -719,6 +778,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-12T19:19:00Z').toISOString(),
   },
   {
@@ -731,6 +791,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-10T08:20:00Z').toISOString(),
   },
   {
@@ -743,6 +804,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-11T09:21:00Z').toISOString(),
   },
   {
@@ -755,6 +817,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-12T10:22:00Z').toISOString(),
   },
   {
@@ -767,6 +830,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-10T11:23:00Z').toISOString(),
   },
   {
@@ -779,6 +843,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-11T12:24:00Z').toISOString(),
   },
   {
@@ -791,6 +856,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-12T13:25:00Z').toISOString(),
   },
   {
@@ -803,6 +869,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'unresolved' as VoiceStatus,
     createdAt: new Date('2026-07-10T14:26:00Z').toISOString(),
   },
   {
@@ -815,6 +882,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-11T15:27:00Z').toISOString(),
   },
   {
@@ -827,6 +895,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-12T16:28:00Z').toISOString(),
   },
   {
@@ -839,6 +908,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'unresolved' as VoiceStatus,
     createdAt: new Date('2026-07-10T17:29:00Z').toISOString(),
   },
   {
@@ -851,6 +921,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-11T18:30:00Z').toISOString(),
   },
   {
@@ -863,6 +934,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-12T19:31:00Z').toISOString(),
   },
   {
@@ -875,6 +947,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-10T08:32:00Z').toISOString(),
   },
   {
@@ -887,6 +960,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-11T09:33:00Z').toISOString(),
   },
   {
@@ -899,6 +973,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-12T10:34:00Z').toISOString(),
   },
   {
@@ -911,6 +986,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-10T11:35:00Z').toISOString(),
   },
   {
@@ -923,6 +999,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-11T12:36:00Z').toISOString(),
   },
   {
@@ -935,6 +1012,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-12T13:37:00Z').toISOString(),
   },
   {
@@ -947,6 +1025,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-10T14:38:00Z').toISOString(),
   },
   {
@@ -959,6 +1038,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-11T15:39:00Z').toISOString(),
   },
   {
@@ -971,6 +1051,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-12T16:40:00Z').toISOString(),
   },
   {
@@ -983,6 +1064,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-10T17:41:00Z').toISOString(),
   },
   {
@@ -995,6 +1077,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-11T18:42:00Z').toISOString(),
   },
   {
@@ -1007,6 +1090,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-12T19:43:00Z').toISOString(),
   },
   {
@@ -1019,6 +1103,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-10T08:44:00Z').toISOString(),
   },
   {
@@ -1031,6 +1116,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-11T09:45:00Z').toISOString(),
   },
   {
@@ -1043,6 +1129,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-12T10:46:00Z').toISOString(),
   },
   {
@@ -1055,6 +1142,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-10T11:47:00Z').toISOString(),
   },
   {
@@ -1067,6 +1155,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-11T12:48:00Z').toISOString(),
   },
   {
@@ -1079,6 +1168,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-12T13:49:00Z').toISOString(),
   },
   {
@@ -1091,6 +1181,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-10T14:50:00Z').toISOString(),
   },
   {
@@ -1103,6 +1194,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-11T15:51:00Z').toISOString(),
   },
   {
@@ -1115,6 +1207,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-12T16:52:00Z').toISOString(),
   },
   {
@@ -1127,6 +1220,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-10T17:53:00Z').toISOString(),
   },
   {
@@ -1139,6 +1233,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-11T18:54:00Z').toISOString(),
   },
   {
@@ -1151,6 +1246,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'unresolved' as VoiceStatus,
     createdAt: new Date('2026-07-12T19:55:00Z').toISOString(),
   },
   {
@@ -1163,6 +1259,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-10T08:56:00Z').toISOString(),
   },
   {
@@ -1175,6 +1272,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-11T09:57:00Z').toISOString(),
   },
   {
@@ -1187,6 +1285,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-12T10:58:00Z').toISOString(),
   },
   {
@@ -1199,6 +1298,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'unresolved' as VoiceStatus,
     createdAt: new Date('2026-07-10T11:59:00Z').toISOString(),
   },
   {
@@ -1211,6 +1311,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'unresolved' as VoiceStatus,
     createdAt: new Date('2026-07-11T12:10:00Z').toISOString(),
   },
   {
@@ -1223,6 +1324,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-12T13:11:00Z').toISOString(),
   },
   {
@@ -1235,6 +1337,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-10T14:12:00Z').toISOString(),
   },
   {
@@ -1247,6 +1350,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-11T15:13:00Z').toISOString(),
   },
   {
@@ -1259,6 +1363,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-12T16:14:00Z').toISOString(),
   },
   {
@@ -1271,6 +1376,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-10T17:15:00Z').toISOString(),
   },
   {
@@ -1283,6 +1389,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-11T18:16:00Z').toISOString(),
   },
   {
@@ -1295,6 +1402,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-12T19:17:00Z').toISOString(),
   },
   {
@@ -1307,6 +1415,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-10T08:18:00Z').toISOString(),
   },
   {
@@ -1319,6 +1428,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-11T09:19:00Z').toISOString(),
   },
   {
@@ -1331,6 +1441,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-12T10:20:00Z').toISOString(),
   },
   {
@@ -1343,6 +1454,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-10T11:21:00Z').toISOString(),
   },
   {
@@ -1355,6 +1467,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-11T12:22:00Z').toISOString(),
   },
   {
@@ -1367,6 +1480,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-12T13:23:00Z').toISOString(),
   },
   {
@@ -1379,6 +1493,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-10T14:24:00Z').toISOString(),
   },
   {
@@ -1391,6 +1506,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-11T15:25:00Z').toISOString(),
   },
   {
@@ -1403,6 +1519,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-12T16:26:00Z').toISOString(),
   },
   {
@@ -1415,6 +1532,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-10T17:27:00Z').toISOString(),
   },
   {
@@ -1427,6 +1545,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-11T18:28:00Z').toISOString(),
   },
   {
@@ -1439,6 +1558,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-12T19:29:00Z').toISOString(),
   },
   {
@@ -1451,6 +1571,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-10T08:30:00Z').toISOString(),
   },
   {
@@ -1463,6 +1584,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-11T09:31:00Z').toISOString(),
   },
   {
@@ -1475,6 +1597,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-12T10:32:00Z').toISOString(),
   },
   {
@@ -1487,6 +1610,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-10T11:33:00Z').toISOString(),
   },
   {
@@ -1499,6 +1623,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-11T12:34:00Z').toISOString(),
   },
   {
@@ -1511,6 +1636,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-12T13:35:00Z').toISOString(),
   },
   {
@@ -1523,6 +1649,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'unresolved' as VoiceStatus,
     createdAt: new Date('2026-07-10T14:36:00Z').toISOString(),
   },
   {
@@ -1535,6 +1662,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-11T15:37:00Z').toISOString(),
   },
   {
@@ -1547,6 +1675,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-12T16:38:00Z').toISOString(),
   },
   {
@@ -1559,6 +1688,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-10T17:39:00Z').toISOString(),
   },
   {
@@ -1571,6 +1701,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-11T18:40:00Z').toISOString(),
   },
   {
@@ -1583,6 +1714,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-12T19:41:00Z').toISOString(),
   },
   {
@@ -1595,6 +1727,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-10T08:42:00Z').toISOString(),
   },
   {
@@ -1607,6 +1740,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-11T09:43:00Z').toISOString(),
   },
   {
@@ -1619,6 +1753,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-12T10:44:00Z').toISOString(),
   },
   {
@@ -1631,6 +1766,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-10T11:45:00Z').toISOString(),
   },
   {
@@ -1643,6 +1779,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-11T12:46:00Z').toISOString(),
   },
   {
@@ -1655,6 +1792,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-12T13:47:00Z').toISOString(),
   },
   {
@@ -1667,6 +1805,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-10T14:48:00Z').toISOString(),
   },
   {
@@ -1679,6 +1818,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-11T15:49:00Z').toISOString(),
   },
   {
@@ -1691,6 +1831,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-12T16:50:00Z').toISOString(),
   },
   {
@@ -1703,6 +1844,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-10T17:51:00Z').toISOString(),
   },
   {
@@ -1715,6 +1857,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-11T18:52:00Z').toISOString(),
   },
   {
@@ -1727,6 +1870,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-12T19:53:00Z').toISOString(),
   },
   {
@@ -1739,6 +1883,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-10T08:54:00Z').toISOString(),
   },
   {
@@ -1751,6 +1896,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-11T09:55:00Z').toISOString(),
   },
   {
@@ -1763,6 +1909,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-12T10:56:00Z').toISOString(),
   },
   {
@@ -1775,6 +1922,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-10T11:57:00Z').toISOString(),
   },
   {
@@ -1787,6 +1935,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-11T12:58:00Z').toISOString(),
   },
   {
@@ -1799,6 +1948,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-12T13:59:00Z').toISOString(),
   },
   {
@@ -1811,6 +1961,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-10T14:10:00Z').toISOString(),
   },
   {
@@ -1823,6 +1974,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-11T15:11:00Z').toISOString(),
   },
   {
@@ -1835,6 +1987,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-12T16:12:00Z').toISOString(),
   },
   {
@@ -1847,6 +2000,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-10T17:13:00Z').toISOString(),
   },
   {
@@ -1859,6 +2013,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-11T18:14:00Z').toISOString(),
   },
   {
@@ -1871,6 +2026,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-12T19:15:00Z').toISOString(),
   },
   {
@@ -1883,6 +2039,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-10T08:16:00Z').toISOString(),
   },
   {
@@ -1895,6 +2052,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-11T09:17:00Z').toISOString(),
   },
   {
@@ -1907,6 +2065,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-12T10:18:00Z').toISOString(),
   },
   {
@@ -1919,6 +2078,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-10T11:19:00Z').toISOString(),
   },
   {
@@ -1931,6 +2091,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-11T12:20:00Z').toISOString(),
   },
   {
@@ -1943,6 +2104,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-12T13:21:00Z').toISOString(),
   },
   {
@@ -1955,6 +2117,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-10T14:22:00Z').toISOString(),
   },
   {
@@ -1967,6 +2130,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-11T15:23:00Z').toISOString(),
   },
   {
@@ -1979,6 +2143,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-12T16:24:00Z').toISOString(),
   },
   {
@@ -1991,6 +2156,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-10T17:25:00Z').toISOString(),
   },
   {
@@ -2003,6 +2169,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-11T18:26:00Z').toISOString(),
   },
   {
@@ -2015,6 +2182,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-12T19:27:00Z').toISOString(),
   },
   {
@@ -2027,6 +2195,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-10T08:28:00Z').toISOString(),
   },
   {
@@ -2039,6 +2208,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-11T09:29:00Z').toISOString(),
   },
   {
@@ -2051,6 +2221,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-12T10:30:00Z').toISOString(),
   },
   {
@@ -2063,6 +2234,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-10T11:31:00Z').toISOString(),
   },
   {
@@ -2075,6 +2247,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-11T12:32:00Z').toISOString(),
   },
   {
@@ -2087,6 +2260,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-12T13:33:00Z').toISOString(),
   },
   {
@@ -2099,6 +2273,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-10T14:34:00Z').toISOString(),
   },
   {
@@ -2111,6 +2286,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-11T15:35:00Z').toISOString(),
   },
   {
@@ -2123,6 +2299,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-12T16:36:00Z').toISOString(),
   },
   {
@@ -2135,6 +2312,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-10T17:37:00Z').toISOString(),
   },
   {
@@ -2147,6 +2325,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-11T18:38:00Z').toISOString(),
   },
   {
@@ -2159,6 +2338,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-12T19:39:00Z').toISOString(),
   },
   {
@@ -2171,6 +2351,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-10T08:40:00Z').toISOString(),
   },
   {
@@ -2183,6 +2364,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-11T09:41:00Z').toISOString(),
   },
   {
@@ -2195,6 +2377,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-12T10:42:00Z').toISOString(),
   },
   {
@@ -2207,6 +2390,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-10T11:43:00Z').toISOString(),
   },
   {
@@ -2219,6 +2403,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-11T12:44:00Z').toISOString(),
   },
   {
@@ -2231,6 +2416,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-12T13:45:00Z').toISOString(),
   },
   {
@@ -2243,6 +2429,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-10T14:46:00Z').toISOString(),
   },
   {
@@ -2255,6 +2442,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-11T15:47:00Z').toISOString(),
   },
   {
@@ -2267,6 +2455,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-12T16:48:00Z').toISOString(),
   },
   {
@@ -2279,6 +2468,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-10T17:49:00Z').toISOString(),
   },
   {
@@ -2291,6 +2481,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-11T18:50:00Z').toISOString(),
   },
   {
@@ -2303,6 +2494,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-12T19:51:00Z').toISOString(),
   },
   {
@@ -2315,6 +2507,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'unresolved' as VoiceStatus,
     createdAt: new Date('2026-07-10T08:52:00Z').toISOString(),
   },
   {
@@ -2327,6 +2520,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'unresolved' as VoiceStatus,
     createdAt: new Date('2026-07-11T09:53:00Z').toISOString(),
   },
   {
@@ -2339,6 +2533,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'unresolved' as VoiceStatus,
     createdAt: new Date('2026-07-12T10:54:00Z').toISOString(),
   },
   {
@@ -2351,6 +2546,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-10T11:55:00Z').toISOString(),
   },
   {
@@ -2363,6 +2559,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-11T12:56:00Z').toISOString(),
   },
   {
@@ -2375,6 +2572,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-12T13:57:00Z').toISOString(),
   },
   {
@@ -2387,6 +2585,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-10T14:58:00Z').toISOString(),
   },
   {
@@ -2399,6 +2598,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-11T15:59:00Z').toISOString(),
   },
   {
@@ -2411,6 +2611,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-12T16:10:00Z').toISOString(),
   },
   {
@@ -2423,6 +2624,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-10T17:11:00Z').toISOString(),
   },
   {
@@ -2435,6 +2637,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-11T18:12:00Z').toISOString(),
   },
   {
@@ -2447,6 +2650,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-12T19:13:00Z').toISOString(),
   },
   {
@@ -2459,6 +2663,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'unresolved' as VoiceStatus,
     createdAt: new Date('2026-07-10T08:14:00Z').toISOString(),
   },
   {
@@ -2471,6 +2676,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-11T09:15:00Z').toISOString(),
   },
   {
@@ -2483,6 +2689,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-12T10:16:00Z').toISOString(),
   },
   {
@@ -2495,6 +2702,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'unresolved' as VoiceStatus,
     createdAt: new Date('2026-07-10T11:17:00Z').toISOString(),
   },
   {
@@ -2507,6 +2715,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-11T12:18:00Z').toISOString(),
   },
   {
@@ -2519,6 +2728,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-12T13:19:00Z').toISOString(),
   },
   {
@@ -2531,6 +2741,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'unresolved' as VoiceStatus,
     createdAt: new Date('2026-07-10T14:20:00Z').toISOString(),
   },
   {
@@ -2543,6 +2754,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-11T15:21:00Z').toISOString(),
   },
   {
@@ -2555,6 +2767,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-12T16:22:00Z').toISOString(),
   },
   {
@@ -2567,6 +2780,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'unresolved' as VoiceStatus,
     createdAt: new Date('2026-07-10T17:23:00Z').toISOString(),
   },
   {
@@ -2579,6 +2793,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-11T18:24:00Z').toISOString(),
   },
   {
@@ -2591,6 +2806,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-12T19:25:00Z').toISOString(),
   },
   {
@@ -2603,6 +2819,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'unresolved' as VoiceStatus,
     createdAt: new Date('2026-07-10T08:26:00Z').toISOString(),
   },
   {
@@ -2615,6 +2832,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-11T09:27:00Z').toISOString(),
   },
   {
@@ -2627,6 +2845,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'unresolved' as VoiceStatus,
     createdAt: new Date('2026-07-12T10:28:00Z').toISOString(),
   },
   {
@@ -2639,6 +2858,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'unresolved' as VoiceStatus,
     createdAt: new Date('2026-07-10T11:29:00Z').toISOString(),
   },
   {
@@ -2651,6 +2871,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-11T12:30:00Z').toISOString(),
   },
   {
@@ -2663,6 +2884,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-12T13:31:00Z').toISOString(),
   },
   {
@@ -2675,6 +2897,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'unresolved' as VoiceStatus,
     createdAt: new Date('2026-07-10T14:32:00Z').toISOString(),
   },
   {
@@ -2687,6 +2910,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'unresolved' as VoiceStatus,
     createdAt: new Date('2026-07-11T15:33:00Z').toISOString(),
   },
   {
@@ -2699,6 +2923,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'unresolved' as VoiceStatus,
     createdAt: new Date('2026-07-12T16:34:00Z').toISOString(),
   },
   {
@@ -2711,6 +2936,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-10T17:35:00Z').toISOString(),
   },
   {
@@ -2723,6 +2949,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'unresolved' as VoiceStatus,
     createdAt: new Date('2026-07-11T18:36:00Z').toISOString(),
   },
   {
@@ -2735,6 +2962,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-12T19:37:00Z').toISOString(),
   },
   {
@@ -2747,6 +2975,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-10T08:38:00Z').toISOString(),
   },
   {
@@ -2759,6 +2988,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-11T09:39:00Z').toISOString(),
   },
   {
@@ -2771,6 +3001,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'unresolved' as VoiceStatus,
     createdAt: new Date('2026-07-12T10:40:00Z').toISOString(),
   },
   {
@@ -2783,6 +3014,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-10T11:41:00Z').toISOString(),
   },
   {
@@ -2795,6 +3027,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-11T12:42:00Z').toISOString(),
   },
   {
@@ -2807,6 +3040,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-12T13:43:00Z').toISOString(),
   },
   {
@@ -2819,6 +3053,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'resolved' as VoiceStatus,
     createdAt: new Date('2026-07-10T14:44:00Z').toISOString(),
   },
   {
@@ -2831,6 +3066,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'unresolved' as VoiceStatus,
     createdAt: new Date('2026-07-11T15:45:00Z').toISOString(),
   },
   {
@@ -2843,6 +3079,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'unresolved' as VoiceStatus,
     createdAt: new Date('2026-07-12T16:46:00Z').toISOString(),
   },
   {
@@ -2855,6 +3092,7 @@ export const SEED_VOICES: Voice[] = [
     likes: 0,
     aiReply: null,
     isBatch: true,
+    status: 'unresolved' as VoiceStatus,
     createdAt: new Date('2026-07-10T17:47:00Z').toISOString(),
   }
 ];

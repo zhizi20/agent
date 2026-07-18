@@ -66,10 +66,14 @@ export function getVoiceStats() {
   const total = voices.length;
   const byCategory: Record<string, number> = {};
   const byDepartment: Record<string, number> = {};
+  const byStatus: Record<string, number> = { resolved: 0, unresolved: 0 };
   let totalLikes = 0;
   let anonymousCount = 0;
   const oneWeekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
   let recentWeek = 0;
+
+  // Weekly trend: group by ISO week
+  const weeklyMap: Record<string, number> = {};
 
   for (const v of voices) {
     byCategory[v.category] = (byCategory[v.category] || 0) + 1;
@@ -79,7 +83,25 @@ export function getVoiceStats() {
     totalLikes += v.likes;
     if (v.isAnonymous) anonymousCount++;
     if (new Date(v.createdAt).getTime() > oneWeekAgo) recentWeek++;
+
+    // Status
+    const status = v.status || 'unresolved';
+    byStatus[status] = (byStatus[status] || 0) + 1;
+
+    // Weekly trend - compute ISO week string
+    const d = new Date(v.createdAt);
+    const year = d.getFullYear();
+    const oneJan = new Date(year, 0, 1);
+    const dayOfYear = Math.floor((d.getTime() - oneJan.getTime()) / 86400000) + 1;
+    const weekNum = Math.ceil((dayOfYear + oneJan.getDay()) / 7);
+    const weekKey = `${year}-W${String(weekNum).padStart(2, '0')}`;
+    weeklyMap[weekKey] = (weeklyMap[weekKey] || 0) + 1;
   }
 
-  return { total, byCategory, byDepartment, totalLikes, anonymousCount, recentWeek };
+  // Sort weekly trend by week key
+  const weeklyTrend = Object.entries(weeklyMap)
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([week, count]) => ({ week, count }));
+
+  return { total, byCategory, byDepartment, byStatus, weeklyTrend, totalLikes, anonymousCount, recentWeek };
 }

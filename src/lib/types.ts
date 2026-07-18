@@ -27,6 +27,8 @@ export const CATEGORY_MAP: Record<VoiceCategory, { label: string; color: string;
 
 export const CATEGORY_KEYS = Object.keys(CATEGORY_MAP) as VoiceCategory[];
 
+export type VoiceStatus = 'resolved' | 'unresolved';
+
 export interface Voice {
   id: string;
   content: string;
@@ -38,12 +40,20 @@ export interface Voice {
   aiReply: string | null;
   createdAt: string;
   isBatch?: boolean;
+  status?: VoiceStatus;
+}
+
+export interface WeeklyTrend {
+  week: string;
+  count: number;
 }
 
 export interface Stats {
   total: number;
   byCategory: Record<string, number>;
   byDepartment?: Record<string, number>;
+  byStatus?: Record<string, number>;
+  weeklyTrend?: WeeklyTrend[];
   totalLikes: number;
   anonymousCount: number;
   recentWeek: number;
