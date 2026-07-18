@@ -226,10 +226,10 @@ export default function HomePage() {
       {/* Batch input modal */}
       {showBatchInput && (
         <BatchInput
-          onSuccess={(result) => {
+          onSuccess={async (result) => {
             setBatchResult(result);
             setShowBatchInput(false);
-            fetchVoices();
+            await fetchVoices();
           }}
           onClose={() => setShowBatchInput(false)}
         />
