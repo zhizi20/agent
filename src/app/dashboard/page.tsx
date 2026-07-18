@@ -501,7 +501,7 @@ function CategoryPieChart({ byCategory, total }: { byCategory: Record<string, nu
         'Z',
       ].join(' ');
 
-      return { ...entry, pathData };
+      return { ...entry, pathData, pieColor: entry.pieColor };
     });
   }, [byCategory, total, centerX, centerY, radius]);
 
@@ -523,7 +523,7 @@ function CategoryPieChart({ byCategory, total }: { byCategory: Record<string, nu
             <path
               key={slice.key}
               d={slice.pathData}
-              fill={slice.color}
+              fill={slice.pieColor}
               stroke="white"
               strokeWidth="2"
               className="cursor-pointer transition-all duration-200"
@@ -570,7 +570,7 @@ function CategoryPieChart({ byCategory, total }: { byCategory: Record<string, nu
           >
             <div
               className="h-3.5 w-3.5 shrink-0 rounded"
-              style={{ backgroundColor: slice.color }}
+              style={{ backgroundColor: slice.pieColor }}
             />
             <span className="text-sm text-foreground">
               {slice.icon} {slice.label}
@@ -580,7 +580,7 @@ function CategoryPieChart({ byCategory, total }: { byCategory: Record<string, nu
             </span>
             <span
               className="min-w-[3rem] rounded-full px-2 py-0.5 text-center text-xs font-medium"
-              style={{ backgroundColor: `${slice.color}18`, color: slice.color }}
+              style={{ backgroundColor: `${slice.pieColor}18`, color: slice.pieColor }}
             >
               {slice.percentage.toFixed(1)}%
             </span>

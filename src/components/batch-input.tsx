@@ -329,7 +329,7 @@ export function BatchResultChart({ distribution, total }: BatchResultChartProps)
 
       return {
         pathData,
-        color: catInfo.color,
+        color: catInfo.pieColor,
         label: catInfo.label,
         icon: catInfo.icon,
         count: d.count,
