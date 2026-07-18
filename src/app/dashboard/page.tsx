@@ -31,26 +31,36 @@ interface AnalysisResult {
 export default function DashboardPage() {
   const [stats, setStats] = useState<Stats | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [rawAnalysisText, setRawAnalysisText] = useState('');
 
-  useEffect(() => {
-    async function fetchStats() {
-      try {
-        const res = await fetch('/api/stats');
-        const data = await res.json();
-        if (data.success) {
-          setStats(data.data);
-        }
-      } catch {
-        // silently fail
-      } finally {
-        setIsLoading(false);
+  const fetchStats = useCallback(async (silent = false) => {
+    if (!silent) setIsLoading(true);
+    try {
+      const res = await fetch('/api/stats');
+      const data = await res.json();
+      if (data.success) {
+        setStats(data.data);
       }
+    } catch {
+      // silently fail
+    } finally {
+      setIsLoading(false);
+      setIsRefreshing(false);
     }
-    fetchStats();
   }, []);
+
+  useEffect(() => {
+    fetchStats();
+    // Poll every 3 seconds for real-time updates
+    const interval = setInterval(() => {
+      setIsRefreshing(true);
+      fetchStats(true);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [fetchStats]);
 
   const runAnalysis = useCallback(async () => {
     if (isAnalyzing) return;
@@ -135,9 +145,18 @@ export default function DashboardPage() {
           <h1 className="mb-2 text-2xl font-bold tracking-tight text-foreground">
             数据看板
           </h1>
-          <p className="text-sm text-muted-foreground">
-            了解员工心声的整体趋势与分布
-          </p>
+          <div className="flex items-center gap-2">
+            <p className="text-sm text-muted-foreground">
+              了解员工心声的整体趋势与分布
+            </p>
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-green-50 px-2.5 py-0.5 text-xs text-green-700">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+              </span>
+              实时
+            </span>
+          </div>
         </div>
 
         {isLoading ? (

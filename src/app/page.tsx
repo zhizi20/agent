@@ -30,7 +30,8 @@ export default function HomePage() {
   const [showBatchInput, setShowBatchInput] = useState(false);
   const [batchResult, setBatchResult] = useState<BatchResult | null>(null);
 
-  const fetchVoices = useCallback(async () => {
+  const fetchVoices = useCallback(async (silent = false) => {
+    if (!silent) setIsLoading(true);
     try {
       const url = category === 'all' ? '/api/voices' : `/api/voices?category=${category}`;
       const res = await fetch(url);
@@ -48,6 +49,11 @@ export default function HomePage() {
   useEffect(() => {
     setIsLoading(true);
     fetchVoices();
+    // Poll every 3 seconds for real-time updates
+    const interval = setInterval(() => {
+      fetchVoices(true);
+    }, 3000);
+    return () => clearInterval(interval);
   }, [fetchVoices]);
 
   const handleLike = async (id: string) => {
@@ -104,9 +110,18 @@ export default function HomePage() {
           <h1 className="mb-2 text-2xl font-bold tracking-tight text-foreground">
             员工心声墙
           </h1>
-          <p className="text-sm text-muted-foreground">
-            每一个声音都值得被听见，每一份心声都会被温柔以待
-          </p>
+          <div className="flex items-center gap-2">
+            <p className="text-sm text-muted-foreground">
+              每一个声音都值得被听见，每一份心声都会被温柔以待
+            </p>
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-green-50 px-2.5 py-0.5 text-xs text-green-700">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+              </span>
+              实时
+            </span>
+          </div>
         </div>
 
         {/* Action bar */}
