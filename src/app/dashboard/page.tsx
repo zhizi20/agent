@@ -1,59 +1,143 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import { CATEGORY_MAP, DEPARTMENT_RESPONSIBILITY } from '@/lib/types';
-import type { FeedbackCategory } from '@/lib/types';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Skeleton } from '@/components/ui/skeleton';
-import { BarChart3, TrendingUp, Users, FileText, AlertTriangle, Building2, Sparkles, Brain, ChevronDown, ChevronUp, Shield } from 'lucide-react';
+import { CATEGORY_OPTIONS, URGENCY_OPTIONS, FACTORY_LIST, RESPONSIBLE_DEPT_LIST } from '@/lib/types';
+import type { UrgencyLevel } from '@/lib/types';
 
-interface DashboardStats {
+interface StatsData {
   total: number;
   byCategory: Record<string, number>;
   byFactory: Record<string, number>;
+  byUrgency: Record<string, number>;
+  byResponsibleDept: Record<string, number>;
+  byHandleStatus: Record<string, number>;
   handledCount: number;
   handleRate: number;
   avgScore: number;
   scoreCount: number;
   topIssues: { category: string; count: number; percentage: number; samples: string[] }[];
-  detailedFeedbacks: { id: string; description: string; category: string; factory: string; hasResult: boolean }[];
 }
 
-interface AnalysisIssue {
+interface UrgencyItem {
+  id: string;
   title: string;
-  urgency: string;
   description: string;
-  relatedCount: number;
+  category: string;
+  factory: string;
+  urgency: UrgencyLevel;
   department: string;
-  suggestions: string[];
-  replyTemplate: string;
 }
 
-interface AnalysisResult {
-  summary: string;
-  issues: AnalysisIssue[];
-  overallSuggestions: string[];
+// 分类视图类型
+type ViewType = 'category' | 'factory' | 'responsible' | 'status';
+
+// 饼图组件
+function PieChart({ data, size = 200 }: { data: { label: string; value: number; color: string }[]; size?: number }) {
+  const total = data.reduce((sum, d) => sum + d.value, 0);
+  if (total === 0) return <div className="flex items-center justify-center" style={{ width: size, height: size }}><span className="text-[#8A817A] text-sm">暂无数据</span></div>;
+  
+  const radius = size / 2 - 10;
+  const centerX = size / 2;
+  const centerY = size / 2;
+
+  // Calculate all slices using reduce to accumulate angles
+  const slicesData = data.filter(d => d.value > 0).reduce<{ acc: number; items: { startAngle: number; endAngle: number; color: string }[] }>(
+    (result, d) => {
+      const sliceAngle = (d.value / total) * Math.PI * 2;
+      const startAngle = result.acc;
+      const endAngle = result.acc + sliceAngle;
+      return {
+        acc: endAngle,
+        items: [...result.items, { startAngle, endAngle, color: d.color }],
+      };
+    },
+    { acc: -Math.PI / 2, items: [] }
+  );
+
+  const slices = slicesData.items.map((item, i) => {
+    const x1 = centerX + radius * Math.cos(item.startAngle);
+    const y1 = centerY + radius * Math.sin(item.startAngle);
+    const x2 = centerX + radius * Math.cos(item.endAngle);
+    const y2 = centerY + radius * Math.sin(item.endAngle);
+    const sliceAngle = item.endAngle - item.startAngle;
+    const largeArc = sliceAngle > Math.PI ? 1 : 0;
+
+    const path = `M ${centerX} ${centerY} L ${x1} ${y1} A ${radius} ${radius} 0 ${largeArc} 1 ${x2} ${y2} Z`;
+
+    return (
+      <path
+        key={i}
+        d={path}
+        fill={item.color}
+        stroke="#FAF8F5"
+        strokeWidth="2"
+        className="transition-all duration-300 hover:opacity-80"
+      />
+    );
+  });
+
+  return (
+    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+      {slices}
+      <circle cx={centerX} cy={centerY} r={radius * 0.4} fill="#FAF8F5" />
+      <text x={centerX} y={centerY - 8} textAnchor="middle" className="fill-[#3D3632] text-lg font-semibold">{total}</text>
+      <text x={centerX} y={centerY + 12} textAnchor="middle" className="fill-[#8A817A] text-xs">总计</text>
+    </svg>
+  );
+}
+
+// 图例组件
+function Legend({ data }: { data: { label: string; value: number; color: string; percentage?: number }[] }) {
+  const total = data.reduce((sum, d) => sum + d.value, 0);
+  return (
+    <div className="space-y-2">
+      {data.filter(d => d.value > 0).map((d, i) => (
+        <div key={i} className="flex items-center justify-between text-sm">
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded-full" style={{ backgroundColor: d.color }} />
+            <span className="text-[#3D3632]">{d.label}</span>
+          </div>
+          <div className="flex items-center gap-2 text-[#8A817A]">
+            <span className="font-medium text-[#3D3632]">{d.value}</span>
+            <span className="text-xs">({d.percentage ?? Math.round((d.value / total) * 100)}%)</span>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
 }
 
 export default function DashboardPage() {
-  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [stats, setStats] = useState<StatsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [analyzing, setAnalyzing] = useState(false);
-  const [analysisText, setAnalysisText] = useState('');
-  const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
-  const [expandedIssue, setExpandedIssue] = useState<number | null>(null);
+  const [analysis, setAnalysis] = useState('');
+  const [viewType, setViewType] = useState<ViewType>('category');
+  const [urgencyFeedbacks, setUrgencyFeedbacks] = useState<{ urgent: UrgencyItem[]; high: UrgencyItem[]; normal: UrgencyItem[] }>({ urgent: [], high: [], normal: [] });
 
   const fetchStats = useCallback(async () => {
     try {
-      const res = await fetch('/api/stats');
-      const data = await res.json();
-      if (data.success) {
-        setStats(data.data);
+      const [statsRes, voicesRes] = await Promise.all([
+        fetch('/api/stats'),
+        fetch('/api/voices'),
+      ]);
+      const statsJson = await statsRes.json();
+      const voicesJson = await voicesRes.json();
+      
+      if (statsJson.success) {
+        setStats(statsJson.data);
       }
-    } catch (err) {
-      console.error('Failed to fetch stats:', err);
+      
+      if (voicesJson.success) {
+        const voices = voicesJson.data as UrgencyItem[];
+        setUrgencyFeedbacks({
+          urgent: voices.filter(v => v.urgency === 'urgent'),
+          high: voices.filter(v => v.urgency === 'high'),
+          normal: voices.filter(v => v.urgency === 'normal'),
+        });
+      }
+    } catch (error) {
+      console.error('Failed to fetch stats:', error);
     } finally {
       setLoading(false);
     }
@@ -65,476 +149,360 @@ export default function DashboardPage() {
 
   const handleAnalysis = async () => {
     setAnalyzing(true);
-    setAnalysisText('');
-    setAnalysisResult(null);
-    setExpandedIssue(null);
-
+    setAnalysis('');
     try {
       const res = await fetch('/api/analysis', { method: 'POST' });
-      const reader = res.body?.getReader();
-      const decoder = new TextDecoder();
-      let fullText = '';
+      if (!res.ok) throw new Error('分析请求失败');
+      if (!res.body) throw new Error('无法获取响应流');
 
-      if (!reader) return;
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
 
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
-
-        const chunk = decoder.decode(value, { stream: true });
-        const lines = chunk.split('\n').filter((line) => line.startsWith('data: '));
-
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || '';
         for (const line of lines) {
-          const jsonStr = line.replace('data: ', '');
-          try {
-            const data = JSON.parse(jsonStr);
-            if (data.content) {
-              fullText += data.content;
-              setAnalysisText(fullText);
-            }
-            if (data.done) {
-              // Try to parse JSON from the full text
-              const jsonMatch = fullText.match(/```json\s*([\s\S]*?)\s*```/);
-              if (jsonMatch) {
-                try {
-                  const parsed = JSON.parse(jsonMatch[1]);
-                  setAnalysisResult(parsed);
-                } catch {
-                  // JSON parse failed, keep raw text
-                }
-              }
-            }
-            if (data.error) {
-              console.error('Analysis error:', data.error);
-            }
-          } catch {
-            // Skip invalid JSON
+          if (line.startsWith('data: ')) {
+            const data = line.slice(6);
+            if (data === '[DONE]') break;
+            try {
+              const parsed = JSON.parse(data);
+              if (parsed.content) setAnalysis(prev => prev + parsed.content);
+            } catch { /* skip */ }
           }
         }
       }
     } catch (err) {
-      console.error('Failed to analyze:', err);
+      setAnalysis('分析请求失败，请稍后重试。');
     } finally {
       setAnalyzing(false);
     }
   };
 
-  const getCategoryLabel = (cat: string) => {
-    const info = CATEGORY_MAP[cat as FeedbackCategory];
-    return info?.label || cat;
-  };
-
-  const getCategoryColor = (cat: string) => {
-    const info = CATEGORY_MAP[cat as FeedbackCategory];
-    return info?.color || 'bg-gray-100 text-gray-700';
-  };
-
-  const getUrgencyColor = (urgency: string) => {
-    switch (urgency) {
-      case '高': return 'bg-red-100 text-red-700 border-red-200';
-      case '中': return 'bg-amber-100 text-amber-700 border-amber-200';
-      case '低': return 'bg-emerald-100 text-emerald-700 border-emerald-200';
-      default: return 'bg-gray-100 text-gray-700';
-    }
-  };
-
-  const getUrgencyIcon = (urgency: string) => {
-    switch (urgency) {
-      case '高': return '🔴';
-      case '中': return '🟡';
-      case '低': return '🟢';
-      default: return '⚪';
-    }
-  };
-
-  const maxCategoryCount = stats ? Math.max(...Object.values(stats.byCategory)) : 1;
-
   if (loading) {
     return (
-      <div className="space-y-6">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {[1, 2, 3, 4].map((i) => (
-            <Skeleton key={i} className="h-28 rounded-2xl" />
-          ))}
-        </div>
-        <Skeleton className="h-80 rounded-2xl" />
-        <Skeleton className="h-60 rounded-2xl" />
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-[#8A817A]">加载中...</div>
       </div>
     );
   }
 
   if (!stats) {
     return (
-      <div className="text-center py-20">
-        <p className="text-gray-500">加载数据失败，请刷新页面重试</p>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-[#8A817A]">加载失败，请刷新页面</div>
       </div>
     );
   }
 
+  // 根据视图类型生成饼图数据
+  const getPieData = () => {
+    switch (viewType) {
+      case 'category':
+        return CATEGORY_OPTIONS.map(opt => ({
+          label: opt.label,
+          value: stats.byCategory[opt.value] || 0,
+          color: opt.color,
+        }));
+      case 'factory':
+        const factoryColors = ['#D4A574', '#E8917A', '#B8A9C9', '#7FB5B0', '#E5A889', '#A8A099'];
+        return FACTORY_LIST.map((f, i) => ({
+          label: f,
+          value: stats.byFactory[f] || 0,
+          color: factoryColors[i % factoryColors.length],
+        }));
+      case 'responsible':
+        const deptColors = ['#D4A574', '#E8917A', '#B8A9C9', '#7FB5B0', '#E5A889', '#9DB5A5', '#C97B6B'];
+        return RESPONSIBLE_DEPT_LIST.map((d, i) => ({
+          label: d,
+          value: stats.byResponsibleDept[d] || 0,
+          color: deptColors[i % deptColors.length],
+        }));
+      case 'status':
+        return [
+          { label: '已解决', value: stats.byHandleStatus.resolved || 0, color: '#7FB5B0' },
+          { label: '未解决', value: stats.byHandleStatus.unresolved || 0, color: '#E8917A' },
+        ];
+      default:
+        return [];
+    }
+  };
+
+  // 紧急程度数据
+  const urgencyData = [
+    { label: '紧急', value: stats.byUrgency.urgent || 0, color: '#DC2626' },
+    { label: '高优', value: stats.byUrgency.high || 0, color: '#EA580C' },
+    { label: '常规', value: stats.byUrgency.normal || 0, color: '#2563EB' },
+  ];
+
+  const viewTitles: Record<ViewType, string> = {
+    category: '按问题类别分类',
+    factory: '按厂区/部门分类',
+    responsible: '按责任部门分类',
+    status: '按处理状态分类',
+  };
+
   return (
-    <div className="space-y-6">
-      {/* Page Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">数据看板</h1>
-        <p className="text-gray-500 mt-1">员工反馈分类统计、高频问题摘要与处理建议</p>
-      </div>
+    <div className="min-h-screen">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+        {/* 页面标题 */}
+        <div className="mb-8">
+          <h1 className="text-2xl font-bold text-[#3D3632]">数据看板</h1>
+          <p className="text-[#8A817A] mt-1">员工反馈数据可视化分析</p>
+        </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Card className="bg-gradient-to-br from-amber-50 to-orange-50 border-amber-100 rounded-2xl">
-          <CardContent className="p-5">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-amber-700">总反馈数</p>
-                <p className="text-3xl font-bold text-amber-900 mt-1">{stats.total}</p>
-              </div>
-              <div className="w-12 h-12 rounded-xl bg-amber-100 flex items-center justify-center">
-                <FileText className="w-6 h-6 text-amber-600" />
-              </div>
+        {/* 总览统计卡片 */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+          <div className="bg-white rounded-2xl p-5 shadow-sm border border-[#F0EDE8]">
+            <div className="text-[#8A817A] text-sm">总反馈数</div>
+            <div className="text-3xl font-bold text-[#3D3632] mt-1">{stats.total}</div>
+            <div className="text-xs text-[#8A817A] mt-1">条员工心声</div>
+          </div>
+          <div className="bg-white rounded-2xl p-5 shadow-sm border border-[#F0EDE8]">
+            <div className="text-[#8A817A] text-sm">已处理</div>
+            <div className="text-3xl font-bold text-[#7FB5B0] mt-1">{stats.handledCount}</div>
+            <div className="text-xs text-[#8A817A] mt-1">处理率 {stats.handleRate}%</div>
+          </div>
+          <div className="bg-white rounded-2xl p-5 shadow-sm border border-[#F0EDE8]">
+            <div className="text-[#8A817A] text-sm">待处理</div>
+            <div className="text-3xl font-bold text-[#E8917A] mt-1">{stats.byHandleStatus.unresolved || 0}</div>
+            <div className="text-xs text-[#8A817A] mt-1">需要跟进</div>
+          </div>
+          <div className="bg-white rounded-2xl p-5 shadow-sm border border-[#F0EDE8]">
+            <div className="text-[#8A817A] text-sm">平均评分</div>
+            <div className="text-3xl font-bold text-[#D4A574] mt-1">{stats.avgScore > 0 ? stats.avgScore.toFixed(1) : '-'}</div>
+            <div className="text-xs text-[#8A817A] mt-1">{stats.scoreCount > 0 ? `${stats.scoreCount} 条评价` : '暂无评价'}</div>
+          </div>
+        </div>
+
+        {/* 分类分布 + 紧急程度 */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          {/* 分类分布 - 支持切换 */}
+          <div className="bg-white rounded-2xl p-6 shadow-sm border border-[#F0EDE8]">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold text-[#3D3632]">反馈分类分布</h2>
             </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gradient-to-br from-purple-50 to-violet-50 border-purple-100 rounded-2xl">
-          <CardContent className="p-5">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-purple-700">已处理</p>
-                <p className="text-3xl font-bold text-purple-900 mt-1">{stats.handledCount}</p>
-                <p className="text-xs text-purple-500 mt-0.5">处理率 {stats.handleRate}%</p>
-              </div>
-              <div className="w-12 h-12 rounded-xl bg-purple-100 flex items-center justify-center">
-                <TrendingUp className="w-6 h-6 text-purple-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gradient-to-br from-emerald-50 to-teal-50 border-emerald-100 rounded-2xl">
-          <CardContent className="p-5">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-emerald-700">平均评分</p>
-                <p className="text-3xl font-bold text-emerald-900 mt-1">{stats.avgScore}</p>
-                <p className="text-xs text-emerald-500 mt-0.5">{stats.scoreCount} 条评价</p>
-              </div>
-              <div className="w-12 h-12 rounded-xl bg-emerald-100 flex items-center justify-center">
-                <Users className="w-6 h-6 text-emerald-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gradient-to-br from-coral-50 to-rose-50 border-coral-100 rounded-2xl">
-          <CardContent className="p-5">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-coral-700">问题类别</p>
-                <p className="text-3xl font-bold text-coral-900 mt-1">{Object.keys(stats.byCategory).length}</p>
-                <p className="text-xs text-coral-500 mt-0.5">个分类</p>
-              </div>
-              <div className="w-12 h-12 rounded-xl bg-coral-100 flex items-center justify-center">
-                <BarChart3 className="w-6 h-6 text-coral-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Charts Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Category Distribution */}
-        <Card className="rounded-2xl border-gray-100 shadow-sm">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-lg flex items-center gap-2">
-              <BarChart3 className="w-5 h-5 text-amber-500" />
-              反馈分类分布
-            </CardTitle>
-            <CardDescription>按问题类别统计反馈数量</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {stats.topIssues.map((issue) => (
-                <div key={issue.category} className="group">
-                  <div className="flex items-center justify-between mb-1.5">
-                    <div className="flex items-center gap-2">
-                      <Badge className={getCategoryColor(issue.category)} variant="secondary">
-                        {getCategoryLabel(issue.category)}
-                      </Badge>
-                      <span className="text-sm font-medium text-gray-700">{issue.count} 条</span>
-                    </div>
-                    <span className="text-sm text-gray-500">{issue.percentage}%</span>
-                  </div>
-                  <div className="h-2.5 bg-gray-100 rounded-full overflow-hidden">
-                    <div
-                      className="h-full rounded-full bg-gradient-to-r from-amber-400 to-coral-400 transition-all duration-700 ease-out group-hover:opacity-80"
-                      style={{ width: `${(issue.count / maxCategoryCount) * 100}%` }}
-                    />
-                  </div>
-                  {issue.samples.length > 0 && (
-                    <p className="text-xs text-gray-400 mt-1 truncate">
-                      典型: {issue.samples[0]}
-                    </p>
-                  )}
-                </div>
+            {/* 分类切换标签 */}
+            <div className="flex flex-wrap gap-2 mb-6">
+              {([
+                { key: 'category', label: '问题类别' },
+                { key: 'factory', label: '厂区/部门' },
+                { key: 'responsible', label: '责任部门' },
+                { key: 'status', label: '处理状态' },
+              ] as { key: ViewType; label: string }[]).map(tab => (
+                <button
+                  key={tab.key}
+                  onClick={() => setViewType(tab.key)}
+                  className={`px-4 py-1.5 rounded-full text-sm transition-all ${
+                    viewType === tab.key
+                      ? 'bg-[#D4A574] text-white shadow-sm'
+                      : 'bg-[#F5F2EE] text-[#8A817A] hover:bg-[#EBE7E1]'
+                  }`}
+                >
+                  {tab.label}
+                </button>
               ))}
             </div>
-          </CardContent>
-        </Card>
-
-        {/* Factory Distribution */}
-        <Card className="rounded-2xl border-gray-100 shadow-sm">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-lg flex items-center gap-2">
-              <Building2 className="w-5 h-5 text-lavender" />
-              厂区分布
-            </CardTitle>
-            <CardDescription>按厂区/部门统计反馈数量</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {Object.entries(stats.byFactory)
-                .sort(([, a], [, b]) => b - a)
-                .map(([factory, count]) => {
-                  const maxFactory = Math.max(...Object.values(stats.byFactory));
-                  const percentage = Math.round((count / stats.total) * 100);
-                  return (
-                    <div key={factory} className="group">
-                      <div className="flex items-center justify-between mb-1.5">
-                        <span className="text-sm font-medium text-gray-700">{factory}</span>
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm text-gray-500">{count} 条</span>
-                          <span className="text-xs text-gray-400">({percentage}%)</span>
-                        </div>
-                      </div>
-                      <div className="h-2.5 bg-gray-100 rounded-full overflow-hidden">
-                        <div
-                          className="h-full rounded-full bg-gradient-to-r from-lavender to-purple-400 transition-all duration-700 ease-out group-hover:opacity-80"
-                          style={{ width: `${(count / maxFactory) * 100}%` }}
-                        />
-                      </div>
-                    </div>
-                  );
-                })}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Top Issues Summary */}
-      <Card className="rounded-2xl border-gray-100 shadow-sm">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-lg flex items-center gap-2">
-            <AlertTriangle className="w-5 h-5 text-coral" />
-            高频问题摘要
-          </CardTitle>
-          <CardDescription>基于 {stats.total} 条反馈提炼的核心问题</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {stats.topIssues.slice(0, 6).map((issue) => (
-              <div key={issue.category} className="flex items-start gap-3 p-3 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors">
-                <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center flex-shrink-0 shadow-sm">
-                  <span className="text-sm font-bold text-gray-600">{issue.count}</span>
-                </div>
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    <Badge className={getCategoryColor(issue.category)} variant="secondary">
-                      {getCategoryLabel(issue.category)}
-                    </Badge>
-                    <span className="text-xs text-gray-400">{issue.percentage}%</span>
-                  </div>
-                  <p className="text-sm text-gray-600 line-clamp-2">
-                    {issue.samples[0] || '暂无典型反馈'}
-                  </p>
-                </div>
+            <div className="flex items-center gap-6">
+              <PieChart data={getPieData()} size={180} />
+              <div className="flex-1">
+                <h3 className="text-sm font-medium text-[#3D3632] mb-3">{viewTitles[viewType]}</h3>
+                <Legend data={getPieData()} />
               </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* AI Analysis Section */}
-      <Card className="rounded-2xl border-gray-100 shadow-sm">
-        <CardHeader className="pb-3">
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle className="text-lg flex items-center gap-2">
-                <Brain className="w-5 h-5 text-purple-500" />
-                AI 深度分析
-              </CardTitle>
-              <CardDescription>
-                基于全部 {stats.total} 条反馈，生成紧急程度判断、责任部门建议与处理方案
-              </CardDescription>
             </div>
-            <Button
+          </div>
+
+          {/* 紧急程度分布 */}
+          <div className="bg-white rounded-2xl p-6 shadow-sm border border-[#F0EDE8]">
+            <h2 className="text-lg font-semibold text-[#3D3632] mb-4">紧急程度分布</h2>
+            <div className="flex items-center gap-6 mb-6">
+              <PieChart data={urgencyData} size={180} />
+              <div className="flex-1">
+                <h3 className="text-sm font-medium text-[#3D3632] mb-3">按紧急程度分类</h3>
+                <Legend data={urgencyData} />
+              </div>
+            </div>
+            {/* 紧急程度说明 */}
+            <div className="border-t border-[#F0EDE8] pt-4 mt-4">
+              <div className="space-y-2">
+                {URGENCY_OPTIONS.map(opt => (
+                  <div key={opt.value} className="flex items-start gap-2 text-xs">
+                    <div className="w-2 h-2 rounded-full mt-1 flex-shrink-0" style={{ backgroundColor: opt.color }} />
+                    <div>
+                      <span className="font-medium text-[#3D3632]">{opt.label}</span>
+                      <span className="text-[#8A817A] ml-1">- {opt.desc}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* 紧急程度排序列表 */}
+        <div className="bg-white rounded-2xl p-6 shadow-sm border border-[#F0EDE8] mb-8">
+          <h2 className="text-lg font-semibold text-[#3D3632] mb-4">紧急程度排序</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* 紧急 */}
+            <div className="rounded-xl border-2 border-red-200 bg-red-50/50 p-4">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-3 h-3 rounded-full bg-red-600" />
+                <span className="font-semibold text-red-700">紧急</span>
+                <span className="text-xs text-red-600 bg-red-100 px-2 py-0.5 rounded-full">{urgencyFeedbacks.urgent.length}</span>
+              </div>
+              <div className="space-y-2 max-h-48 overflow-y-auto">
+                {urgencyFeedbacks.urgent.length === 0 ? (
+                  <p className="text-sm text-red-400">暂无紧急反馈</p>
+                ) : (
+                  urgencyFeedbacks.urgent.slice(0, 5).map(item => (
+                    <div key={item.id} className="bg-white rounded-lg p-2 text-xs border border-red-100">
+                      <p className="font-medium text-[#3D3632] truncate">{item.title}</p>
+                      <p className="text-[#8A817A] truncate mt-0.5">{item.description}</p>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+
+            {/* 高优 */}
+            <div className="rounded-xl border-2 border-orange-200 bg-orange-50/50 p-4">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-3 h-3 rounded-full bg-orange-600" />
+                <span className="font-semibold text-orange-700">高优</span>
+                <span className="text-xs text-orange-600 bg-orange-100 px-2 py-0.5 rounded-full">{urgencyFeedbacks.high.length}</span>
+              </div>
+              <div className="space-y-2 max-h-48 overflow-y-auto">
+                {urgencyFeedbacks.high.length === 0 ? (
+                  <p className="text-sm text-orange-400">暂无高优反馈</p>
+                ) : (
+                  urgencyFeedbacks.high.slice(0, 5).map(item => (
+                    <div key={item.id} className="bg-white rounded-lg p-2 text-xs border border-orange-100">
+                      <p className="font-medium text-[#3D3632] truncate">{item.title}</p>
+                      <p className="text-[#8A817A] truncate mt-0.5">{item.description}</p>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+
+            {/* 常规 */}
+            <div className="rounded-xl border-2 border-blue-200 bg-blue-50/50 p-4">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-3 h-3 rounded-full bg-blue-600" />
+                <span className="font-semibold text-blue-700">常规</span>
+                <span className="text-xs text-blue-600 bg-blue-100 px-2 py-0.5 rounded-full">{urgencyFeedbacks.normal.length}</span>
+              </div>
+              <div className="space-y-2 max-h-48 overflow-y-auto">
+                {urgencyFeedbacks.normal.length === 0 ? (
+                  <p className="text-sm text-blue-400">暂无常规反馈</p>
+                ) : (
+                  urgencyFeedbacks.normal.slice(0, 5).map(item => (
+                    <div key={item.id} className="bg-white rounded-lg p-2 text-xs border border-blue-100">
+                      <p className="font-medium text-[#3D3632] truncate">{item.title}</p>
+                      <p className="text-[#8A817A] truncate mt-0.5">{item.description}</p>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* 高频问题摘要 */}
+        <div className="bg-white rounded-2xl p-6 shadow-sm border border-[#F0EDE8] mb-8">
+          <h2 className="text-lg font-semibold text-[#3D3632] mb-4">高频问题摘要</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {stats.topIssues.slice(0, 4).map((issue, i) => {
+              const catInfo = CATEGORY_OPTIONS.find(c => c.value === issue.category);
+              return (
+                <div key={i} className="rounded-xl p-4 border border-[#F0EDE8] hover:shadow-md transition-shadow">
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="w-2 h-2 rounded-full" style={{ backgroundColor: catInfo?.color || '#A8A099' }} />
+                    <span className="text-sm font-medium text-[#3D3632]">{catInfo?.label || issue.category}</span>
+                  </div>
+                  <div className="text-2xl font-bold text-[#3D3632]">{issue.count}<span className="text-sm font-normal text-[#8A817A] ml-1">条</span></div>
+                  <div className="text-xs text-[#8A817A] mt-1">占比 {issue.percentage}%</div>
+                  {issue.samples.length > 0 && (
+                    <div className="mt-3 pt-3 border-t border-[#F0EDE8]">
+                      <p className="text-xs text-[#8A817A] line-clamp-2">&ldquo;{issue.samples[0]}&rdquo;</p>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* 责任部门工作量分布 */}
+        <div className="bg-white rounded-2xl p-6 shadow-sm border border-[#F0EDE8] mb-8">
+          <h2 className="text-lg font-semibold text-[#3D3632] mb-4">责任部门工作量</h2>
+          <div className="space-y-3">
+            {RESPONSIBLE_DEPT_LIST.map((dept, i) => {
+              const count = stats.byResponsibleDept[dept] || 0;
+              const percentage = stats.total > 0 ? Math.round((count / stats.total) * 100) : 0;
+              const colors = ['#D4A574', '#E8917A', '#B8A9C9', '#7FB5B0', '#E5A889', '#9DB5A5', '#C97B6B'];
+              return (
+                <div key={dept} className="flex items-center gap-4">
+                  <div className="w-24 text-sm text-[#3D3632] truncate">{dept}</div>
+                  <div className="flex-1 h-6 bg-[#F5F2EE] rounded-full overflow-hidden">
+                    <div
+                      className="h-full rounded-full transition-all duration-500"
+                      style={{ width: `${percentage}%`, backgroundColor: colors[i % colors.length] }}
+                    />
+                  </div>
+                  <div className="w-16 text-right text-sm">
+                    <span className="font-medium text-[#3D3632]">{count}</span>
+                    <span className="text-[#8A817A] ml-1">({percentage}%)</span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* AI 深度分析 */}
+        <div className="bg-white rounded-2xl p-6 shadow-sm border border-[#F0EDE8]">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold text-[#3D3632]">AI 深度分析</h2>
+            <button
               onClick={handleAnalysis}
               disabled={analyzing}
-              className="bg-gradient-to-r from-amber-500 to-coral-500 hover:from-amber-600 hover:to-coral-600 text-white rounded-xl"
+              className="px-4 py-2 bg-[#D4A574] text-white rounded-full text-sm font-medium hover:bg-[#C49564] disabled:opacity-50 transition-colors"
             >
-              {analyzing ? (
-                <>
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
-                  分析中...
-                </>
-              ) : (
-                <>
-                  <Sparkles className="w-4 h-4 mr-2" />
-                  生成分析
-                </>
-              )}
-            </Button>
+              {analyzing ? '分析中...' : analysis ? '重新分析' : '生成分析'}
+            </button>
           </div>
-        </CardHeader>
-        <CardContent>
-          {/* Analysis Result - Structured View */}
-          {analysisResult && analysisResult.issues && (
-            <div className="space-y-6">
-              {/* Summary */}
-              <div className="p-4 rounded-xl bg-gradient-to-r from-amber-50 to-coral-50 border border-amber-100">
-                <h3 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
-                  <Sparkles className="w-4 h-4 text-amber-500" />
-                  整体分析摘要
-                </h3>
-                <p className="text-sm text-gray-700 leading-relaxed">{analysisResult.summary}</p>
-              </div>
 
-              {/* Issues with Urgency */}
-              <div>
-                <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                  <AlertTriangle className="w-4 h-4 text-coral" />
-                  问题详情与处理建议
-                </h3>
-                <div className="space-y-3">
-                  {analysisResult.issues.map((issue, idx) => (
-                    <div key={idx} className="border border-gray-100 rounded-xl overflow-hidden">
-                      <button
-                        onClick={() => setExpandedIssue(expandedIssue === idx ? null : idx)}
-                        className="w-full p-4 flex items-center gap-3 hover:bg-gray-50 transition-colors text-left"
-                      >
-                        <span className="text-lg">{getUrgencyIcon(issue.urgency)}</span>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="font-medium text-gray-900">{issue.title}</span>
-                            <Badge className={getUrgencyColor(issue.urgency)} variant="outline">
-                              {issue.urgency}紧急
-                            </Badge>
-                          </div>
-                          <p className="text-sm text-gray-500 truncate">{issue.description}</p>
-                        </div>
-                        <div className="flex items-center gap-2 flex-shrink-0">
-                          <Badge variant="secondary" className="bg-purple-50 text-purple-700">
-                            {issue.department}
-                          </Badge>
-                          {expandedIssue === idx ? (
-                            <ChevronUp className="w-4 h-4 text-gray-400" />
-                          ) : (
-                            <ChevronDown className="w-4 h-4 text-gray-400" />
-                          )}
-                        </div>
-                      </button>
-                      {expandedIssue === idx && (
-                        <div className="px-4 pb-4 space-y-3 border-t border-gray-50 pt-3">
-                          <div>
-                            <h4 className="text-sm font-medium text-gray-700 mb-1.5">问题描述</h4>
-                            <p className="text-sm text-gray-600">{issue.description}</p>
-                          </div>
-                          <div>
-                            <h4 className="text-sm font-medium text-gray-700 mb-1.5">处理建议</h4>
-                            <ul className="space-y-1">
-                              {issue.suggestions.map((s, i) => (
-                                <li key={i} className="text-sm text-gray-600 flex items-start gap-2">
-                                  <span className="w-5 h-5 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center text-xs flex-shrink-0 mt-0.5">
-                                    {i + 1}
-                                  </span>
-                                  {s}
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                          <div>
-                            <h4 className="text-sm font-medium text-gray-700 mb-1.5">员工回复话术</h4>
-                            <div className="p-3 rounded-lg bg-gray-50 text-sm text-gray-600 leading-relaxed">
-                              {issue.replyTemplate}
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Overall Suggestions */}
-              {analysisResult.overallSuggestions && (
-                <div className="p-4 rounded-xl bg-purple-50 border border-purple-100">
-                  <h3 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
-                    <Shield className="w-4 h-4 text-purple-500" />
-                    公司层面改进建议
-                  </h3>
-                  <ul className="space-y-1.5">
-                    {analysisResult.overallSuggestions.map((s, i) => (
-                      <li key={i} className="text-sm text-gray-700 flex items-start gap-2">
-                        <span className="w-1.5 h-1.5 rounded-full bg-purple-400 mt-2 flex-shrink-0" />
-                        {s}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
+          {analysis ? (
+            <div className="prose prose-sm max-w-none">
+              <div className="whitespace-pre-wrap text-[#3D3632] leading-relaxed">{analysis}</div>
+            </div>
+          ) : (
+            <div className="text-center py-8 text-[#8A817A]">
+              <p>点击「生成分析」按钮，AI 将基于所有反馈数据生成深度分析报告</p>
+              <p className="text-sm mt-2">包括：紧急程度判断、责任部门建议、处理建议、员工回复话术</p>
             </div>
           )}
+        </div>
 
-          {/* Raw Streaming Text (shown during analysis or if JSON parse fails) */}
-          {analyzing && !analysisResult && (
-            <div className="relative">
-              <div className="absolute top-0 left-0 right-0 h-8 bg-gradient-to-b from-white to-transparent z-10" />
-              <div className="max-h-96 overflow-y-auto pt-4">
-                <div className="prose prose-sm max-w-none text-gray-700 whitespace-pre-wrap">
-                  {analysisText}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {!analyzing && !analysisResult && !analysisText && (
-            <div className="text-center py-10">
-              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-100 to-coral-100 flex items-center justify-center mx-auto mb-4">
-                <Brain className="w-8 h-8 text-amber-600" />
-              </div>
-              <p className="text-gray-600 mb-1">点击「生成分析」按钮</p>
-              <p className="text-sm text-gray-400">AI 将分析全部 {stats.total} 条反馈，生成处理建议</p>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Insights */}
-      <Card className="rounded-2xl bg-gradient-to-r from-amber-50 to-coral-50 border-amber-100">
-        <CardContent className="p-6">
-          <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-amber-500" />
-            数据洞察
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="p-3 rounded-xl bg-white/60">
-              <p className="text-sm text-gray-600">
-                绩效问题占比最高（{stats.topIssues[0]?.percentage || 0}%），建议重点关注绩效考核透明度和沟通机制。
-              </p>
-            </div>
-            <div className="p-3 rounded-xl bg-white/60">
-              <p className="text-sm text-gray-600">
-                住宿和用餐问题合计占比超过 38%，生活服务类是员工关注的重点方向。
-              </p>
-            </div>
-            <div className="p-3 rounded-xl bg-white/60">
-              <p className="text-sm text-gray-600">
-                智能总装一厂反馈最多，建议优先关注该厂区的管理改善和服务提升。
-              </p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+        {/* 数据洞察 */}
+        <div className="mt-8 bg-gradient-to-r from-[#D4A574]/10 to-[#B8A9C9]/10 rounded-2xl p-6 border border-[#F0EDE8]">
+          <h3 className="text-sm font-semibold text-[#3D3632] mb-2">数据洞察</h3>
+          <p className="text-sm text-[#8A817A] leading-relaxed">
+            当前共收到 <span className="font-medium text-[#3D3632]">{stats.total}</span> 条员工反馈，
+            其中 <span className="font-medium text-[#E8917A]">{stats.byCategory.performance || 0}</span> 条涉及绩效问题（占比最高），
+            <span className="font-medium text-[#D4A574]">{stats.byCategory.accommodation || 0}</span> 条涉及住宿问题。
+            已处理 <span className="font-medium text-[#7FB5B0]">{stats.handledCount}</span> 条，处理率 {stats.handleRate}%。
+            {stats.byUrgency.urgent > 0 && (
+              <> 需要特别关注的是，有 <span className="font-medium text-red-600">{stats.byUrgency.urgent}</span> 条紧急反馈需要优先处理。</>
+            )}
+          </p>
+        </div>
+      </div>
     </div>
   );
 }

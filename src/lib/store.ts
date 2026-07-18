@@ -1,4 +1,4 @@
-import type { Feedback, FeedbackCategory } from './types';
+import type { Feedback, FeedbackCategory, UrgencyLevel, HandleStatus, ResponsibleDept } from './types';
 
 // 真实员工反馈数据（238条，已脱敏）- 来源：反馈问题列表_20260712_164911.xlsx
 const feedbackData: Feedback[] = [
@@ -14,6 +14,9 @@ const feedbackData: Feedback[] = [
     score: '5',
     scoreContent: '感谢受理结果，当时真的特别生气，，但是现在过了两天，感觉气消了很多，已经不想追究问题了，也不想麻烦宿管办人员了，感谢公司给予的反馈平台。',
     factory: '智能总装一厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '行政部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -28,6 +31,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装一厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '行政部' as ResponsibleDept,
+    handleStatus: 'unresolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -42,6 +48,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装一厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '行政部' as ResponsibleDept,
+    handleStatus: 'unresolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -56,6 +65,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装一厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '人力资源部' as ResponsibleDept,
+    handleStatus: 'unresolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -70,6 +82,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装一厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '厂长办公室' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -84,6 +99,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装二厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '人力资源部' as ResponsibleDept,
+    handleStatus: 'unresolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -98,6 +116,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '质量及运营',
+    urgency: 'normal' as UrgencyLevel,
+    responsibleDept: '生产管理部' as ResponsibleDept,
+    handleStatus: 'unresolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -112,6 +133,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '质量及运营',
+    urgency: 'normal' as UrgencyLevel,
+    responsibleDept: '生产管理部' as ResponsibleDept,
+    handleStatus: 'unresolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -126,6 +150,9 @@ const feedbackData: Feedback[] = [
     score: '1',
     scoreContent: '一般',
     factory: '智能总装二厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '人力资源部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -140,6 +167,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装一厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '人力资源部' as ResponsibleDept,
+    handleStatus: 'unresolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -154,6 +184,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装一厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '人力资源部' as ResponsibleDept,
+    handleStatus: 'unresolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -168,6 +201,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装一厂',
+    urgency: 'normal' as UrgencyLevel,
+    responsibleDept: '生产管理部' as ResponsibleDept,
+    handleStatus: 'unresolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -182,6 +218,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装一厂',
+    urgency: 'normal' as UrgencyLevel,
+    responsibleDept: '生产管理部' as ResponsibleDept,
+    handleStatus: 'unresolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -196,6 +235,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装一厂',
+    urgency: 'normal' as UrgencyLevel,
+    responsibleDept: '生产管理部' as ResponsibleDept,
+    handleStatus: 'unresolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -210,6 +252,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装一厂',
+    urgency: 'normal' as UrgencyLevel,
+    responsibleDept: '生产管理部' as ResponsibleDept,
+    handleStatus: 'unresolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -224,6 +269,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装一厂',
+    urgency: 'normal' as UrgencyLevel,
+    responsibleDept: '生产管理部' as ResponsibleDept,
+    handleStatus: 'unresolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -238,6 +286,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装一厂',
+    urgency: 'normal' as UrgencyLevel,
+    responsibleDept: '生产管理部' as ResponsibleDept,
+    handleStatus: 'unresolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -252,6 +303,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装一厂',
+    urgency: 'normal' as UrgencyLevel,
+    responsibleDept: '生产管理部' as ResponsibleDept,
+    handleStatus: 'unresolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -266,6 +320,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装一厂',
+    urgency: 'normal' as UrgencyLevel,
+    responsibleDept: '生产管理部' as ResponsibleDept,
+    handleStatus: 'unresolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -280,6 +337,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装一厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '人力资源部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -294,6 +354,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装一厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '人力资源部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -308,6 +371,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装一厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '人力资源部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -322,6 +388,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装一厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '人力资源部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -336,6 +405,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装二厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '行政部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -350,6 +422,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装二厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '行政部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -364,6 +439,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装二厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '行政部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -378,6 +456,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装二厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '行政部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -392,6 +473,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装二厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '行政部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -406,6 +490,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装二厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '行政部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -420,6 +507,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装二厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '行政部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -434,6 +524,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装二厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '行政部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -448,6 +541,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装一厂',
+    urgency: 'urgent' as UrgencyLevel,
+    responsibleDept: '生产管理部' as ResponsibleDept,
+    handleStatus: 'unresolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -462,6 +558,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装二厂',
+    urgency: 'normal' as UrgencyLevel,
+    responsibleDept: '行政部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -476,6 +575,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装二厂',
+    urgency: 'normal' as UrgencyLevel,
+    responsibleDept: '行政部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -490,6 +592,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装二厂',
+    urgency: 'normal' as UrgencyLevel,
+    responsibleDept: '行政部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -504,6 +609,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装二厂',
+    urgency: 'normal' as UrgencyLevel,
+    responsibleDept: '行政部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -518,6 +626,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装二厂',
+    urgency: 'normal' as UrgencyLevel,
+    responsibleDept: '行政部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -532,6 +643,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装二厂',
+    urgency: 'normal' as UrgencyLevel,
+    responsibleDept: '行政部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -546,6 +660,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装一厂',
+    urgency: 'normal' as UrgencyLevel,
+    responsibleDept: '行政部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -560,6 +677,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '注塑厂',
+    urgency: 'normal' as UrgencyLevel,
+    responsibleDept: '行政部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -574,6 +694,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '注塑厂',
+    urgency: 'normal' as UrgencyLevel,
+    responsibleDept: '行政部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -588,6 +711,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '注塑厂',
+    urgency: 'normal' as UrgencyLevel,
+    responsibleDept: '行政部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -602,6 +728,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '注塑厂',
+    urgency: 'normal' as UrgencyLevel,
+    responsibleDept: '行政部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -616,6 +745,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装一厂',
+    urgency: 'normal' as UrgencyLevel,
+    responsibleDept: '厂长办公室' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -630,6 +762,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装一厂',
+    urgency: 'normal' as UrgencyLevel,
+    responsibleDept: '厂长办公室' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -644,6 +779,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装二厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '人力资源部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -658,6 +796,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '注塑厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '人力资源部' as ResponsibleDept,
+    handleStatus: 'unresolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -672,6 +813,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装一厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '人力资源部' as ResponsibleDept,
+    handleStatus: 'unresolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -686,6 +830,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装二厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '人力资源部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -700,6 +847,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装一厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '人力资源部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -714,6 +864,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '供应链',
+    urgency: 'normal' as UrgencyLevel,
+    responsibleDept: '行政部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -728,6 +881,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装一厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '人力资源部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -742,6 +898,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装二厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '人力资源部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -756,6 +915,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '注塑厂',
+    urgency: 'normal' as UrgencyLevel,
+    responsibleDept: '厂长办公室' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -770,6 +932,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装一厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '人力资源部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -784,6 +949,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装二厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '人力资源部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -798,6 +966,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装一厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '人力资源部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -812,6 +983,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '注塑厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '行政部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -826,6 +1000,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装二厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '人力资源部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -840,6 +1017,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装一厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '人力资源部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -854,6 +1034,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装一厂',
+    urgency: 'normal' as UrgencyLevel,
+    responsibleDept: '行政部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -868,6 +1051,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '注塑厂',
+    urgency: 'normal' as UrgencyLevel,
+    responsibleDept: '行政部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -882,6 +1068,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '注塑厂',
+    urgency: 'normal' as UrgencyLevel,
+    responsibleDept: '行政部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -896,6 +1085,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装二厂',
+    urgency: 'normal' as UrgencyLevel,
+    responsibleDept: '行政部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -910,6 +1102,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装二厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '人力资源部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -924,6 +1119,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装二厂',
+    urgency: 'normal' as UrgencyLevel,
+    responsibleDept: '行政部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -938,6 +1136,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装一厂',
+    urgency: 'normal' as UrgencyLevel,
+    responsibleDept: '厂长办公室' as ResponsibleDept,
+    handleStatus: 'unresolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -952,6 +1153,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装一厂',
+    urgency: 'normal' as UrgencyLevel,
+    responsibleDept: '行政部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -966,6 +1170,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装二厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '行政部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -980,6 +1187,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装一厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '人力资源部' as ResponsibleDept,
+    handleStatus: 'unresolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -994,6 +1204,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '供应链',
+    urgency: 'normal' as UrgencyLevel,
+    responsibleDept: '行政部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -1008,6 +1221,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装一厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '行政部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -1022,6 +1238,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装二厂',
+    urgency: 'normal' as UrgencyLevel,
+    responsibleDept: '行政部' as ResponsibleDept,
+    handleStatus: 'unresolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -1036,6 +1255,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装一厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '人力资源部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -1050,6 +1272,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装一厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '人力资源部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -1064,6 +1289,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装二厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '人力资源部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -1078,6 +1306,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '其他部门',
+    urgency: 'normal' as UrgencyLevel,
+    responsibleDept: '行政部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -1092,6 +1323,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装一厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '行政部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -1106,6 +1340,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装二厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '人力资源部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -1120,6 +1357,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装一厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '人力资源部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -1134,6 +1374,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装一厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '人力资源部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -1148,6 +1391,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '质量及运营',
+    urgency: 'normal' as UrgencyLevel,
+    responsibleDept: '行政部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -1162,6 +1408,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '供应链',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '行政部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -1176,6 +1425,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装一厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '人力资源部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -1190,6 +1442,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装一厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '人力资源部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -1204,6 +1459,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装一厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '人力资源部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -1218,6 +1476,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装一厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '人力资源部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -1232,6 +1493,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装一厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '人力资源部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -1246,6 +1510,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装一厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '人力资源部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -1260,6 +1527,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装一厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '人力资源部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -1274,6 +1544,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装一厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '人力资源部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -1288,6 +1561,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装一厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '人力资源部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -1302,6 +1578,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装一厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '人力资源部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -1316,6 +1595,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '注塑厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '生产管理部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -1330,6 +1612,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装一厂',
+    urgency: 'normal' as UrgencyLevel,
+    responsibleDept: '行政部' as ResponsibleDept,
+    handleStatus: 'unresolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -1344,6 +1629,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装二厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '人力资源部' as ResponsibleDept,
+    handleStatus: 'unresolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -1358,6 +1646,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装一厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '行政部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -1372,6 +1663,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装一厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '人力资源部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -1386,6 +1680,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装一厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '人力资源部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -1400,6 +1697,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装一厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '行政部' as ResponsibleDept,
+    handleStatus: 'unresolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -1414,6 +1714,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装一厂',
+    urgency: 'normal' as UrgencyLevel,
+    responsibleDept: '行政部' as ResponsibleDept,
+    handleStatus: 'unresolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -1428,6 +1731,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装二厂',
+    urgency: 'normal' as UrgencyLevel,
+    responsibleDept: '行政部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -1442,6 +1748,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装一厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '生产管理部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -1456,6 +1765,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装一厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '行政部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -1470,6 +1782,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装一厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '行政部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -1484,6 +1799,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装一厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '行政部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -1498,6 +1816,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装一厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '行政部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -1512,6 +1833,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装一厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '行政部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -1526,6 +1850,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装一厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '人力资源部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -1540,6 +1867,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装二厂',
+    urgency: 'normal' as UrgencyLevel,
+    responsibleDept: '生产管理部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -1554,6 +1884,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装二厂',
+    urgency: 'normal' as UrgencyLevel,
+    responsibleDept: '生产管理部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -1568,6 +1901,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '质量及运营',
+    urgency: 'normal' as UrgencyLevel,
+    responsibleDept: '行政部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -1582,6 +1918,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装一厂',
+    urgency: 'normal' as UrgencyLevel,
+    responsibleDept: '行政部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -1596,6 +1935,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装一厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '人力资源部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -1610,6 +1952,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装一厂',
+    urgency: 'normal' as UrgencyLevel,
+    responsibleDept: '行政部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -1624,6 +1969,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装二厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '人力资源部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -1638,6 +1986,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装一厂',
+    urgency: 'normal' as UrgencyLevel,
+    responsibleDept: '生产管理部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -1652,6 +2003,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装二厂',
+    urgency: 'normal' as UrgencyLevel,
+    responsibleDept: '生产管理部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -1666,6 +2020,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装一厂',
+    urgency: 'normal' as UrgencyLevel,
+    responsibleDept: '行政部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -1680,6 +2037,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装一厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '生产管理部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -1694,6 +2054,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装二厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '人力资源部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -1708,6 +2071,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装一厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '人力资源部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -1722,6 +2088,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装二厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '人力资源部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -1736,6 +2105,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装一厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '人力资源部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -1750,6 +2122,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装二厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '人力资源部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -1764,6 +2139,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装一厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '人力资源部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -1778,6 +2156,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '供应链',
+    urgency: 'normal' as UrgencyLevel,
+    responsibleDept: '行政部' as ResponsibleDept,
+    handleStatus: 'unresolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -1792,6 +2173,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装二厂',
+    urgency: 'normal' as UrgencyLevel,
+    responsibleDept: '生产管理部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -1806,6 +2190,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装一厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '人力资源部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -1820,6 +2207,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装一厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '人力资源部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -1834,6 +2224,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装一厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '人力资源部' as ResponsibleDept,
+    handleStatus: 'unresolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -1848,6 +2241,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装二厂',
+    urgency: 'normal' as UrgencyLevel,
+    responsibleDept: '行政部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -1862,6 +2258,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装二厂',
+    urgency: 'normal' as UrgencyLevel,
+    responsibleDept: '行政部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -1876,6 +2275,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '质量及运营',
+    urgency: 'normal' as UrgencyLevel,
+    responsibleDept: '行政部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -1890,6 +2292,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装一厂',
+    urgency: 'normal' as UrgencyLevel,
+    responsibleDept: '行政部' as ResponsibleDept,
+    handleStatus: 'unresolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -1904,6 +2309,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装一厂',
+    urgency: 'normal' as UrgencyLevel,
+    responsibleDept: '行政部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -1918,6 +2326,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装二厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '行政部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -1932,6 +2343,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装一厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '行政部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -1946,6 +2360,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装一厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '行政部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -1960,6 +2377,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装一厂',
+    urgency: 'normal' as UrgencyLevel,
+    responsibleDept: '厂长办公室' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -1974,6 +2394,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装二厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '行政部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -1988,6 +2411,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装一厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '人力资源部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -2002,6 +2428,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装二厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '行政部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -2016,6 +2445,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装二厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '人力资源部' as ResponsibleDept,
+    handleStatus: 'unresolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -2030,6 +2462,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装二厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '人力资源部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -2044,6 +2479,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装一厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '人力资源部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -2058,6 +2496,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装二厂',
+    urgency: 'normal' as UrgencyLevel,
+    responsibleDept: '行政部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -2072,6 +2513,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装二厂',
+    urgency: 'normal' as UrgencyLevel,
+    responsibleDept: '行政部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -2086,6 +2530,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装二厂',
+    urgency: 'normal' as UrgencyLevel,
+    responsibleDept: '行政部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -2100,6 +2547,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装一厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '生产管理部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -2114,6 +2564,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装二厂',
+    urgency: 'normal' as UrgencyLevel,
+    responsibleDept: '行政部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -2128,6 +2581,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装二厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '人力资源部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -2142,6 +2598,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装一厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '生产管理部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -2156,6 +2615,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装二厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '人力资源部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -2170,6 +2632,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装二厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '人力资源部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -2184,6 +2649,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装二厂',
+    urgency: 'normal' as UrgencyLevel,
+    responsibleDept: '厂长办公室' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -2198,6 +2666,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装一厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '人力资源部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -2212,6 +2683,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装二厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '人力资源部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -2226,6 +2700,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装二厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '人力资源部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -2240,6 +2717,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装二厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '人力资源部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -2254,6 +2734,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装二厂',
+    urgency: 'normal' as UrgencyLevel,
+    responsibleDept: '生产管理部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -2268,6 +2751,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装二厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '人力资源部' as ResponsibleDept,
+    handleStatus: 'unresolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -2282,6 +2768,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装一厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '人力资源部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -2296,6 +2785,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装二厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '人力资源部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -2310,6 +2802,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装二厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '生产管理部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -2324,6 +2819,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装一厂',
+    urgency: 'normal' as UrgencyLevel,
+    responsibleDept: '生产管理部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -2338,6 +2836,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装二厂',
+    urgency: 'normal' as UrgencyLevel,
+    responsibleDept: '生产管理部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -2352,6 +2853,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装二厂',
+    urgency: 'normal' as UrgencyLevel,
+    responsibleDept: '行政部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -2366,6 +2870,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装二厂',
+    urgency: 'normal' as UrgencyLevel,
+    responsibleDept: '行政部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -2380,6 +2887,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装二厂',
+    urgency: 'normal' as UrgencyLevel,
+    responsibleDept: '厂长办公室' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -2394,6 +2904,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '注塑厂',
+    urgency: 'urgent' as UrgencyLevel,
+    responsibleDept: '行政部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -2408,6 +2921,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '注塑厂',
+    urgency: 'normal' as UrgencyLevel,
+    responsibleDept: '行政部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -2422,6 +2938,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '注塑厂',
+    urgency: 'urgent' as UrgencyLevel,
+    responsibleDept: '行政部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -2436,6 +2955,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装一厂',
+    urgency: 'normal' as UrgencyLevel,
+    responsibleDept: '行政部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -2450,6 +2972,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装二厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '行政部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -2464,6 +2989,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装一厂',
+    urgency: 'normal' as UrgencyLevel,
+    responsibleDept: '厂长办公室' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -2478,6 +3006,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装二厂',
+    urgency: 'normal' as UrgencyLevel,
+    responsibleDept: '行政部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -2492,6 +3023,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装一厂',
+    urgency: 'normal' as UrgencyLevel,
+    responsibleDept: '行政部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -2506,6 +3040,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装二厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '人力资源部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -2520,6 +3057,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装二厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '人力资源部' as ResponsibleDept,
+    handleStatus: 'unresolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -2534,6 +3074,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装二厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '人力资源部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -2548,6 +3091,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装一厂',
+    urgency: 'normal' as UrgencyLevel,
+    responsibleDept: '行政部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -2562,6 +3108,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装一厂',
+    urgency: 'normal' as UrgencyLevel,
+    responsibleDept: '生产管理部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -2576,6 +3125,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装一厂',
+    urgency: 'normal' as UrgencyLevel,
+    responsibleDept: '行政部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -2590,6 +3142,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装一厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '人力资源部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -2604,6 +3159,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装一厂',
+    urgency: 'normal' as UrgencyLevel,
+    responsibleDept: '生产管理部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -2618,6 +3176,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装二厂',
+    urgency: 'normal' as UrgencyLevel,
+    responsibleDept: '生产管理部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -2632,6 +3193,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装二厂',
+    urgency: 'normal' as UrgencyLevel,
+    responsibleDept: '行政部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -2646,6 +3210,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '质量及运营',
+    urgency: 'normal' as UrgencyLevel,
+    responsibleDept: '行政部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -2660,6 +3227,9 @@ const feedbackData: Feedback[] = [
     score: '5',
     scoreContent: '谢谢领导！麻烦您了！',
     factory: '智能总装一厂',
+    urgency: 'normal' as UrgencyLevel,
+    responsibleDept: '行政部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -2674,6 +3244,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装一厂',
+    urgency: 'normal' as UrgencyLevel,
+    responsibleDept: '行政部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -2688,6 +3261,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装二厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '行政部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -2702,6 +3278,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装二厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '人力资源部' as ResponsibleDept,
+    handleStatus: 'unresolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -2716,6 +3295,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '质量及运营',
+    urgency: 'normal' as UrgencyLevel,
+    responsibleDept: '行政部' as ResponsibleDept,
+    handleStatus: 'unresolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -2730,6 +3312,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装一厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '人力资源部' as ResponsibleDept,
+    handleStatus: 'unresolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -2744,6 +3329,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装一厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '人力资源部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -2758,6 +3346,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装一厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '人力资源部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -2772,6 +3363,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装一厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '人力资源部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -2786,6 +3380,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装一厂',
+    urgency: 'normal' as UrgencyLevel,
+    responsibleDept: '厂长办公室' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -2800,6 +3397,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装二厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '人力资源部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -2814,6 +3414,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装二厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '人力资源部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -2828,6 +3431,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装二厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '人力资源部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -2842,6 +3448,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装二厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '人力资源部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -2856,6 +3465,9 @@ const feedbackData: Feedback[] = [
     score: '5',
     scoreContent: '感谢！',
     factory: '智能总装二厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '人力资源部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -2870,6 +3482,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装二厂',
+    urgency: 'normal' as UrgencyLevel,
+    responsibleDept: '行政部' as ResponsibleDept,
+    handleStatus: 'unresolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -2884,6 +3499,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装一厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '生产管理部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -2898,6 +3516,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '注塑厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '生产管理部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -2912,6 +3533,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '供应链',
+    urgency: 'normal' as UrgencyLevel,
+    responsibleDept: '行政部' as ResponsibleDept,
+    handleStatus: 'unresolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -2926,6 +3550,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装一厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '生产管理部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -2940,6 +3567,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装一厂',
+    urgency: 'normal' as UrgencyLevel,
+    responsibleDept: '行政部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -2954,6 +3584,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '供应链',
+    urgency: 'normal' as UrgencyLevel,
+    responsibleDept: '行政部' as ResponsibleDept,
+    handleStatus: 'unresolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -2968,6 +3601,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装一厂',
+    urgency: 'normal' as UrgencyLevel,
+    responsibleDept: '厂长办公室' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -2982,6 +3618,9 @@ const feedbackData: Feedback[] = [
     score: '5',
     scoreContent: '十分满意',
     factory: '智能总装一厂',
+    urgency: 'normal' as UrgencyLevel,
+    responsibleDept: '厂长办公室' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -2996,6 +3635,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '供应链',
+    urgency: 'urgent' as UrgencyLevel,
+    responsibleDept: '厂长办公室' as ResponsibleDept,
+    handleStatus: 'unresolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -3010,6 +3652,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装一厂',
+    urgency: 'normal' as UrgencyLevel,
+    responsibleDept: '行政部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -3024,6 +3669,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装一厂',
+    urgency: 'normal' as UrgencyLevel,
+    responsibleDept: '行政部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -3038,6 +3686,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装二厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '行政部' as ResponsibleDept,
+    handleStatus: 'unresolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -3052,6 +3703,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装一厂',
+    urgency: 'urgent' as UrgencyLevel,
+    responsibleDept: '行政部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -3066,6 +3720,9 @@ const feedbackData: Feedback[] = [
     score: '1',
     scoreContent: '没有解决问题，没有具体的回复',
     factory: '智能总装二厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '行政部' as ResponsibleDept,
+    handleStatus: 'unresolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -3080,6 +3737,9 @@ const feedbackData: Feedback[] = [
     score: '5',
     scoreContent: '很好很棒',
     factory: '智能总装一厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '行政部' as ResponsibleDept,
+    handleStatus: 'unresolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -3094,6 +3754,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装二厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '生产管理部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -3108,6 +3771,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装二厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '生产管理部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -3122,6 +3788,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '质量及运营',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '行政部' as ResponsibleDept,
+    handleStatus: 'unresolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -3136,6 +3805,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装二厂',
+    urgency: 'normal' as UrgencyLevel,
+    responsibleDept: '行政部' as ResponsibleDept,
+    handleStatus: 'unresolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -3150,6 +3822,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装二厂',
+    urgency: 'normal' as UrgencyLevel,
+    responsibleDept: '行政部' as ResponsibleDept,
+    handleStatus: 'unresolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -3164,6 +3839,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装二厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '人力资源部' as ResponsibleDept,
+    handleStatus: 'unresolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -3178,6 +3856,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '注塑厂',
+    urgency: 'normal' as UrgencyLevel,
+    responsibleDept: '行政部' as ResponsibleDept,
+    handleStatus: 'unresolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -3192,6 +3873,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装二厂',
+    urgency: 'normal' as UrgencyLevel,
+    responsibleDept: '生产管理部' as ResponsibleDept,
+    handleStatus: 'unresolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -3206,6 +3890,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '其他部门',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '生产管理部' as ResponsibleDept,
+    handleStatus: 'unresolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -3220,6 +3907,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装二厂',
+    urgency: 'urgent' as UrgencyLevel,
+    responsibleDept: '工会/员工关系' as ResponsibleDept,
+    handleStatus: 'unresolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -3234,6 +3924,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装二厂',
+    urgency: 'normal' as UrgencyLevel,
+    responsibleDept: '行政部' as ResponsibleDept,
+    handleStatus: 'unresolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -3248,6 +3941,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装二厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '行政部' as ResponsibleDept,
+    handleStatus: 'unresolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -3262,6 +3958,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装一厂',
+    urgency: 'normal' as UrgencyLevel,
+    responsibleDept: '行政部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -3276,6 +3975,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装一厂',
+    urgency: 'normal' as UrgencyLevel,
+    responsibleDept: '行政部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -3290,6 +3992,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装一厂',
+    urgency: 'normal' as UrgencyLevel,
+    responsibleDept: '行政部' as ResponsibleDept,
+    handleStatus: 'resolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -3304,6 +4009,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装一厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '行政部' as ResponsibleDept,
+    handleStatus: 'unresolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -3318,6 +4026,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '智能总装一厂',
+    urgency: 'high' as UrgencyLevel,
+    responsibleDept: '行政部' as ResponsibleDept,
+    handleStatus: 'unresolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
   {
@@ -3332,6 +4043,9 @@ const feedbackData: Feedback[] = [
     score: '',
     scoreContent: '',
     factory: '质量及运营',
+    urgency: 'normal' as UrgencyLevel,
+    responsibleDept: '行政部' as ResponsibleDept,
+    handleStatus: 'unresolved' as HandleStatus,
     createdAt: new Date('2026-07-12').toISOString(),
   },
 ];
@@ -3374,6 +4088,9 @@ export function createFeedback(data: {
     score: '',
     scoreContent: '',
     factory: '其他部门',
+    urgency: 'normal',
+    responsibleDept: '行政部',
+    handleStatus: 'unresolved',
     createdAt: new Date().toISOString(),
   };
   feedbacks = [newFeedback, ...feedbacks];
@@ -3383,6 +4100,9 @@ export function createFeedback(data: {
 export function getFeedbackStats() {
   const byCategory: Record<string, number> = {};
   const byFactory: Record<string, number> = {};
+  const byUrgency: Record<string, number> = { urgent: 0, high: 0, normal: 0 };
+  const byResponsibleDept: Record<string, number> = {};
+  const byHandleStatus: Record<string, number> = { resolved: 0, unresolved: 0 };
   let handledCount = 0;
   let totalScore = 0;
   let scoreCount = 0;
@@ -3390,6 +4110,9 @@ export function getFeedbackStats() {
   for (const f of feedbacks) {
     byCategory[f.category] = (byCategory[f.category] || 0) + 1;
     byFactory[f.factory] = (byFactory[f.factory] || 0) + 1;
+    byUrgency[f.urgency] = (byUrgency[f.urgency] || 0) + 1;
+    byResponsibleDept[f.responsibleDept] = (byResponsibleDept[f.responsibleDept] || 0) + 1;
+    byHandleStatus[f.handleStatus] = (byHandleStatus[f.handleStatus] || 0) + 1;
     if (f.handler) handledCount++;
     if (f.score) {
       const s = parseInt(f.score);
@@ -3404,6 +4127,9 @@ export function getFeedbackStats() {
     total: feedbacks.length,
     byCategory,
     byFactory,
+    byUrgency,
+    byResponsibleDept,
+    byHandleStatus,
     handledCount,
     handleRate: feedbacks.length > 0 ? Math.round((handledCount / feedbacks.length) * 100) : 0,
     avgScore: scoreCount > 0 ? Math.round((totalScore / scoreCount) * 10) / 10 : 0,
@@ -3433,4 +4159,12 @@ export function getTopIssues(): { category: string; count: number; percentage: n
       samples: data.samples,
     }))
     .sort((a, b) => b.count - a.count);
+}
+
+// Get feedbacks grouped by urgency
+export function getFeedbacksByUrgency() {
+  const urgent = feedbacks.filter(f => f.urgency === 'urgent');
+  const high = feedbacks.filter(f => f.urgency === 'high');
+  const normal = feedbacks.filter(f => f.urgency === 'normal');
+  return { urgent, high, normal };
 }

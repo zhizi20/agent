@@ -44,7 +44,6 @@ export function CategoryFilter({ selected, onChange }: CategoryFilterProps) {
             ...(selected === key ? { boxShadow: `0 0 0 1px ${val.color}40` } : {}),
           }}
         >
-          <span>{val.emoji}</span>
           {val.label}
         </button>
       ))}
