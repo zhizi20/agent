@@ -120,6 +120,10 @@ export function getVoiceStats(): {
   totalLikes: number;
   anonymousCount: number;
   recentWeek: number;
+  dailyTrend: { date: string; count: number }[];
+  topVoices: { id: string; content: string; category: string; likes: number; createdAt: string }[];
+  avgLikesPerVoice: number;
+  replyRate: number;
 } {
   const now = Date.now();
   const weekAgo = now - 86400000 * 7;
@@ -128,13 +132,53 @@ export function getVoiceStats(): {
   let totalLikes = 0;
   let anonymousCount = 0;
   let recentWeek = 0;
+  let repliedCount = 0;
+
+  // Daily trend for last 7 days
+  const dailyTrend: { date: string; count: number }[] = [];
+  for (let i = 6; i >= 0; i--) {
+    const dayStart = new Date(now - 86400000 * i);
+    dayStart.setHours(0, 0, 0, 0);
+    const dayEnd = new Date(dayStart);
+    dayEnd.setHours(23, 59, 59, 999);
+    dailyTrend.push({
+      date: `${dayStart.getMonth() + 1}/${dayStart.getDate()}`,
+      count: 0,
+    });
+  }
 
   for (const v of voices) {
     byCategory[v.category] = (byCategory[v.category] || 0) + 1;
     totalLikes += v.likes;
     if (v.isAnonymous) anonymousCount++;
     if (new Date(v.createdAt).getTime() > weekAgo) recentWeek++;
+    if (v.aiReply) repliedCount++;
+
+    // Add to daily trend
+    const voiceTime = new Date(v.createdAt).getTime();
+    for (let i = 0; i < dailyTrend.length; i++) {
+      const dayStart = new Date(now - 86400000 * (6 - i));
+      dayStart.setHours(0, 0, 0, 0);
+      const dayEnd = new Date(dayStart);
+      dayEnd.setHours(23, 59, 59, 999);
+      if (voiceTime >= dayStart.getTime() && voiceTime <= dayEnd.getTime()) {
+        dailyTrend[i].count++;
+        break;
+      }
+    }
   }
+
+  // Top voices by likes
+  const topVoices = [...voices]
+    .sort((a, b) => b.likes - a.likes)
+    .slice(0, 5)
+    .map((v) => ({
+      id: v.id,
+      content: v.content.length > 50 ? v.content.slice(0, 50) + '...' : v.content,
+      category: v.category,
+      likes: v.likes,
+      createdAt: v.createdAt,
+    }));
 
   return {
     total: voices.length,
@@ -142,5 +186,9 @@ export function getVoiceStats(): {
     totalLikes,
     anonymousCount,
     recentWeek,
+    dailyTrend,
+    topVoices,
+    avgLikesPerVoice: voices.length > 0 ? Math.round((totalLikes / voices.length) * 10) / 10 : 0,
+    replyRate: voices.length > 0 ? Math.round((repliedCount / voices.length) * 100) : 0,
   };
 }
