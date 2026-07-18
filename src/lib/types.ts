@@ -6,6 +6,9 @@ export type VoiceCategory =
   | 'salary'
   | 'dining'
   | 'rough_management'
+  | 'training'
+  | 'office'
+  | 'commute'
   | 'other';
 
 export const CATEGORY_MAP: Record<VoiceCategory, { label: string; color: string; bgColor: string; icon: string; pieColor: string }> = {
@@ -16,6 +19,9 @@ export const CATEGORY_MAP: Record<VoiceCategory, { label: string; color: string;
   salary:            { label: '工资问题', color: 'text-green-700',  bgColor: 'bg-green-50 border-green-200',   icon: '💰', pieColor: '#059669' },
   dining:            { label: '用餐问题', color: 'text-orange-700', bgColor: 'bg-orange-50 border-orange-200', icon: '🍽️', pieColor: '#EA580C' },
   rough_management:  { label: '粗暴管理', color: 'text-red-700',    bgColor: 'bg-red-50 border-red-200',       icon: '⚠️', pieColor: '#DC2626' },
+  training:          { label: '培训问题', color: 'text-teal-700',   bgColor: 'bg-teal-50 border-teal-200',     icon: '🎓', pieColor: '#0D9488' },
+  office:            { label: '办公问题', color: 'text-cyan-700',   bgColor: 'bg-cyan-50 border-cyan-200',     icon: '🖥️', pieColor: '#0891B2' },
+  commute:           { label: '通勤问题', color: 'text-pink-700',   bgColor: 'bg-pink-50 border-pink-200',     icon: '🚌', pieColor: '#DB2777' },
   other:             { label: '其他',    color: 'text-stone-600',  bgColor: 'bg-stone-50 border-stone-200',   icon: '💬', pieColor: '#78716C' },
 };
 

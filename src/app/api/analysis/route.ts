@@ -25,6 +25,9 @@ export async function POST(request: NextRequest) {
       salary: '工资问题',
       dining: '用餐问题',
       rough_management: '粗暴管理',
+      training: '培训问题',
+      office: '办公问题',
+      commute: '通勤问题',
       other: '其他',
     };
 
