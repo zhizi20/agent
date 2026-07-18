@@ -528,26 +528,6 @@ export default function DashboardPage() {
               <StatCard label="匿名反馈" value={stats.anonymousCount} sub={`${((stats.anonymousCount / stats.total) * 100).toFixed(0)}% 匿名率`} icon="🔒" accent="bg-violet-50 text-violet-600" />
               <StatCard label="共鸣次数" value={stats.totalLikes} sub="点赞总计" icon="💬" accent="bg-amber-50 text-amber-600" />
             </div>
-            {/* TOP 3 categories mini */}
-            <div className="mt-4 bg-white rounded-2xl p-5 border border-stone-200/60 shadow-sm">
-              <h3 className="text-sm font-semibold text-stone-700 mb-3">TOP 3 反馈类别</h3>
-              <div className="flex flex-wrap gap-3">
-                {topCategories.map(([cat, count], i) => {
-                  const info = CATEGORY_MAP[cat as VoiceCategory];
-                  return (
-                    <div key={cat} className="flex items-center gap-2 px-3 py-2 rounded-xl bg-stone-50 border border-stone-100">
-                      <span className="w-6 h-6 rounded-md bg-gradient-to-br from-amber-400 to-orange-500 text-white text-xs font-bold flex items-center justify-center">
-                        {i + 1}
-                      </span>
-                      <span className="text-base">{info?.icon}</span>
-                      <span className="text-sm font-medium text-stone-700">{info?.label || cat}</span>
-                      <span className="text-sm font-bold text-stone-800">{count}</span>
-                      <span className="text-xs text-stone-400">({((count / stats.total) * 100).toFixed(1)}%)</span>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
             {/* 反馈活跃趋势 + 问题处理状态 */}
             <div className="mt-4 grid grid-cols-1 lg:grid-cols-5 gap-6">
               {/* 折线图：反馈活跃趋势 */}
@@ -594,48 +574,165 @@ export default function DashboardPage() {
                 </div>
               </div>
             </div>
-          </section>
-
-          {/* ═══ Section 3: 高频问题洞察 ═══ */}
-          <section>
-            <SectionTitle num="3" title="高频问题洞察" subtitle="热点问题识别与趋势变化" />
-            <div className="bg-white rounded-2xl p-6 border border-stone-200/60 shadow-sm">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {topCategories.map(([cat, count]) => {
+            {/* TOP 3 反馈类别 */}
+            <div className="mt-4 bg-white rounded-2xl p-5 border border-stone-200/60 shadow-sm">
+              <h3 className="text-sm font-semibold text-stone-700 mb-3">TOP 3 反馈类别</h3>
+              <div className="flex flex-wrap gap-3">
+                {topCategories.map(([cat, count], i) => {
                   const info = CATEGORY_MAP[cat as VoiceCategory];
-                  const pct = ((count / stats.total) * 100).toFixed(1);
-                  const hotTopics: Record<string, string[]> = {
-                    performance: ['评C原因不清', '扣分标准不明', '与考勤关联', '目标不合理'],
-                    housing: ['空调不制冷', '热水器故障', '卫生问题', '噪音干扰'],
-                    attendance: ['补卡困难', '打卡异常', '工时核算', '加班记录缺失'],
-                    management: ['沟通态度', '流程不清', '分配不公'],
-                    salary: ['调薪不及时', '薪资标准低', '奖金分配'],
-                    dining: ['菜品单一', '食材新鲜度', '就餐环境'],
-                    rough_management: ['当众批评', '言语粗暴'],
-                    other: ['其他建议', '综合反馈'],
-                  };
                   return (
-                    <div key={cat} className="p-4 rounded-xl border border-stone-100 bg-gradient-to-br from-stone-50 to-white">
-                      <div className="flex items-center gap-2 mb-3">
-                        <span className="text-2xl">{info?.icon}</span>
-                        <div>
-                          <h4 className="font-semibold text-stone-800">{info?.label || cat}</h4>
-                          <p className="text-xs text-stone-400">{count} 条 · {pct}%</p>
-                        </div>
-                      </div>
-                      <div className="space-y-1.5">
-                        <p className="text-xs font-medium text-stone-500">常见子问题：</p>
-                        {(hotTopics[cat] || ['综合反馈']).map((topic, i) => (
-                          <div key={i} className="flex items-center gap-2 text-sm text-stone-600">
-                            <div className="w-1 h-1 rounded-full" style={{ backgroundColor: info?.pieColor }} />
-                            {topic}
-                          </div>
-                        ))}
-                      </div>
+                    <div key={cat} className="flex items-center gap-2 px-3 py-2 rounded-xl bg-stone-50 border border-stone-100">
+                      <span className="w-6 h-6 rounded-md bg-gradient-to-br from-amber-400 to-orange-500 text-white text-xs font-bold flex items-center justify-center">
+                        {i + 1}
+                      </span>
+                      <span className="text-base">{info?.icon}</span>
+                      <span className="text-sm font-medium text-stone-700">{info?.label || cat}</span>
+                      <span className="text-sm font-bold text-stone-800">{count}</span>
+                      <span className="text-xs text-stone-400">({((count / stats.total) * 100).toFixed(1)}%)</span>
                     </div>
                   );
                 })}
               </div>
+            </div>
+          </section>
+
+          {/* ═══ Section 3: 高频问题洞察 ═══ */}
+          <section>
+            <SectionTitle num="3" title="高频问题洞察" subtitle="热点问题、趋势变化与潜在风险" />
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+              {/* 卡片1: 关注热点 */}
+              {(() => {
+                const topCat = topCategories[0];
+                if (!topCat) return null;
+                const [cat, count] = topCat;
+                const info = CATEGORY_MAP[cat as VoiceCategory];
+                const pct = ((count / stats.total) * 100).toFixed(1);
+                return (
+                  <div className="bg-white rounded-2xl p-6 border border-stone-200/60 shadow-sm relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-orange-50 to-transparent rounded-bl-full" />
+                    <div className="relative">
+                      <div className="flex items-center gap-2 mb-4">
+                        <span className="text-2xl">🔥</span>
+                        <h3 className="text-sm font-bold text-stone-800">当前热点问题</h3>
+                      </div>
+                      <div className="mb-4">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-lg">{info?.icon}</span>
+                          <span className="text-lg font-bold text-stone-800">{info?.label || cat}</span>
+                        </div>
+                        <p className="text-sm text-stone-500">反馈持续较高，为员工最关注议题</p>
+                      </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="bg-stone-50 rounded-xl p-3">
+                          <p className="text-xs text-stone-400 mb-1">占比</p>
+                          <p className="text-xl font-bold" style={{ color: info?.pieColor }}>{pct}%</p>
+                        </div>
+                        <div className="bg-stone-50 rounded-xl p-3">
+                          <p className="text-xs text-stone-400 mb-1">涉及</p>
+                          <p className="text-xl font-bold text-stone-800">{count}<span className="text-sm font-normal text-stone-400 ml-1">条反馈</span></p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
+
+              {/* 卡片2: 问题趋势 */}
+              {(() => {
+                // Calculate trend: compare recent week vs previous week
+                const trend = stats.weeklyTrend || [];
+                const currentWeek = trend[trend.length - 1]?.count || 0;
+                const prevWeek = trend[trend.length - 2]?.count || 0;
+                const change = prevWeek > 0 ? ((currentWeek - prevWeek) / prevWeek * 100) : 0;
+                const isUp = change > 0;
+                // Find second highest category as trending issue
+                const secondCat = topCategories[1];
+                const secondInfo = secondCat ? CATEGORY_MAP[secondCat[0] as VoiceCategory] : null;
+                const focusAreas: Record<string, string> = {
+                  performance: '评分标准、目标设定',
+                  housing: '宿舍环境、设施维护',
+                  attendance: '打卡异常、工时核算',
+                  management: '沟通方式、流程透明',
+                  salary: '调薪机制、奖金分配',
+                  dining: '菜品质量、就餐环境',
+                  rough_management: '管理态度、尊重员工',
+                  other: '综合建议',
+                };
+                return (
+                  <div className="bg-white rounded-2xl p-6 border border-stone-200/60 shadow-sm relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-blue-50 to-transparent rounded-bl-full" />
+                    <div className="relative">
+                      <div className="flex items-center gap-2 mb-4">
+                        <span className="text-2xl">{isUp ? '📈' : '📉'}</span>
+                        <h3 className="text-sm font-bold text-stone-800">{isUp ? '上升问题' : '下降问题'}</h3>
+                      </div>
+                      <div className="mb-4">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-lg">{secondInfo?.icon}</span>
+                          <span className="text-lg font-bold text-stone-800">{secondInfo?.label || '—'}</span>
+                        </div>
+                        <p className="text-sm text-stone-500">较上周期反馈量{isUp ? '增加' : '减少'}</p>
+                      </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className={cn("rounded-xl p-3", isUp ? "bg-red-50" : "bg-green-50")}>
+                          <p className="text-xs text-stone-400 mb-1">较上周期</p>
+                          <p className={cn("text-xl font-bold", isUp ? "text-red-500" : "text-green-500")}>
+                            {isUp ? '+' : ''}{change.toFixed(0)}%
+                          </p>
+                        </div>
+                        <div className="bg-stone-50 rounded-xl p-3">
+                          <p className="text-xs text-stone-400 mb-1">建议关注</p>
+                          <p className="text-sm font-medium text-stone-700 leading-tight mt-1">
+                            {secondCat ? (focusAreas[secondCat[0]] || '综合反馈') : '—'}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
+
+              {/* 卡片3: 潜在风险 */}
+              {(() => {
+                // Risk: rough_management is highest risk, also check unresolved rate
+                const unresolvedRate = stats.byStatus?.unresolved ? ((stats.byStatus.unresolved / stats.total) * 100).toFixed(1) : '0';
+                const roughCount = stats.byCategory.rough_management || 0;
+                const mgmtCount = stats.byCategory.management || 0;
+                const riskItems = [
+                  { label: '粗暴管理', count: roughCount, level: 'high' as const },
+                  { label: '管理问题', count: mgmtCount, level: 'medium' as const },
+                  { label: '未解决问题', count: stats.byStatus?.unresolved || 0, level: 'medium' as const },
+                ].filter(item => item.count > 0);
+                return (
+                  <div className="bg-white rounded-2xl p-6 border border-stone-200/60 shadow-sm relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-red-50 to-transparent rounded-bl-full" />
+                    <div className="relative">
+                      <div className="flex items-center gap-2 mb-4">
+                        <span className="text-2xl">⚠️</span>
+                        <h3 className="text-sm font-bold text-stone-800">潜在风险</h3>
+                      </div>
+                      <div className="mb-4">
+                        <p className="text-sm text-stone-500">
+                          未解决问题占比 <span className="font-bold text-red-500">{unresolvedRate}%</span>，需重点关注
+                        </p>
+                      </div>
+                      <div className="space-y-2.5">
+                        {riskItems.map((item) => {
+                          const colors = item.level === 'high'
+                            ? 'bg-red-50 text-red-600 border-red-100'
+                            : 'bg-amber-50 text-amber-600 border-amber-100';
+                          return (
+                            <div key={item.label} className={cn("flex items-center justify-between px-3 py-2 rounded-lg border", colors)}>
+                              <span className="text-sm font-medium">{item.label}</span>
+                              <span className="text-sm font-bold">{item.count} 条</span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
             </div>
           </section>
 
