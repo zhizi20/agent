@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Header } from '@/components/header';
 import { CATEGORY_MAP } from '@/lib/types';
 import type { VoiceCategory } from '@/lib/types';
@@ -240,6 +240,14 @@ export default function DashboardPage() {
               </div>
             </div>
 
+            {/* Pie chart - Category distribution */}
+            <div className="mb-8 rounded-2xl border border-border/60 bg-card p-6 shadow-sm">
+              <h2 className="mb-6 text-base font-semibold text-foreground">
+                分类占比
+              </h2>
+              <CategoryPieChart byCategory={stats.byCategory} total={stats.total} />
+            </div>
+
             {/* AI Analysis Section */}
             <div className="mb-8 rounded-2xl border border-border/60 bg-card p-6 shadow-sm">
               <div className="mb-4 flex items-center justify-between">
@@ -449,6 +457,140 @@ function StreamingAnalysis({ rawText }: { rawText: string }) {
   );
 }
 
+function CategoryPieChart({ byCategory, total }: { byCategory: Record<string, number>; total: number }) {
+  const [hoveredSlice, setHoveredSlice] = useState<string | null>(null);
+
+  const radius = 90;
+  const centerX = 110;
+  const centerY = 110;
+
+  const slices = useMemo(() => {
+    const entries = Object.entries(byCategory)
+      .filter(([, count]) => count > 0)
+      .map(([key, count]) => ({
+        key,
+        count,
+        percentage: total > 0 ? (count / total) * 100 : 0,
+        ...CATEGORY_MAP[key as VoiceCategory],
+      }));
+
+    // Compute cumulative start angles purely (no mutable variables)
+    const sliceStartAngles = entries.map((_, i) =>
+      entries.slice(0, i).reduce((sum, e) => sum + (e.percentage / 100) * 360, -90)
+    );
+
+    return entries.map((entry, idx) => {
+      const angle = (entry.percentage / 100) * 360;
+      const startAngle = sliceStartAngles[idx];
+      const endAngle = startAngle + angle;
+
+      const startRad = (startAngle * Math.PI) / 180;
+      const endRad = (endAngle * Math.PI) / 180;
+
+      const x1 = centerX + radius * Math.cos(startRad);
+      const y1 = centerY + radius * Math.sin(startRad);
+      const x2 = centerX + radius * Math.cos(endRad);
+      const y2 = centerY + radius * Math.sin(endRad);
+
+      const largeArcFlag = angle > 180 ? 1 : 0;
+
+      const pathData = [
+        `M ${centerX} ${centerY}`,
+        `L ${x1} ${y1}`,
+        `A ${radius} ${radius} 0 ${largeArcFlag} 1 ${x2} ${y2}`,
+        'Z',
+      ].join(' ');
+
+      return { ...entry, pathData };
+    });
+  }, [byCategory, total, centerX, centerY, radius]);
+
+  if (slices.length === 0 || total === 0) {
+    return (
+      <div className="py-8 text-center">
+        <div className="mb-2 text-3xl opacity-40">📊</div>
+        <p className="text-sm text-muted-foreground">暂无数据</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-col items-center gap-6 md:flex-row md:items-start md:gap-10">
+      {/* SVG Pie Chart */}
+      <div className="relative shrink-0">
+        <svg width="220" height="220" viewBox="0 0 220 220">
+          {slices.map((slice) => (
+            <path
+              key={slice.key}
+              d={slice.pathData}
+              fill={slice.color}
+              stroke="white"
+              strokeWidth="2"
+              className="cursor-pointer transition-all duration-200"
+              style={{
+                transform: hoveredSlice === slice.key ? 'scale(1.06)' : 'scale(1)',
+                transformOrigin: 'center',
+                opacity: hoveredSlice !== null && hoveredSlice !== slice.key ? 0.55 : 1,
+              }}
+              onMouseEnter={() => setHoveredSlice(slice.key)}
+              onMouseLeave={() => setHoveredSlice(null)}
+            />
+          ))}
+          {/* Center donut hole */}
+          <circle cx={centerX} cy={centerY} r="48" fill="var(--card)" />
+          <text
+            x={centerX}
+            y={centerY - 6}
+            textAnchor="middle"
+            className="fill-foreground text-2xl font-bold"
+            style={{ fontSize: '22px', fontWeight: 700 }}
+          >
+            {total}
+          </text>
+          <text
+            x={centerX}
+            y={centerY + 14}
+            textAnchor="middle"
+            className="fill-muted-foreground"
+            style={{ fontSize: '11px' }}
+          >
+            条心声
+          </text>
+        </svg>
+      </div>
+
+      {/* Legend */}
+      <div className="flex-1 space-y-2">
+        {slices.map((slice) => (
+          <div
+            key={slice.key}
+            className="flex items-center gap-3 rounded-lg px-3 py-2 transition-colors hover:bg-muted/50 cursor-pointer"
+            onMouseEnter={() => setHoveredSlice(slice.key)}
+            onMouseLeave={() => setHoveredSlice(null)}
+          >
+            <div
+              className="h-3.5 w-3.5 shrink-0 rounded"
+              style={{ backgroundColor: slice.color }}
+            />
+            <span className="text-sm text-foreground">
+              {slice.emoji} {slice.label}
+            </span>
+            <span className="ml-auto text-sm font-semibold text-foreground">
+              {slice.count}
+            </span>
+            <span
+              className="min-w-[3rem] rounded-full px-2 py-0.5 text-center text-xs font-medium"
+              style={{ backgroundColor: `${slice.color}18`, color: slice.color }}
+            >
+              {slice.percentage.toFixed(1)}%
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function StatCard({
   label,
   value,
@@ -562,28 +704,12 @@ function getTopCategory(byCategory: Record<string, number>): string {
   const entries = Object.entries(byCategory);
   if (entries.length === 0) return '💡';
   const top = entries.reduce((a, b) => (a[1] > b[1] ? a : b));
-  const emojiMap: Record<string, string> = {
-    suggestion: '💡',
-    vent: '😤',
-    gratitude: '🙏',
-    confusion: '🤔',
-    idea: '✨',
-    other: '💬',
-  };
-  return emojiMap[top[0]] || '💬';
+  return CATEGORY_MAP[top[0] as VoiceCategory]?.emoji || '💬';
 }
 
 function getTopCategoryLabel(byCategory: Record<string, number>): string {
   const entries = Object.entries(byCategory);
   if (entries.length === 0) return '暂无';
   const top = entries.reduce((a, b) => (a[1] > b[1] ? a : b));
-  const labelMap: Record<string, string> = {
-    suggestion: '建议',
-    vent: '吐槽',
-    gratitude: '感恩',
-    confusion: '困惑',
-    idea: '灵感',
-    other: '其他',
-  };
-  return labelMap[top[0]] || '其他';
+  return CATEGORY_MAP[top[0] as VoiceCategory]?.label || '其他';
 }

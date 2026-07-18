@@ -45,10 +45,10 @@ export function VoiceForm({ onSubmit }: VoiceFormProps) {
     }
   };
 
-  const categories = Object.entries(CATEGORY_MAP) as [
+  const categories = (Object.entries(CATEGORY_MAP) as [
     VoiceCategory,
     (typeof CATEGORY_MAP)[VoiceCategory],
-  ][];
+  ][]).filter(([key]) => ['suggestion', 'vent', 'gratitude', 'confusion', 'idea', 'other'].includes(key));
 
   return (
     <form onSubmit={handleSubmit} className="rounded-2xl border border-border/60 bg-card p-6 shadow-sm">

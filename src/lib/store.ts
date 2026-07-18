@@ -93,6 +93,29 @@ export function createVoice(data: {
     likes: 0,
     aiReply: null,
     createdAt: new Date().toISOString(),
+    isBatch: false,
+  };
+  voices = [newVoice, ...voices];
+  return newVoice;
+}
+
+export function addVoice(data: {
+  content: string;
+  category: VoiceCategory;
+  author: string;
+  isAnonymous: boolean;
+  isBatch?: boolean;
+}): Voice | null {
+  const newVoice: Voice = {
+    id: String(Date.now()) + String(Math.random()).slice(2, 6),
+    content: data.content,
+    category: data.category,
+    author: data.isAnonymous ? '' : data.author,
+    isAnonymous: data.isAnonymous,
+    likes: 0,
+    aiReply: null,
+    createdAt: new Date().toISOString(),
+    isBatch: data.isBatch ?? false,
   };
   voices = [newVoice, ...voices];
   return newVoice;
