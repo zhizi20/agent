@@ -736,46 +736,69 @@ export default function DashboardPage() {
             </div>
           </section>
 
-          {/* ═══ Section 4: 风险等级分析 ═══ */}
+          {/* ═══ Section 4: 紧急程度排序 ═══ */}
           <section>
-            <SectionTitle num="4" title="风险等级分析" subtitle="基于反馈内容、频次和影响范围的风险评估" />
+            <SectionTitle num="4" title="紧急程度排序" subtitle="基于反馈分类和影响范围的紧急程度判断与责任部门映射" />
             <div className="bg-white rounded-2xl p-6 border border-stone-200/60 shadow-sm">
-              {analysis?.riskAnalysis ? (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {(['high', 'medium', 'low'] as const).map((level) => {
-                    const items = analysis.riskAnalysis?.[level] || [];
-                    const style = RISK_COLORS[level];
-                    return (
-                      <div key={level} className={cn("rounded-xl p-4 border", style.bg, style.border)}>
-                        <div className="flex items-center gap-2 mb-3">
-                          <div className={cn("w-2.5 h-2.5 rounded-full", style.dot)} />
-                          <span className={cn("text-sm font-bold", style.text)}>{style.label}</span>
-                          <span className={cn("text-xs px-1.5 py-0.5 rounded-full", style.bg, style.text)}>
-                            {items.length} 项
-                          </span>
-                        </div>
-                        <div className="space-y-2">
-                          {items.map((item, i) => (
-                            <div key={i} className="text-sm text-stone-700 flex items-start gap-2">
-                              <span className={cn("text-xs mt-0.5", style.text)}>●</span>
-                              {item}
-                            </div>
-                          ))}
-                          {items.length === 0 && <p className="text-sm text-stone-400">暂无</p>}
-                        </div>
-                      </div>
+              {analysis ? (
+                <div className="space-y-4">
+                  {/* Urgency Legend */}
+                  <div className="flex flex-wrap gap-3 mb-4 p-3 rounded-xl bg-stone-50 border border-stone-100">
+                    <span className="text-xs text-stone-500">紧急程度判断规则：</span>
+                    <span className="text-xs px-2 py-0.5 rounded-full bg-red-100 text-red-700">高：涉及安全、大面积影响工作</span>
+                    <span className="text-xs px-2 py-0.5 rounded-full bg-amber-100 text-amber-700">中：影响效率但有临时替代方案</span>
+                    <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700">低：体验优化类、长期改进类</span>
+                  </div>
+                  {/* Issues sorted by urgency */}
+                  {(() => {
+                    // Sort issues by urgency (高 > 中 > 低)
+                    const urgencyOrder = { '高': 0, '中': 1, '低': 2 };
+                    const sortedIssues = [...analysis.issues].sort((a, b) => 
+                      (urgencyOrder[a.urgency as keyof typeof urgencyOrder] ?? 3) - (urgencyOrder[b.urgency as keyof typeof urgencyOrder] ?? 3)
                     );
-                  })}
+                    return sortedIssues.map((issue, i) => {
+                      const urgencyColor = issue.urgency === '高' ? 'bg-red-100 text-red-700 border-red-200' : issue.urgency === '中' ? 'bg-amber-100 text-amber-700 border-amber-200' : 'bg-emerald-100 text-emerald-700 border-emerald-200';
+                      const urgencyIcon = issue.urgency === '高' ? '🔴' : issue.urgency === '中' ? '🟡' : '🟢';
+                      return (
+                        <div key={i} className="p-4 rounded-xl border border-stone-100 bg-gradient-to-r from-stone-50/80 to-white hover:shadow-sm transition-all">
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className="text-lg">{urgencyIcon}</span>
+                            <span className="font-semibold text-stone-800">{issue.title}</span>
+                            <span className={cn("text-xs px-2 py-0.5 rounded-full font-medium border", urgencyColor)}>
+                              {issue.urgency}紧急
+                            </span>
+                            <span className="text-xs text-stone-400 ml-auto">{issue.relatedCount} 条相关</span>
+                          </div>
+                          <p className="text-sm text-stone-600 mb-3 pl-7">{issue.description}</p>
+                          <div className="flex flex-wrap items-center gap-3 pl-7 text-xs">
+                            <span className="flex items-center gap-1 text-stone-500">
+                              <span className="w-4 h-4 rounded bg-blue-100 text-blue-600 flex items-center justify-center text-[10px]">📍</span>
+                              责任部门：<span className="font-medium text-stone-700">{issue.department}</span>
+                            </span>
+                            {issue.suggestions && issue.suggestions.length > 0 && (
+                              <span className="flex items-center gap-1 text-stone-500">
+                                <span className="w-4 h-4 rounded bg-orange-100 text-orange-600 flex items-center justify-center text-[10px]">💡</span>
+                                处理建议：<span className="text-stone-600">{issue.suggestions[0]}</span>
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    });
+                  })()}
+                  {analysis.issues.length === 0 && (
+                    <p className="text-center text-stone-400 py-4">暂无问题数据</p>
+                  )}
                 </div>
               ) : (
                 <div className="text-center py-8">
-                  <p className="text-stone-400 text-sm mb-4">通过 AI 分析反馈数据，识别潜在风险</p>
+                  <p className="text-stone-400 text-sm mb-4">通过 AI 分析反馈数据，按紧急程度排序并匹配责任部门</p>
                   <button
                     onClick={runAnalysis}
                     disabled={isAnalyzing}
                     className="px-6 py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-xl text-sm font-medium shadow-sm hover:shadow-md transition-all disabled:opacity-50"
                   >
-                    {isAnalyzing ? '分析中...' : analysisError ? '重试分析' : '启动 AI 风险分析'}
+                    {isAnalyzing ? '分析中...' : analysisError ? '重试分析' : '启动 AI 紧急程度分析'}
                   </button>
                   {analysisError && <p className="text-red-500 text-xs mt-2">{analysisError}</p>}
                 </div>
