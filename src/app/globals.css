@@ -52,6 +52,15 @@
   --font-serif:
     'Noto Serif SC', 'Songti SC', 'SimSun', ui-serif, Georgia, Cambria,
     'Times New Roman', Times, serif;
+  --color-coral-50: #FFF5F2;
+  --color-coral-100: #FFE8E0;
+  --color-coral-400: #E8917A;
+  --color-coral-500: #E07A62;
+  --color-coral-600: #D4654D;
+  --color-coral-700: #B84D38;
+  --color-coral-900: #7A2E1F;
+  --color-lavender: #B8A9C9;
+  --color-lavender-light: #E8E0F0;
 }
 
 :root {
