@@ -1,14 +1,25 @@
 export type VoiceCategory =
-  | 'suggestion'
-  | 'vent'
-  | 'gratitude'
-  | 'confusion'
-  | 'idea'
-  | 'other'
-  | 'admin_logistics'
-  | 'office_env'
-  | 'training'
-  | 'process_tools';
+  | 'performance'
+  | 'housing'
+  | 'attendance'
+  | 'management'
+  | 'salary'
+  | 'dining'
+  | 'rough_management'
+  | 'other';
+
+export const CATEGORY_MAP: Record<VoiceCategory, { label: string; color: string; bgColor: string; icon: string }> = {
+  performance: { label: '绩效问题', color: 'text-amber-700', bgColor: 'bg-amber-50 border-amber-200', icon: '📊' },
+  housing: { label: '住宿问题', color: 'text-blue-700', bgColor: 'bg-blue-50 border-blue-200', icon: '🏠' },
+  attendance: { label: '考勤问题', color: 'text-purple-700', bgColor: 'bg-purple-50 border-purple-200', icon: '⏰' },
+  management: { label: '管理问题', color: 'text-indigo-700', bgColor: 'bg-indigo-50 border-indigo-200', icon: '📋' },
+  salary: { label: '工资问题', color: 'text-green-700', bgColor: 'bg-green-50 border-green-200', icon: '💰' },
+  dining: { label: '用餐问题', color: 'text-orange-700', bgColor: 'bg-orange-50 border-orange-200', icon: '🍽️' },
+  rough_management: { label: '粗暴管理', color: 'text-red-700', bgColor: 'bg-red-50 border-red-200', icon: '⚠️' },
+  other: { label: '其他', color: 'text-stone-600', bgColor: 'bg-stone-50 border-stone-200', icon: '💬' },
+};
+
+export const CATEGORY_KEYS = Object.keys(CATEGORY_MAP) as VoiceCategory[];
 
 export interface Voice {
   id: string;
@@ -22,32 +33,10 @@ export interface Voice {
   isBatch?: boolean;
 }
 
-export const CATEGORY_MAP: Record<VoiceCategory, { label: string; emoji: string; color: string }> = {
-  suggestion: { label: '建议', emoji: '💡', color: '#D4A574' },
-  vent: { label: '吐槽', emoji: '😤', color: '#E8917A' },
-  gratitude: { label: '感恩', emoji: '🙏', color: '#8BC49E' },
-  confusion: { label: '困惑', emoji: '🤔', color: '#B8A9C9' },
-  idea: { label: '灵感', emoji: '✨', color: '#7EB8D4' },
-  other: { label: '其他', emoji: '💬', color: '#A8A29E' },
-  admin_logistics: { label: '行政后勤', emoji: '🏢', color: '#E8917A' },
-  office_env: { label: '办公环境', emoji: '🖥️', color: '#7EB8D4' },
-  training: { label: '培训发展', emoji: '📚', color: '#8BC49E' },
-  process_tools: { label: '流程工具', emoji: '⚙️', color: '#B8A9C9' },
-};
-
-// Batch-specific categories (based on classification principles)
-export const BATCH_CATEGORIES: VoiceCategory[] = [
-  'admin_logistics',
-  'office_env',
-  'training',
-  'process_tools',
-  'other',
-];
-
-export const BATCH_CATEGORY_MAP: Record<string, { label: string; emoji: string; color: string }> = {
-  admin_logistics: { label: '行政后勤', emoji: '🏢', color: '#E8917A' },
-  office_env: { label: '办公环境', emoji: '🖥️', color: '#7EB8D4' },
-  training: { label: '培训发展', emoji: '📚', color: '#8BC49E' },
-  process_tools: { label: '流程工具', emoji: '⚙️', color: '#B8A9C9' },
-  other: { label: '其他', emoji: '💬', color: '#A8A29E' },
-};
+export interface Stats {
+  total: number;
+  byCategory: Record<string, number>;
+  totalLikes: number;
+  anonymousCount: number;
+  recentWeek: number;
+}

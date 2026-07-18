@@ -10,10 +10,10 @@ interface CategoryFilterProps {
 }
 
 export function CategoryFilter({ selected, onChange }: CategoryFilterProps) {
-  const categories = (Object.entries(CATEGORY_MAP) as [
+  const categories = Object.entries(CATEGORY_MAP) as [
     VoiceCategory,
     (typeof CATEGORY_MAP)[VoiceCategory],
-  ][]).filter(([key]) => ['suggestion', 'vent', 'gratitude', 'confusion', 'idea', 'other'].includes(key));
+  ][];
 
   return (
     <div className="flex flex-wrap gap-2">
@@ -44,7 +44,7 @@ export function CategoryFilter({ selected, onChange }: CategoryFilterProps) {
             ...(selected === key ? { boxShadow: `0 0 0 1px ${val.color}40` } : {}),
           }}
         >
-          <span>{val.emoji}</span>
+          <span>{val.icon}</span>
           {val.label}
         </button>
       ))}

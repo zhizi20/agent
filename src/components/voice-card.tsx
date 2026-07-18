@@ -107,7 +107,7 @@ export function VoiceCard({ voice, index, onLike, onRequestAiReply }: VoiceCardP
               color: category.color,
             }}
           >
-            <span>{category.emoji}</span>
+            <span>{category.icon}</span>
             {category.label}
           </span>
           <span className="text-xs text-muted-foreground">{timeAgo}</span>

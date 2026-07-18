@@ -211,7 +211,7 @@ export default function DashboardPage() {
                   const percentage = stats.total > 0 ? (count / stats.total) * 100 : 0;
                   return (
                     <div key={key} className="flex items-center gap-3">
-                      <span className="w-6 text-center text-base">{val.emoji}</span>
+                      <span className="w-6 text-center text-base">{val.icon}</span>
                       <span className="w-12 text-sm text-foreground">{val.label}</span>
                       <div className="flex-1">
                         <div className="h-7 w-full overflow-hidden rounded-full bg-secondary/60">
@@ -573,7 +573,7 @@ function CategoryPieChart({ byCategory, total }: { byCategory: Record<string, nu
               style={{ backgroundColor: slice.color }}
             />
             <span className="text-sm text-foreground">
-              {slice.emoji} {slice.label}
+              {slice.icon} {slice.label}
             </span>
             <span className="ml-auto text-sm font-semibold text-foreground">
               {slice.count}
@@ -702,9 +702,9 @@ function parseAnalysisResult(text: string): AnalysisResult | null {
 
 function getTopCategory(byCategory: Record<string, number>): string {
   const entries = Object.entries(byCategory);
-  if (entries.length === 0) return '💡';
+  if (entries.length === 0) return '💬';
   const top = entries.reduce((a, b) => (a[1] > b[1] ? a : b));
-  return CATEGORY_MAP[top[0] as VoiceCategory]?.emoji || '💬';
+  return CATEGORY_MAP[top[0] as VoiceCategory]?.icon || '💬';
 }
 
 function getTopCategoryLabel(byCategory: Record<string, number>): string {

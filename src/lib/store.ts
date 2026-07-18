@@ -4,62 +4,62 @@ import type { Voice, VoiceCategory } from './types';
 let voices: Voice[] = [
   {
     id: '1',
-    content: '希望公司能多一些团建活动，增进部门之间的了解和协作。平时大家都很忙，很少有机会和其他部门的同事交流。',
-    category: 'suggestion',
-    author: '小明',
-    isAnonymous: false,
-    likes: 12,
-    aiReply: '感谢你的建议！团队建设确实是增进协作的重要方式。我们已经计划在下季度组织一次跨部门的户外活动，期待你的参与！',
+    content: '这个月的绩效考核标准又变了，之前定的目标根本不合理，感觉怎么努力都完不成。',
+    category: 'performance',
+    author: '',
+    isAnonymous: true,
+    likes: 24,
+    aiReply: '绩效考核标准的合理性确实很重要。建议你和直属主管沟通，了解指标调整的背景，也可以提出自己的看法。',
     createdAt: new Date(Date.now() - 86400000 * 2).toISOString(),
   },
   {
     id: '2',
-    content: '最近项目压力好大，连续加班两周了。虽然知道项目重要，但感觉身体有点吃不消...',
-    category: 'vent',
+    content: '宿舍的热水器坏了快两周了，报修了也没人来修，每天只能用冷水洗澡，太难受了。',
+    category: 'housing',
     author: '',
     isAnonymous: true,
-    likes: 28,
-    aiReply: '你的辛苦大家都看在眼里。健康永远是第一位的，建议你和直属主管沟通一下工作节奏，适当调整排期。记住，你比任何项目都重要。',
+    likes: 31,
+    aiReply: '住宿条件直接影响生活质量，这个问题需要尽快解决。建议再次联系后勤部门并保留报修记录。',
     createdAt: new Date(Date.now() - 86400000).toISOString(),
   },
   {
     id: '3',
-    content: '特别感谢我们组的 leader，每次遇到困难都会耐心指导，还经常自掏腰包请大家喝奶茶。遇到这样的领导真的很幸运！',
-    category: 'gratitude',
-    author: '小红',
-    isAnonymous: false,
-    likes: 35,
-    aiReply: '温暖的团队关系是最珍贵的财富！有这样的好 leader 值得珍惜，也相信你的感恩之心会让团队更加凝聚。',
+    content: '加班打卡系统经常出问题，明明加了班却打不上卡，考勤记录总是对不上。',
+    category: 'attendance',
+    author: '',
+    isAnonymous: true,
+    likes: 18,
+    aiReply: '考勤记录关系到大家的切身利益，系统问题应该尽快修复。建议同时保留加班证据（如邮件、聊天记录）作为备份。',
     createdAt: new Date(Date.now() - 86400000 * 3).toISOString(),
   },
   {
     id: '4',
-    content: '对于新上线的 OKR 系统有些不太理解，目标和关键结果之间的关系总是理不清楚，有没有培训可以参加？',
-    category: 'confusion',
+    content: '部门主管开会经常当众骂人，说话很难听，让人很没面子，工作压力更大了。',
+    category: 'rough_management',
     author: '',
     isAnonymous: true,
-    likes: 8,
-    aiReply: 'OKR 确实需要一些时间来适应。HR 团队下周会组织一场线上培训，届时会详细讲解 OKR 的制定方法和最佳实践，记得关注邮件通知哦！',
+    likes: 45,
+    aiReply: '没有人应该在工作中被粗暴对待。如果情况严重，可以向HR部门反映，公司应该维护每位员工的基本尊严。',
     createdAt: new Date(Date.now() - 3600000 * 5).toISOString(),
   },
   {
     id: '5',
-    content: '我有一个想法：能不能在办公区设置一个安静的冥想角？配上柔和的灯光和绿植，让大家在高压时有个放松的空间。',
-    category: 'idea',
-    author: '匿名同事',
+    content: '食堂的菜品太单一了，而且有时候不太新鲜，希望能改善一下用餐质量。',
+    category: 'dining',
+    author: '',
     isAnonymous: true,
-    likes: 42,
-    aiReply: null,
+    likes: 22,
+    aiReply: '用餐质量直接影响大家的身体健康和工作状态。建议向行政部门反馈具体问题，也可以收集同事意见一起提出。',
     createdAt: new Date(Date.now() - 3600000 * 2).toISOString(),
   },
   {
     id: '6',
-    content: '食堂的菜品能不能多一些健康轻食的选择？最近在健身，发现可选的蛋白质餐食比较有限。',
-    category: 'suggestion',
-    author: '健身达人',
-    isAnonymous: false,
-    likes: 15,
-    aiReply: '收到你的建议！行政部已经在和食堂供应商沟通，下个月会新增健康轻食窗口，包括鸡胸肉沙拉、蛋白质碗等选项，敬请期待！',
+    content: '入职半年了，工资还是按最低标准发的，同岗位的老员工说早就该调了，但一直没动静。',
+    category: 'salary',
+    author: '',
+    isAnonymous: true,
+    likes: 38,
+    aiReply: '薪酬问题确实让人焦虑。建议在合适的时机与HR或主管沟通薪资调整机制，了解公司的调薪周期和标准。',
     createdAt: new Date(Date.now() - 86400000 * 5).toISOString(),
   },
 ];
@@ -74,40 +74,15 @@ export function getVoiceById(id: string): Voice | undefined {
   return voices.find((v) => v.id === id);
 }
 
-export function getVoicesByCategory(category: VoiceCategory): Voice[] {
-  return getAllVoices().filter((v) => v.category === category);
-}
-
 export function createVoice(data: {
   content: string;
   category: VoiceCategory;
   author: string;
   isAnonymous: boolean;
-}): Voice {
-  const newVoice: Voice = {
-    id: String(Date.now()),
-    content: data.content,
-    category: data.category,
-    author: data.isAnonymous ? '' : data.author,
-    isAnonymous: data.isAnonymous,
-    likes: 0,
-    aiReply: null,
-    createdAt: new Date().toISOString(),
-    isBatch: false,
-  };
-  voices = [newVoice, ...voices];
-  return newVoice;
-}
-
-export function addVoice(data: {
-  content: string;
-  category: VoiceCategory;
-  author: string;
-  isAnonymous: boolean;
   isBatch?: boolean;
-}): Voice | null {
-  const newVoice: Voice = {
-    id: String(Date.now()) + String(Math.random()).slice(2, 6),
+}): Voice {
+  const voice: Voice = {
+    id: Date.now().toString() + Math.random().toString(36).slice(2, 6),
     content: data.content,
     category: data.category,
     author: data.isAnonymous ? '' : data.author,
@@ -117,8 +92,18 @@ export function addVoice(data: {
     createdAt: new Date().toISOString(),
     isBatch: data.isBatch ?? false,
   };
-  voices = [newVoice, ...voices];
-  return newVoice;
+  voices = [voice, ...voices];
+  return voice;
+}
+
+export function addVoice(data: {
+  content: string;
+  category: VoiceCategory;
+  author: string;
+  isAnonymous: boolean;
+  isBatch?: boolean;
+}): Voice {
+  return createVoice(data);
 }
 
 export function likeVoice(id: string): Voice | undefined {
@@ -137,33 +122,20 @@ export function updateAiReply(id: string, reply: string): Voice | undefined {
   return voice;
 }
 
-export function getVoiceStats(): {
-  total: number;
-  byCategory: Record<string, number>;
-  totalLikes: number;
-  anonymousCount: number;
-  recentWeek: number;
-} {
-  const now = Date.now();
-  const weekAgo = now - 86400000 * 7;
-
+export function getVoiceStats() {
+  const total = voices.length;
   const byCategory: Record<string, number> = {};
   let totalLikes = 0;
   let anonymousCount = 0;
+  const oneWeekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
   let recentWeek = 0;
 
   for (const v of voices) {
     byCategory[v.category] = (byCategory[v.category] || 0) + 1;
     totalLikes += v.likes;
     if (v.isAnonymous) anonymousCount++;
-    if (new Date(v.createdAt).getTime() > weekAgo) recentWeek++;
+    if (new Date(v.createdAt).getTime() > oneWeekAgo) recentWeek++;
   }
 
-  return {
-    total: voices.length,
-    byCategory,
-    totalLikes,
-    anonymousCount,
-    recentWeek,
-  };
+  return { total, byCategory, totalLikes, anonymousCount, recentWeek };
 }

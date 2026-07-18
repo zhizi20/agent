@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getAllVoices, createVoice, likeVoice, getVoiceById } from '@/lib/store';
+import { getAllVoices, createVoice, likeVoice, getVoiceById, updateAiReply } from '@/lib/store';
+import { CATEGORY_KEYS } from '@/lib/types';
 import type { VoiceCategory } from '@/lib/types';
 
-const VALID_CATEGORIES: VoiceCategory[] = ['suggestion', 'vent', 'gratitude', 'confusion', 'idea', 'other'];
+const VALID_CATEGORIES = CATEGORY_KEYS;
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -76,7 +77,6 @@ export async function PUT(request: NextRequest) {
     }
 
     if (aiReply !== undefined) {
-      const { updateAiReply } = await import('@/lib/store');
       const updated = updateAiReply(id, aiReply);
       return NextResponse.json({ success: true, data: updated });
     }

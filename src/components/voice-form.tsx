@@ -16,7 +16,7 @@ interface VoiceFormProps {
 
 export function VoiceForm({ onSubmit }: VoiceFormProps) {
   const [content, setContent] = useState('');
-  const [category, setCategory] = useState<VoiceCategory>('suggestion');
+  const [category, setCategory] = useState<VoiceCategory>('performance');
   const [author, setAuthor] = useState('');
   const [isAnonymous, setIsAnonymous] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -35,7 +35,7 @@ export function VoiceForm({ onSubmit }: VoiceFormProps) {
         isAnonymous,
       });
       setContent('');
-      setCategory('suggestion');
+      setCategory('performance');
       setAuthor('');
       setIsAnonymous(true);
       setShowSuccess(true);
@@ -45,10 +45,10 @@ export function VoiceForm({ onSubmit }: VoiceFormProps) {
     }
   };
 
-  const categories = (Object.entries(CATEGORY_MAP) as [
+  const categories = Object.entries(CATEGORY_MAP) as [
     VoiceCategory,
     (typeof CATEGORY_MAP)[VoiceCategory],
-  ][]).filter(([key]) => ['suggestion', 'vent', 'gratitude', 'confusion', 'idea', 'other'].includes(key));
+  ][];
 
   return (
     <form onSubmit={handleSubmit} className="rounded-2xl border border-border/60 bg-card p-6 shadow-sm">
@@ -79,7 +79,7 @@ export function VoiceForm({ onSubmit }: VoiceFormProps) {
                 ...(category === key ? { ringColor: val.color } : {}),
               }}
             >
-              <span>{val.emoji}</span>
+              <span>{val.icon}</span>
               {val.label}
             </button>
           ))}

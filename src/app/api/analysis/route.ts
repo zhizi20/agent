@@ -18,11 +18,13 @@ export async function POST(request: NextRequest) {
     const client = new LLMClient(config, customHeaders);
 
     const categoryLabels: Record<string, string> = {
-      suggestion: '建议',
-      vent: '吐槽',
-      gratitude: '感恩',
-      confusion: '困惑',
-      idea: '灵感',
+      performance: '绩效问题',
+      housing: '住宿问题',
+      attendance: '考勤问题',
+      management: '管理问题',
+      salary: '工资问题',
+      dining: '用餐问题',
+      rough_management: '粗暴管理',
       other: '其他',
     };
 

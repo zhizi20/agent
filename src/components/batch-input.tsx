@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useRef, useMemo } from 'react';
-import { BATCH_CATEGORY_MAP } from '@/lib/types';
+import { CATEGORY_MAP } from '@/lib/types';
+import type { VoiceCategory } from '@/lib/types';
 
 interface BatchResult {
   voices: Array<{
@@ -234,13 +235,13 @@ export function BatchInput({ onSuccess, onClose }: BatchInputProps) {
         <div className="mb-5 rounded-xl bg-muted/30 px-4 py-3">
           <p className="mb-2 text-xs font-medium text-muted-foreground">AI 将按以下类别自动分类：</p>
           <div className="flex flex-wrap gap-2">
-            {Object.entries(BATCH_CATEGORY_MAP).map(([key, val]) => (
+            {(Object.entries(CATEGORY_MAP) as [string, (typeof CATEGORY_MAP)[VoiceCategory]][]).map(([key, val]) => (
               <span
                 key={key}
                 className="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium"
                 style={{ backgroundColor: val.color + '20', color: val.color }}
               >
-                {val.emoji} {val.label}
+                {val.icon} {val.label}
               </span>
             ))}
           </div>
@@ -324,13 +325,13 @@ export function BatchResultChart({ distribution, total }: BatchResultChartProps)
         'Z',
       ].join(' ');
 
-      const catInfo = BATCH_CATEGORY_MAP[d.category] || BATCH_CATEGORY_MAP.other;
+      const catInfo = CATEGORY_MAP[d.category as VoiceCategory] || CATEGORY_MAP.other;
 
       return {
         pathData,
         color: catInfo.color,
         label: catInfo.label,
-        emoji: catInfo.emoji,
+        icon: catInfo.icon,
         count: d.count,
         percentage: d.percentage,
         index: i,
@@ -395,7 +396,7 @@ export function BatchResultChart({ distribution, total }: BatchResultChartProps)
               style={{ backgroundColor: slice.color }}
             />
             <span className="text-sm text-foreground">
-              {slice.emoji} {slice.label}
+              {slice.icon} {slice.label}
             </span>
             <span className="ml-auto text-sm font-medium text-foreground">
               {slice.count} 条

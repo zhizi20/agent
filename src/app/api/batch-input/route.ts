@@ -1,30 +1,34 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { LLMClient, Config, HeaderUtils } from 'coze-coding-dev-sdk';
 import { addVoice } from '@/lib/store';
+import { CATEGORY_KEYS } from '@/lib/types';
 import type { Voice, VoiceCategory } from '@/lib/types';
 
 // Classification principles for AI
 const CLASSIFICATION_PROMPT = `你是一个员工反馈分类专家。请根据以下分类原则，对每条员工心声进行分类。
 
 ## 分类类别
-- admin_logistics（行政后勤）：食堂、宿舍、通勤、保洁、安保等后勤保障相关反馈
-- office_env（办公环境）：会议室、网络、工位、空调、照明等办公设施相关反馈
-- training（培训发展）：课件质量、产品知识培训、技能训练、职业发展相关反馈
-- process_tools（流程工具）：系统不好用、指引不清、审批流程繁琐、工具效率低等反馈
-- other（其他）：无法归入以上四类的反馈
+- performance（绩效问题）：绩效考核标准、考核流程、目标设定、评分不公等。关键词：绩效、考核、KPI、OKR、目标、评分、指标
+- housing（住宿问题）：宿舍条件、设施维修、住宿环境、卫生安全等。关键词：宿舍、住房、热水器、空调、维修、报修
+- attendance（考勤问题）：打卡系统、加班记录、请假流程、考勤异常等。关键词：考勤、打卡、加班、请假、迟到、出勤
+- management（管理问题）：管理方式、沟通方式、决策透明度、团队协作等。关键词：管理、沟通、决策、安排、协调、分工
+- salary（工资问题）：薪资水平、调薪机制、福利待遇、奖金发放等。关键词：工资、薪资、调薪、奖金、福利、补贴、待遇
+- dining（用餐问题）：食堂菜品、餐饮质量、用餐环境、食品卫生等。关键词：食堂、菜品、用餐、餐饮、伙食、饭菜
+- rough_management（粗暴管理）：辱骂、威胁、当众批评、不尊重员工等管理行为。关键词：骂人、威胁、侮辱、粗暴、当众批评、不尊重
+- other（其他）：无法归入以上七类的反馈
 
 ## 判断原则
-1. 先判断反馈的核心诉求指向哪个服务场景
+1. 先判断反馈的核心诉求指向哪个类别
 2. 若涉及多个类别，以主要诉求为准
-3. 若无法明确归类，标记为"other"
-4. 关注关键词：食堂/宿舍/班车→admin_logistics，网络/会议室/工位→office_env，培训/学习/课程→training，系统/流程/审批→process_tools
+3. 粗暴管理优先于一般管理问题 — 如果涉及辱骂、威胁等行为，归为 rough_management
+4. 若无法明确归类，标记为"other"
 
 ## 输出格式
 请严格按以下 JSON 格式输出，不要输出其他内容：
 \`\`\`json
 [
-  { "index": 0, "category": "admin_logistics" },
-  { "index": 1, "category": "office_env" }
+  { "index": 0, "category": "performance" },
+  { "index": 1, "category": "housing" }
 ]
 \`\`\`
 
@@ -111,13 +115,10 @@ export async function POST(request: NextRequest) {
     }
 
     // Calculate distribution
-    const distribution: Record<string, number> = {
-      admin_logistics: 0,
-      office_env: 0,
-      training: 0,
-      process_tools: 0,
-      other: 0,
-    };
+    const distribution: Record<string, number> = {};
+    for (const key of CATEGORY_KEYS) {
+      distribution[key] = 0;
+    }
 
     for (const voice of newVoices) {
       if (distribution[voice.category] !== undefined) {
