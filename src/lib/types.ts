@@ -31,6 +31,7 @@ export interface Voice {
   id: string;
   content: string;
   category: VoiceCategory;
+  department?: string;
   author: string;
   isAnonymous: boolean;
   likes: number;
@@ -42,6 +43,7 @@ export interface Voice {
 export interface Stats {
   total: number;
   byCategory: Record<string, number>;
+  byDepartment?: Record<string, number>;
   totalLikes: number;
   anonymousCount: number;
   recentWeek: number;

@@ -38,81 +38,102 @@ export async function POST(request: NextRequest) {
       )
       .join('\n');
 
-    const systemPrompt = `你是一个专业的企业管理分析师。请根据以下员工心声数据，完成三项分析任务。
+    const systemPrompt = `你是一名企业组织运营数据分析专家，服务对象为 HR、行政管理人员和组织运营负责人。
+请基于员工反馈数据，生成一份完整的组织运营数据分析报告。
 
-## 分析任务
+## 分析维度
 
-### 任务一：高频问题摘要
-从所有心声中提炼出 3-5 个高频/共性问题，每个问题用一句话概括核心诉求。
+### 1. 整体态势摘要 (summary)
+用 2-3 句话概括当前员工反馈反映的核心态势和主要矛盾。
 
-### 任务二：紧急程度判断
-对每个高频问题判断紧急程度（高/中/低），判断标准：
-- 高：涉及员工身心健康、安全风险、大规模不满、可能引发离职
-- 中：影响工作效率或满意度、多人共同关注
-- 低：改善型建议、长期规划类
+### 2. 高频问题详情 (issues)
+从反馈中提炼 3-5 个高频/共性问题，每个包含：
+- title: 问题标题（简洁）
+- urgency: 紧急程度（高/中/低）
+  - 高：涉及员工身心健康、安全风险、大规模不满、可能引发离职潮
+  - 中：影响工作效率和员工满意度，需尽快解决
+  - 低：改善型需求，可纳入计划逐步优化
+- description: 问题描述（50-100字）
+- relatedCount: 相关反馈数量
+- department: 建议责任部门（如：人力资源部、行政部、生产管理部、IT部等）
+- suggestions: 处理建议数组（2-3条具体措施）
 
-### 任务三：处理建议与责任部门
-针对每个问题给出 1-2 条具体可执行的处理建议，并指定建议的责任部门（如：人力资源部、行政部、IT 部、财务部、业务管理部、企业文化部等）。
+### 3. 风险等级分析 (riskAnalysis)
+将识别出的问题按风险等级分类：
+- high: 高风险问题列表（可能导致员工离职、安全事故、法律风险）
+- medium: 中风险问题列表（影响团队稳定性和效率）
+- low: 低风险问题列表（改善型需求）
 
-## 输出格式（严格遵循）
+### 4. AI 组织洞察 (orgInsight)
+- currentState: 当前组织状态评估（100-150字，从员工满意度、管理健康度、组织氛围等维度）
+- priorities: 优先改善方向（3-5条，按优先级排序）
 
-请严格按以下 JSON 格式输出，不要输出任何其他内容：
+### 5. 管理优化建议 (managementAdvice)
+- shortTerm: 短期措施（3-5条，1-4周内可执行的具体行动）
+- longTerm: 长期建设（3-5条，1-6个月的系统性改善方案）
 
+## 输出格式
+严格输出 JSON，不要输出任何其他内容：
 \`\`\`json
 {
-  "summary": "整体分析摘要，2-3句话概括当前员工心声反映的核心态势",
+  "summary": "整体态势摘要",
   "issues": [
     {
-      "title": "问题标题（简洁概括）",
-      "urgency": "高|中|低",
-      "description": "问题描述（结合具体心声内容说明）",
-      "relatedCount": 相关心声数量（数字）,
-      "department": "建议责任部门名称",
+      "title": "问题标题",
+      "urgency": "高",
+      "description": "问题描述",
+      "relatedCount": 10,
+      "department": "责任部门",
       "suggestions": ["建议1", "建议2"]
     }
-  ]
+  ],
+  "riskAnalysis": {
+    "high": ["高风险问题1", "高风险问题2"],
+    "medium": ["中风险问题1"],
+    "low": ["低风险问题1"]
+  },
+  "orgInsight": {
+    "currentState": "组织状态评估",
+    "priorities": ["优先方向1", "优先方向2"]
+  },
+  "managementAdvice": {
+    "shortTerm": ["短期措施1", "短期措施2"],
+    "longTerm": ["长期建设1", "长期建设2"]
+  }
 }
 \`\`\`
 
-## 员工心声数据
+## 分析原则
+1. 基于数据说话，不臆造不存在的问题
+2. 关注问题背后的组织管理根因
+3. 建议要具体可执行，不要空泛
+4. 区分短期应急和长期建设
+5. 从组织运营角度分析，不是简单回复员工`;
 
-${voicesSummary}`;
-
-    const messages: { role: 'system' | 'user' | 'assistant'; content: string }[] = [
-      { role: 'system', content: systemPrompt },
-      { role: 'user', content: '请分析以上员工心声数据，输出 JSON 格式的分析结果。' },
-    ];
-
-    const stream = client.stream(messages, {
-      model: 'doubao-seed-2-0-mini-260215',
-      temperature: 0.3,
-    });
+    const stream = client.stream(
+      [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: `以下是 ${voices.length} 条员工反馈数据，请分析：\n\n${voicesSummary}` },
+      ],
+      { model: 'doubao-seed-2-0-mini-260215', temperature: 0.7 }
+    );
 
     const encoder = new TextEncoder();
-    let fullText = '';
-
     const readableStream = new ReadableStream({
       async start(controller) {
         try {
           for await (const chunk of stream) {
-            if (chunk.content) {
-              const text = chunk.content.toString();
-              fullText += text;
+            const content = chunk.content ? chunk.content.toString() : '';
+            if (content) {
               controller.enqueue(
-                encoder.encode(`data: ${JSON.stringify({ content: text })}\n\n`)
+                encoder.encode(`data: ${JSON.stringify({ content })}\n\n`)
               );
             }
           }
-          controller.enqueue(
-            encoder.encode(`data: ${JSON.stringify({ done: true })}\n\n`)
-          );
+          controller.enqueue(encoder.encode('data: [DONE]\n\n'));
           controller.close();
-        } catch (err) {
-          const errorMsg = err instanceof Error ? err.message : '分析生成失败';
-          controller.enqueue(
-            encoder.encode(`data: ${JSON.stringify({ error: errorMsg })}\n\n`)
-          );
-          controller.close();
+        } catch (error) {
+          controller.error(error);
         }
       },
     });
@@ -124,10 +145,11 @@ ${voicesSummary}`;
         Connection: 'keep-alive',
       },
     });
-  } catch {
-    return new Response(JSON.stringify({ error: '请求处理失败' }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' },
-    });
+  } catch (error) {
+    console.error('Analysis error:', error);
+    return new Response(
+      JSON.stringify({ error: '分析失败，请稍后重试' }),
+      { status: 500, headers: { 'Content-Type': 'application/json' } }
+    );
   }
 }
