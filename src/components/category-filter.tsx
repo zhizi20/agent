@@ -1,18 +1,18 @@
 'use client';
 
-import type { VoiceCategory } from '@/lib/types';
+import type { FeedbackCategory } from '@/lib/types';
 import { CATEGORY_MAP } from '@/lib/types';
 import { cn } from '@/lib/utils';
 
 interface CategoryFilterProps {
-  selected: VoiceCategory | 'all';
-  onChange: (category: VoiceCategory | 'all') => void;
+  selected: FeedbackCategory | 'all';
+  onChange: (category: FeedbackCategory | 'all') => void;
 }
 
 export function CategoryFilter({ selected, onChange }: CategoryFilterProps) {
   const categories = Object.entries(CATEGORY_MAP) as [
-    VoiceCategory,
-    (typeof CATEGORY_MAP)[VoiceCategory],
+    FeedbackCategory,
+    (typeof CATEGORY_MAP)[FeedbackCategory],
   ][];
 
   return (
@@ -44,7 +44,6 @@ export function CategoryFilter({ selected, onChange }: CategoryFilterProps) {
             ...(selected === key ? { boxShadow: `0 0 0 1px ${val.color}40` } : {}),
           }}
         >
-          <span>{val.icon}</span>
           {val.label}
         </button>
       ))}

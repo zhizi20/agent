@@ -1,238 +1,169 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
-import { Header } from '@/components/header';
+import { useEffect, useState, useCallback } from 'react';
+import { CATEGORY_MAP } from '@/lib/types';
+import type { Feedback, FeedbackCategory } from '@/lib/types';
 import { VoiceCard } from '@/components/voice-card';
 import { VoiceForm } from '@/components/voice-form';
-import { CategoryFilter } from '@/components/category-filter';
-import { BatchInput, BatchResultChart } from '@/components/batch-input';
-import type { Voice, VoiceCategory } from '@/lib/types';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
+import { MessageSquare, Filter, Search, Sparkles } from 'lucide-react';
 
-interface BatchResult {
-  voices: Array<{
-    id: string;
-    content: string;
-    category: string;
-  }>;
-  distribution: Array<{
-    category: string;
-    count: number;
-    percentage: number;
-  }>;
-  total: number;
-}
-
-export default function HomePage() {
-  const [voices, setVoices] = useState<Voice[]>([]);
-  const [category, setCategory] = useState<VoiceCategory | 'all'>('all');
-  const [isLoading, setIsLoading] = useState(true);
+export default function Home() {
+  const [feedbacks, setFeedbacks] = useState<Feedback[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedCategory, setSelectedCategory] = useState<FeedbackCategory | 'all'>('all');
+  const [searchQuery, setSearchQuery] = useState('');
   const [showForm, setShowForm] = useState(false);
-  const [showBatchInput, setShowBatchInput] = useState(false);
-  const [batchResult, setBatchResult] = useState<BatchResult | null>(null);
 
-  const fetchVoices = useCallback(async (silent = false) => {
-    if (!silent) setIsLoading(true);
+  const fetchFeedbacks = useCallback(async () => {
     try {
-      const url = category === 'all' ? '/api/voices' : `/api/voices?category=${category}`;
-      const res = await fetch(url);
+      const params = new URLSearchParams();
+      if (selectedCategory !== 'all') params.set('category', selectedCategory);
+      
+      const res = await fetch(`/api/voices?${params}`);
       const data = await res.json();
       if (data.success) {
-        setVoices(data.data);
+        setFeedbacks(data.data);
       }
-    } catch {
-      // silently fail
+    } catch (err) {
+      console.error('Failed to fetch feedbacks:', err);
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
-  }, [category]);
+  }, [selectedCategory]);
 
   useEffect(() => {
-    setIsLoading(true);
-    fetchVoices();
-    // Poll every 3 seconds for real-time updates
-    const interval = setInterval(() => {
-      fetchVoices(true);
-    }, 3000);
-    return () => clearInterval(interval);
-  }, [fetchVoices]);
+    fetchFeedbacks();
+  }, [fetchFeedbacks]);
 
-  const handleLike = async (id: string) => {
-    try {
-      const res = await fetch('/api/voices', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id, action: 'like' }),
-      });
-      const data = await res.json();
-      if (data.success) {
-        setVoices((prev) =>
-          prev.map((v) => (v.id === id ? { ...v, likes: data.data.likes } : v))
-        );
-      }
-    } catch {
-      // silently fail
+  const handleCreate = async (data: { category: FeedbackCategory; title: string; description: string; department: string }) => {
+    const res = await fetch('/api/voices', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    const result = await res.json();
+    if (result.success) {
+      setShowForm(false);
+      fetchFeedbacks();
     }
   };
 
-  const handleSubmit = async (formData: {
-    content: string;
-    category: VoiceCategory;
-    author: string;
-    isAnonymous: boolean;
-  }) => {
-    try {
-      const res = await fetch('/api/voices', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      });
-      const data = await res.json();
-      if (data.success) {
-        setVoices((prev) => [data.data, ...prev]);
-        setShowForm(false);
-      }
-    } catch {
-      throw new Error('发布失败');
-    }
-  };
+  const filteredFeedbacks = feedbacks.filter((f) => {
+    if (!searchQuery) return true;
+    const query = searchQuery.toLowerCase();
+    return (
+      f.description.toLowerCase().includes(query) ||
+      f.title.toLowerCase().includes(query) ||
+      f.department.toLowerCase().includes(query)
+    );
+  });
 
-  const handleRequestAiReply = (_id: string) => {
-    // Handled inside VoiceCard
-  };
+  const categoryCounts = feedbacks.reduce((acc, f) => {
+    acc[f.category] = (acc[f.category] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
-
-      <main className="mx-auto max-w-5xl px-6 py-8">
-        {/* Hero section */}
-        <div className="mb-8 text-center">
-          <h1 className="mb-2 text-2xl font-bold tracking-tight text-foreground">
-            员工心声墙
-          </h1>
-          <div className="flex items-center gap-2">
-            <p className="text-sm text-muted-foreground">
-              每一个声音都值得被听见，每一份心声都会被温柔以待
-            </p>
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-green-50 px-2.5 py-0.5 text-xs text-green-700">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-              </span>
-              实时
-            </span>
-          </div>
+    <div className="space-y-6">
+      {/* Hero Section */}
+      <div className="text-center py-6">
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-100 text-amber-700 text-sm mb-4">
+          <Sparkles className="w-4 h-4" />
+          茂佳科技 · 员工反馈分析平台
         </div>
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">员工心声助手</h1>
+        <p className="text-gray-500 max-w-md mx-auto">
+          对员工反馈进行分类、归纳并生成响应建议，让每个声音都被听见
+        </p>
+      </div>
 
-        {/* Action bar */}
-        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <CategoryFilter selected={category} onChange={setCategory} />
-          <div className="flex shrink-0 gap-2">
-            <button
-              onClick={() => setShowBatchInput(true)}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-border bg-card px-4 py-2.5 text-sm font-medium text-foreground shadow-sm transition-all hover:bg-muted hover:shadow-md active:scale-[0.97]"
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                <polyline points="14 2 14 8 20 8" />
-                <line x1="16" y1="13" x2="8" y2="13" />
-                <line x1="16" y1="17" x2="8" y2="17" />
-              </svg>
-              批量输入
-            </button>
-            <button
-              onClick={() => setShowForm(!showForm)}
-              className="inline-flex items-center gap-1.5 rounded-xl bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground shadow-sm transition-all hover:shadow-md hover:brightness-105 active:scale-[0.97]"
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="12" y1="5" x2="12" y2="19" />
-                <line x1="5" y1="12" x2="19" y2="12" />
-              </svg>
-              发布心声
-            </button>
-          </div>
+      {/* Action Bar */}
+      <div className="flex flex-col sm:flex-row gap-3">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <input
+            type="text"
+            placeholder="搜索反馈内容..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-400 transition-all"
+          />
         </div>
+        <button
+          onClick={() => setShowForm(!showForm)}
+          className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-coral-500 text-white text-sm font-medium hover:from-amber-600 hover:to-coral-600 transition-all shadow-sm hover:shadow-md flex items-center gap-2"
+        >
+          <MessageSquare className="w-4 h-4" />
+          提交反馈
+        </button>
+      </div>
 
-        {/* Batch result chart */}
-        {batchResult && (
-          <div className="mb-8 animate-fade-in-up rounded-2xl border border-border/60 bg-card p-6 shadow-sm">
-            <div className="mb-4 flex items-center justify-between">
-              <div>
-                <h3 className="text-base font-semibold text-foreground">批量输入结果</h3>
-                <p className="text-xs text-muted-foreground">
-                  成功导入 {batchResult.total} 条心声，AI 已自动分类
-                </p>
-              </div>
-              <button
-                onClick={() => setBatchResult(null)}
-                className="rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-              >
-                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
+      {/* Voice Form */}
+      {showForm && (
+        <Card className="rounded-2xl border-gray-100 shadow-sm">
+          <CardContent className="pt-6">
+            <VoiceForm onSubmit={handleCreate} onCancel={() => setShowForm(false)} />
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Category Filter */}
+      <div className="flex items-center gap-2 overflow-x-auto pb-2">
+        <Filter className="w-4 h-4 text-gray-400 flex-shrink-0" />
+        <button
+          onClick={() => setSelectedCategory('all')}
+          className={`px-3 py-1.5 rounded-lg text-sm whitespace-nowrap transition-all ${
+            selectedCategory === 'all'
+              ? 'bg-amber-500 text-white shadow-sm'
+              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+          }`}
+        >
+          全部 ({feedbacks.length})
+        </button>
+        {(Object.keys(CATEGORY_MAP) as FeedbackCategory[]).map((cat) => {
+          const info = CATEGORY_MAP[cat];
+          const count = categoryCounts[cat] || 0;
+          return (
+            <button
+              key={cat}
+              onClick={() => setSelectedCategory(cat)}
+              className={`px-3 py-1.5 rounded-lg text-sm whitespace-nowrap transition-all ${
+                selectedCategory === cat
+                  ? 'bg-amber-500 text-white shadow-sm'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              }`}
+            >
+              {info.label} ({count})
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Feedback List */}
+      {loading ? (
+        <div className="space-y-4">
+          {[1, 2, 3].map((i) => (
+            <Skeleton key={i} className="h-40 rounded-2xl" />
+          ))}
+        </div>
+      ) : filteredFeedbacks.length === 0 ? (
+        <Card className="rounded-2xl border-gray-100">
+          <CardContent className="py-16 text-center">
+            <div className="w-16 h-16 rounded-2xl bg-gray-100 flex items-center justify-center mx-auto mb-4">
+              <MessageSquare className="w-8 h-8 text-gray-400" />
             </div>
-            <BatchResultChart distribution={batchResult.distribution} total={batchResult.total} />
-          </div>
-        )}
-
-        {/* Voice form (collapsible) */}
-        {showForm && (
-          <div className="mb-8 animate-fade-in-up opacity-0">
-            <VoiceForm onSubmit={handleSubmit} />
-          </div>
-        )}
-
-        {/* Voice grid */}
-        {isLoading ? (
-          <div className="grid gap-4 sm:grid-cols-2">
-            {Array.from({ length: 4 }).map((_, i) => (
-              <div
-                key={i}
-                className="animate-pulse rounded-2xl border border-border/60 bg-card p-5"
-              >
-                <div className="mb-3 flex items-center gap-2">
-                  <div className="h-5 w-16 rounded-full bg-muted" />
-                  <div className="h-3 w-12 rounded bg-muted" />
-                </div>
-                <div className="mb-2 h-4 w-full rounded bg-muted" />
-                <div className="mb-4 h-4 w-3/4 rounded bg-muted" />
-                <div className="h-6 w-20 rounded-lg bg-muted" />
-              </div>
-            ))}
-          </div>
-        ) : voices.length === 0 ? (
-          <div className="py-16 text-center">
-            <div className="mb-3 text-4xl">💬</div>
-            <p className="text-sm text-muted-foreground">
-              还没有心声，成为第一个分享的人吧
-            </p>
-          </div>
-        ) : (
-          <div className="grid gap-4 sm:grid-cols-2">
-            {voices.map((voice, index) => (
-              <VoiceCard
-                key={voice.id}
-                voice={voice}
-                index={index}
-                onLike={handleLike}
-                onRequestAiReply={handleRequestAiReply}
-              />
-            ))}
-          </div>
-        )}
-      </main>
-
-      {/* Batch input modal */}
-      {showBatchInput && (
-        <BatchInput
-          onSuccess={async (result) => {
-            setBatchResult(result);
-            setShowBatchInput(false);
-            await fetchVoices();
-          }}
-          onClose={() => setShowBatchInput(false)}
-        />
+            <p className="text-gray-500 mb-1">暂无反馈数据</p>
+            <p className="text-sm text-gray-400">点击「提交反馈」开始记录</p>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="space-y-4">
+          {filteredFeedbacks.map((feedback) => (
+            <VoiceCard key={feedback.id} feedback={feedback} onUpdate={fetchFeedbacks} />
+          ))}
+        </div>
       )}
     </div>
   );

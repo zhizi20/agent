@@ -1,7 +1,18 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { getVoiceStats } from '@/lib/store';
+import { NextResponse } from 'next/server';
+import { getFeedbackStats, getTopIssues } from '@/lib/store';
+
+export const runtime = 'nodejs';
+export const dynamic = 'force-static';
 
 export async function GET() {
-  const stats = getVoiceStats();
-  return NextResponse.json({ success: true, data: stats });
+  const stats = getFeedbackStats();
+  const topIssues = getTopIssues();
+
+  return NextResponse.json({
+    success: true,
+    data: {
+      ...stats,
+      topIssues,
+    },
+  });
 }
