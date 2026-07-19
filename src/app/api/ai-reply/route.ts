@@ -1,36 +1,29 @@
 import { NextRequest } from 'next/server';
 import { LLMClient, Config, HeaderUtils } from 'coze-coding-dev-sdk';
-import { getFeedbackById } from '@/lib/store';
-import { CATEGORY_MAP, DEPARTMENT_RESPONSIBILITY } from '@/lib/types';
-import type { FeedbackCategory } from '@/lib/types';
+import { getVoiceById, updateAiReply } from '@/lib/store';
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { feedback, category, description } = body;
+    const { id } = body;
 
-    // Support both: existing feedback by id, or new feedback text
-    let feedbackText = '';
-    let feedbackCategory: FeedbackCategory = 'other';
-    let feedbackDept = '';
+    if (!id) {
+      return new Response(JSON.stringify({ error: '缺少心声 ID' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
 
-    if (feedback?.id) {
-      const fb = getFeedbackById(feedback.id);
-      if (!fb) {
-        return new Response(JSON.stringify({ error: '反馈不存在' }), {
-          status: 404,
-          headers: { 'Content-Type': 'application/json' },
-        });
-      }
-      feedbackText = fb.description;
-      feedbackCategory = fb.category;
-      feedbackDept = fb.department;
-    } else if (description) {
-      feedbackText = description;
-      feedbackCategory = category || 'other';
-      feedbackDept = feedback?.department || '';
-    } else {
-      return new Response(JSON.stringify({ error: '缺少反馈内容' }), {
+    const voice = getVoiceById(id);
+    if (!voice) {
+      return new Response(JSON.stringify({ error: '心声不存在' }), {
+        status: 404,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    if (voice.aiReply) {
+      return new Response(JSON.stringify({ error: '该心声已有回复' }), {
         status: 400,
         headers: { 'Content-Type': 'application/json' },
       });
@@ -40,51 +33,38 @@ export async function POST(request: NextRequest) {
     const config = new Config();
     const client = new LLMClient(config, customHeaders);
 
-    const catInfo = CATEGORY_MAP[feedbackCategory];
-    const responsibleDepts = DEPARTMENT_RESPONSIBILITY[feedbackCategory];
+    const categoryLabels: Record<string, string> = {
+      suggestion: '建议',
+      vent: '吐槽/倾诉',
+      gratitude: '感恩/表扬',
+      confusion: '困惑/求助',
+      idea: '灵感/创意',
+      other: '其他',
+    };
 
-    const systemPrompt = `你是一个专业的员工反馈处理助手，服务于茂佳科技HR和行政团队。
+    const systemPrompt = `你是一个温暖、善解人意的"员工心声助手"。你的工作是认真倾听员工的心声，给予温暖、真诚、有建设性的回应。
 
-## 你的任务
-根据员工反馈内容，输出以下结构化分析：
+你的回复风格：
+1. 先共情：表达对员工感受的理解和接纳
+2. 再回应：针对具体内容给出真诚的想法或建议
+3. 语气温暖但不做作，像一个关心你的前辈或朋友
+4. 控制在100字以内，简洁有力
+5. 不要使用表情符号
 
-1. **反馈分类**：确认反馈属于哪个类别
-2. **紧急程度**：判断紧急程度（高/中/低），说明判断依据
-3. **责任部门**：建议由哪个部门负责处理
-4. **处理建议**：给出2-3条具体可执行的处理步骤
-5. **员工回复话术**：生成一段礼貌、专业的回复，不含虚假承诺
-
-## 紧急程度判断标准
-- 高：涉及安全、食品安全、人身安全、大面积影响工作
-- 中：影响工作效率或满意度、多人共同关注
-- 低：体验优化类、长期改进类
-
-## 责任部门参考
-- 绩效/考勤/工资/管理 → 人力资源部
-- 住宿/用餐/通勤 → 行政部
-- 网络/系统 → IT部
-- 粗暴管理 → 人力资源部 + 安全部门
-
-## 严格禁止
-- 不得输出真实员工姓名、工号、电话
-- 不得对员工个人做评价或标签化
-- 不得承诺具体整改日期
-- 涉及个人隐私、人事纠纷 → 提示升级HR人工处理
-
-当前反馈类别：${catInfo?.label || '其他'}
-反馈人部门：${feedbackDept || '未知'}`;
+这条心声的分类是「${categoryLabels[voice.category] || '其他'}」。`;
 
     const messages: { role: 'system' | 'user' | 'assistant'; content: string }[] = [
       { role: 'system', content: systemPrompt },
-      { role: 'user', content: feedbackText },
+      { role: 'user', content: voice.content },
     ];
 
     const stream = client.stream(messages, {
       model: 'doubao-seed-2-0-mini-260215',
-      temperature: 0.5,
+      temperature: 0.8,
     });
 
     const encoder = new TextEncoder();
+    let fullReply = '';
 
     const readableStream = new ReadableStream({
       async start(controller) {
@@ -92,17 +72,20 @@ export async function POST(request: NextRequest) {
           for await (const chunk of stream) {
             if (chunk.content) {
               const text = chunk.content.toString();
+              fullReply += text;
               controller.enqueue(
                 encoder.encode(`data: ${JSON.stringify({ content: text })}\n\n`)
               );
             }
           }
+          // Save the reply
+          updateAiReply(id, fullReply);
           controller.enqueue(
             encoder.encode(`data: ${JSON.stringify({ done: true })}\n\n`)
           );
           controller.close();
         } catch (err) {
-          const errorMsg = err instanceof Error ? err.message : 'AI 分析生成失败';
+          const errorMsg = err instanceof Error ? err.message : 'AI 回复生成失败';
           controller.enqueue(
             encoder.encode(`data: ${JSON.stringify({ error: errorMsg })}\n\n`)
           );

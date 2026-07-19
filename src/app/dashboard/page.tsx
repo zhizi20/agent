@@ -1,888 +1,943 @@
 'use client';
 
-import { useEffect, useState, useCallback, useMemo } from 'react';
-import { CATEGORY_OPTIONS, URGENCY_OPTIONS, FACTORY_LIST, RESPONSIBLE_DEPT_LIST } from '@/lib/types';
-import type { UrgencyLevel, Feedback, HandleStatus, FeedbackCategory } from '@/lib/types';
+import { useState, useEffect, useCallback, useMemo } from 'react';
+import { Header } from '@/components/header';
+import { CATEGORY_MAP } from '@/lib/types';
+import type { VoiceCategory } from '@/lib/types';
+import { cn } from '@/lib/utils';
 
-interface StatsData {
+// ─── Types ───────────────────────────────────────────────────────
+
+interface Stats {
   total: number;
   byCategory: Record<string, number>;
-  byFactory: Record<string, number>;
-  byUrgency: Record<string, number>;
-  byResponsibleDept: Record<string, number>;
-  byHandleStatus: Record<string, number>;
-  handledCount: number;
-  handleRate: number;
-  avgScore: number;
-  scoreCount: number;
-  topIssues: { category: string; count: number; percentage: number; samples: string[] }[];
+  byDepartment?: Record<string, number>;
+  byStatus?: Record<string, number>;
+  weeklyTrend?: { week: string; count: number }[];
+  totalLikes: number;
+  anonymousCount: number;
+  recentWeek: number;
 }
 
-// 分类视图类型
-type ViewType = 'category' | 'factory' | 'responsible' | 'status';
-
-// 饼图数据项
-interface PieDataItem {
-  label: string;
-  value: number;
-  color: string;
-  filterKey: string; // 用于筛选的 key
+interface AnalysisResult {
+  summary: string;
+  issues: {
+    title: string;
+    urgency: string;
+    description: string;
+    relatedCount: number;
+    department: string;
+    suggestions: string[];
+  }[];
+  riskAnalysis?: {
+    high: string[];
+    medium: string[];
+    low: string[];
+  };
+  orgInsight?: {
+    currentState: string;
+    priorities: string[];
+  };
+  managementAdvice?: {
+    shortTerm: string[];
+    longTerm: string[];
+  };
 }
 
-// 弹窗中显示的反馈项
-interface ModalFeedbackItem {
-  id: string;
-  title: string;
-  description: string;
-  category: string;
-  factory: string;
-  urgency: string;
-  responsibleDept: string;
-  handleStatus: string;
-  handler: string;
-  result: string;
-}
+// ─── Constants ───────────────────────────────────────────────────
 
-// 饼图组件 - 支持悬停放大和点击交互
-function InteractivePieChart({
-  data,
-  size = 200,
-  onSliceClick,
-}: {
-  data: PieDataItem[];
-  size?: number;
-  onSliceClick?: (item: PieDataItem) => void;
+const DEPT_COLORS: Record<string, string> = {
+  '智能总装一厂': '#2563EB',
+  '智能总装二厂': '#7C3AED',
+  '注塑厂': '#059669',
+  '质量及运营中心': '#D97706',
+  '供应链': '#EA580C',
+  '其他部门': '#78716C',
+};
+
+const RISK_COLORS = {
+  high: { bg: 'bg-red-50', border: 'border-red-200', text: 'text-red-700', dot: 'bg-red-500', label: '高风险' },
+  medium: { bg: 'bg-amber-50', border: 'border-amber-200', text: 'text-amber-700', dot: 'bg-amber-500', label: '中风险' },
+  low: { bg: 'bg-emerald-50', border: 'border-emerald-200', text: 'text-emerald-700', dot: 'bg-emerald-500', label: '低风险' },
+};
+
+// ─── Helper Components ───────────────────────────────────────────
+
+function StatCard({ label, value, sub, icon, accent }: {
+  label: string; value: string | number; sub?: string; icon: string; accent: string;
 }) {
-  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
-  const total = data.reduce((sum, d) => sum + d.value, 0);
-
-  if (total === 0) {
-    return (
-      <div className="flex items-center justify-center" style={{ width: size, height: size }}>
-        <span className="text-[#8A817A] text-sm">暂无数据</span>
+  return (
+    <div className="bg-white rounded-2xl p-5 border border-stone-200/60 shadow-sm hover:shadow-md transition-shadow">
+      <div className="flex items-start justify-between">
+        <div>
+          <p className="text-sm text-stone-500 mb-1">{label}</p>
+          <p className="text-3xl font-bold text-stone-800">{value}</p>
+          {sub && <p className="text-xs text-stone-400 mt-1">{sub}</p>}
+        </div>
+        <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center text-lg", accent)}>
+          {icon}
+        </div>
       </div>
-    );
+    </div>
+  );
+}
+
+function WeeklyTrendChart({ data }: { data: { week: string; count: number }[] }) {
+  const chartData = useMemo(() => {
+    if (data.length === 0) return [];
+    const maxCount = Math.max(...data.map(d => d.count));
+    const w = 560;
+    const h = 200;
+    const padL = 40;
+    const padR = 20;
+    const padT = 20;
+    const padB = 40;
+    const plotW = w - padL - padR;
+    const plotH = h - padT - padB;
+
+    return data.map((d, i) => {
+      const x = padL + (data.length > 1 ? (i / (data.length - 1)) * plotW : plotW / 2);
+      const y = padT + plotH - (maxCount > 0 ? (d.count / maxCount) * plotH : 0);
+      const isMax = d.count === maxCount && maxCount > 0;
+      return { ...d, x, y, isMax, index: i };
+    });
+  }, [data]);
+
+  if (data.length === 0) {
+    return <div className="h-48 flex items-center justify-center text-stone-400 text-sm">暂无趋势数据</div>;
   }
 
-  const radius = size / 2 - 20; // 留出空间给悬停放大
-  const centerX = size / 2;
-  const centerY = size / 2;
-  const hoverOffset = 8; // 悬停时向外偏移的距离
+  const maxCount = Math.max(...data.map(d => d.count));
+  const w = 560;
+  const h = 200;
+  const padL = 40;
+  const padR = 20;
+  const padT = 20;
+  const padB = 40;
+  const plotH = h - padT - padB;
 
-  // Calculate all slices
-  const slicesData = data
-    .filter(d => d.value > 0)
-    .reduce<{ acc: number; items: { startAngle: number; endAngle: number; color: string; index: number }[] }>(
-      (result, d, i) => {
-        const sliceAngle = (d.value / total) * Math.PI * 2;
-        const startAngle = result.acc;
-        const endAngle = result.acc + sliceAngle;
-        return {
-          acc: endAngle,
-          items: [...result.items, { startAngle, endAngle, color: d.color, index: i }],
-        };
-      },
-      { acc: -Math.PI / 2, items: [] }
-    );
+  // Build line path
+  const linePath = chartData.map((d, i) => `${i === 0 ? 'M' : 'L'}${d.x},${d.y}`).join(' ');
+  // Build area path
+  const areaPath = `${linePath} L${chartData[chartData.length - 1].x},${padT + plotH} L${chartData[0].x},${padT + plotH} Z`;
 
-  const slices = slicesData.items.map((item, i) => {
-    const isHovered = hoveredIndex === i;
-    const midAngle = (item.startAngle + item.endAngle) / 2;
+  // Y-axis ticks
+  const yTicks = [0, Math.round(maxCount / 2), maxCount];
 
-    // 悬停时向外偏移
-    const offsetX = isHovered ? Math.cos(midAngle) * hoverOffset : 0;
-    const offsetY = isHovered ? Math.sin(midAngle) * hoverOffset : 0;
-
-    const x1 = centerX + radius * Math.cos(item.startAngle);
-    const y1 = centerY + radius * Math.sin(item.startAngle);
-    const x2 = centerX + radius * Math.cos(item.endAngle);
-    const y2 = centerY + radius * Math.sin(item.endAngle);
-    const sliceAngle = item.endAngle - item.startAngle;
-    const largeArc = sliceAngle > Math.PI ? 1 : 0;
-
-    const path = `M ${centerX + offsetX} ${centerY + offsetY} L ${x1 + offsetX} ${y1 + offsetY} A ${radius} ${radius} 0 ${largeArc} 1 ${x2 + offsetX} ${y2 + offsetY} Z`;
-
-    // 计算标签位置
-    const labelRadius = radius * 0.7;
-    const labelX = centerX + labelRadius * Math.cos(midAngle) + offsetX;
-    const labelY = centerY + labelRadius * Math.sin(midAngle) + offsetY;
-    const percentage = Math.round((data[i].value / total) * 100);
-
-    return (
-      <g
-        key={i}
-        onMouseEnter={() => setHoveredIndex(i)}
-        onMouseLeave={() => setHoveredIndex(null)}
-        onClick={() => onSliceClick?.(data[i])}
-        className="cursor-pointer"
-        style={{
-          transform: isHovered ? `scale(1.05)` : 'scale(1)',
-          transformOrigin: `${centerX}px ${centerY}px`,
-          transition: 'transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
-        }}
-      >
-        <path
-          d={path}
-          fill={item.color}
-          stroke="#FAF8F5"
-          strokeWidth="2"
-          style={{
-            filter: isHovered ? 'brightness(1.1) drop-shadow(0 4px 8px rgba(0,0,0,0.15))' : 'none',
-            transition: 'filter 0.3s ease',
-          }}
-        />
-        {/* 在饼图上显示百分比（仅当扇区足够大时） */}
-        {percentage >= 8 && (
+  return (
+    <div className="w-full overflow-x-auto">
+      <svg viewBox={`0 0 ${w} ${h}`} className="w-full min-w-[400px]" preserveAspectRatio="xMidYMid meet">
+        {/* Grid lines */}
+        {yTicks.map((tick) => {
+          const y = padT + plotH - (maxCount > 0 ? (tick / maxCount) * plotH : 0);
+          return (
+            <g key={tick}>
+              <line x1={padL} y1={y} x2={w - padR} y2={y} stroke="#e7e5e4" strokeWidth="1" strokeDasharray="4 2" />
+              <text x={padL - 6} y={y + 4} textAnchor="end" className="text-[10px] fill-stone-400">{tick}</text>
+            </g>
+          );
+        })}
+        {/* Area fill */}
+        <path d={areaPath} fill="url(#trendGradient)" opacity="0.3" />
+        <defs>
+          <linearGradient id="trendGradient" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#f59e0b" />
+            <stop offset="100%" stopColor="#f59e0b" stopOpacity="0" />
+          </linearGradient>
+        </defs>
+        {/* Line */}
+        <path d={linePath} fill="none" stroke="#f59e0b" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+        {/* Data points */}
+        {chartData.map((d) => (
+          <g key={d.week}>
+            <circle
+              cx={d.x} cy={d.y}
+              r={d.isMax ? 6 : 3.5}
+              fill={d.isMax ? '#DC2626' : '#f59e0b'}
+              stroke="white"
+              strokeWidth={d.isMax ? 2.5 : 1.5}
+            />
+            {d.isMax && (
+              <text x={d.x} y={d.y - 12} textAnchor="middle" className="text-[10px] font-bold fill-red-600">
+                {d.count}条
+              </text>
+            )}
+          </g>
+        ))}
+        {/* X-axis labels */}
+        {chartData.map((d) => (
           <text
-            x={labelX}
-            y={labelY}
+            key={`label-${d.week}`}
+            x={d.x}
+            y={h - 8}
             textAnchor="middle"
-            dominantBaseline="middle"
-            className="fill-white text-xs font-semibold pointer-events-none"
-            style={{ textShadow: '0 1px 2px rgba(0,0,0,0.3)' }}
+            className="text-[9px] fill-stone-400"
           >
-            {percentage}%
+            {d.week.replace(/^\d+-/, '')}
           </text>
-        )}
-      </g>
-    );
-  });
-
-  // 悬停提示
-  const hoveredItem = hoveredIndex !== null ? data[hoveredIndex] : null;
-  const tooltipX = centerX;
-  const tooltipY = size - 10;
-
-  return (
-    <div className="relative">
-      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
-        {slices}
-        {/* 中心圆 */}
-        <circle cx={centerX} cy={centerY} r={radius * 0.35} fill="#FAF8F5" className="pointer-events-none" />
-        <text x={centerX} y={centerY - 6} textAnchor="middle" className="fill-[#3D3632] text-lg font-semibold pointer-events-none">{total}</text>
-        <text x={centerX} y={centerY + 10} textAnchor="middle" className="fill-[#8A817A] text-xs pointer-events-none">总计</text>
+        ))}
       </svg>
-      {/* 悬停提示 */}
-      {hoveredItem && (
+      {/* Legend */}
+      <div className="flex items-center gap-4 mt-2 justify-center">
+        <div className="flex items-center gap-1.5">
+          <span className="w-3 h-3 rounded-full bg-amber-500" />
+          <span className="text-xs text-stone-500">周反馈量</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <span className="w-3 h-3 rounded-full bg-red-600" />
+          <span className="text-xs text-stone-500">峰值（最高周）</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function StatusChart({ byStatus, total }: { byStatus: Record<string, number>; total: number }) {
+  const resolved = byStatus.resolved || 0;
+  const unresolved = byStatus.unresolved || 0;
+  const resolvedPct = total > 0 ? ((resolved / total) * 100).toFixed(1) : '0';
+  const unresolvedPct = total > 0 ? ((unresolved / total) * 100).toFixed(1) : '0';
+
+  // Donut chart
+  const size = 140;
+  const cx = size / 2;
+  const cy = size / 2;
+  const r = 52;
+  const strokeW = 18;
+
+  const resolvedAngle = total > 0 ? (resolved / total) * 360 : 0;
+  const resolvedRad = (resolvedAngle * Math.PI) / 180;
+  const largeArc = resolvedAngle > 180 ? 1 : 0;
+
+  const resolvedX = cx + r * Math.sin(resolvedRad);
+  const resolvedY = cy - r * Math.cos(resolvedRad);
+
+  const resolvedPath = resolvedAngle >= 360
+    ? `M ${cx} ${cy - r} A ${r} ${r} 0 1 1 ${cx - 0.01} ${cy - r}`
+    : `M ${cx} ${cy - r} A ${r} ${r} 0 ${largeArc} 1 ${resolvedX} ${resolvedY}`;
+
+  return (
+    <div className="flex flex-col items-center">
+      <svg viewBox={`0 0 ${size} ${size}`} className="w-32 h-32">
+        {/* Background ring */}
+        <circle cx={cx} cy={cy} r={r} fill="none" stroke="#e7e5e4" strokeWidth={strokeW} />
+        {/* Resolved arc */}
+        {resolved > 0 && (
+          <path d={resolvedPath} fill="none" stroke="#059669" strokeWidth={strokeW} strokeLinecap="round" />
+        )}
+        {/* Center text */}
+        <text x={cx} y={cy - 6} textAnchor="middle" className="text-lg font-bold fill-stone-800">{total}</text>
+        <text x={cx} y={cy + 10} textAnchor="middle" className="text-[9px] fill-stone-400">总计</text>
+      </svg>
+      <div className="flex gap-6 mt-3">
+        <div className="flex items-center gap-2">
+          <span className="w-3 h-3 rounded-full bg-emerald-600" />
+          <div>
+            <p className="text-sm font-bold text-stone-800">{resolved} <span className="text-xs font-normal text-stone-400">({resolvedPct}%)</span></p>
+            <p className="text-xs text-stone-500">已解决</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="w-3 h-3 rounded-full bg-stone-300" />
+          <div>
+            <p className="text-sm font-bold text-stone-800">{unresolved} <span className="text-xs font-normal text-stone-400">({unresolvedPct}%)</span></p>
+            <p className="text-xs text-stone-500">未解决</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function SectionTitle({ num, title, subtitle }: { num: string; title: string; subtitle?: string }) {
+  return (
+    <div className="mb-6">
+      <div className="flex items-center gap-3">
+        <span className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-500 to-orange-500 text-white text-sm font-bold flex items-center justify-center shadow-sm">
+          {num}
+        </span>
+        <h2 className="text-xl font-bold text-stone-800">{title}</h2>
+      </div>
+      {subtitle && <p className="text-sm text-stone-500 mt-1 ml-11">{subtitle}</p>}
+    </div>
+  );
+}
+
+function CategoryBar({ label, count, total, color, icon }: {
+  label: string; count: number; total: number; color: string; icon: string;
+}) {
+  const pct = total > 0 ? (count / total) * 100 : 0;
+  return (
+    <div className="group">
+      <div className="flex items-center justify-between mb-1.5">
+        <div className="flex items-center gap-2">
+          <span className="text-base">{icon}</span>
+          <span className="text-sm font-medium text-stone-700">{label}</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-bold text-stone-800">{count}</span>
+          <span className="text-xs text-stone-400">({pct.toFixed(1)}%)</span>
+        </div>
+      </div>
+      <div className="h-2.5 bg-stone-100 rounded-full overflow-hidden">
         <div
-          className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1 bg-[#3D3632] text-white px-3 py-1.5 rounded-lg text-xs whitespace-nowrap shadow-lg pointer-events-none z-10"
-          style={{ animation: 'fadeIn 0.2s ease' }}
-        >
-          <span className="font-medium">{hoveredItem.label}</span>
-          <span className="mx-1.5 text-[#A8A099]">|</span>
-          <span>{hoveredItem.value} 条</span>
-          <span className="ml-1 text-[#A8A099]">({Math.round((hoveredItem.value / total) * 100)}%)</span>
-          <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-[#3D3632] rotate-45" />
-        </div>
-      )}
-    </div>
-  );
-}
-
-// 图例组件 - 支持悬停高亮和点击
-function InteractiveLegend({
-  data,
-  hoveredIndex,
-  onHover,
-  onClick,
-}: {
-  data: PieDataItem[];
-  hoveredIndex: number | null;
-  onHover: (index: number | null) => void;
-  onClick: (item: PieDataItem) => void;
-}) {
-  const total = data.reduce((sum, d) => sum + d.value, 0);
-  return (
-    <div className="space-y-1.5">
-      {data.filter(d => d.value > 0).map((d, i) => {
-        const isHovered = hoveredIndex === i;
-        return (
-          <div
-            key={i}
-            className={`flex items-center justify-between text-sm px-2 py-1 rounded-lg cursor-pointer transition-all ${
-              isHovered ? 'bg-[#F5F2EE] scale-[1.02]' : 'hover:bg-[#F5F2EE]/50'
-            }`}
-            onMouseEnter={() => onHover(i)}
-            onMouseLeave={() => onHover(null)}
-            onClick={() => onClick(d)}
-          >
-            <div className="flex items-center gap-2">
-              <div
-                className="w-3 h-3 rounded-full transition-transform"
-                style={{
-                  backgroundColor: d.color,
-                  transform: isHovered ? 'scale(1.3)' : 'scale(1)',
-                }}
-              />
-              <span className={`text-[#3D3632] ${isHovered ? 'font-medium' : ''}`}>{d.label}</span>
-            </div>
-            <div className="flex items-center gap-2 text-[#8A817A]">
-              <span className={`font-medium ${isHovered ? 'text-[#3D3632]' : 'text-[#3D3632]'}`}>{d.value}</span>
-              <span className="text-xs">({Math.round((d.value / total) * 100)}%)</span>
-            </div>
-          </div>
-        );
-      })}
-    </div>
-  );
-}
-
-// 详情弹窗组件
-function DetailModal({
-  isOpen,
-  onClose,
-  title,
-  color,
-  feedbacks,
-}: {
-  isOpen: boolean;
-  onClose: () => void;
-  title: string;
-  color: string;
-  feedbacks: ModalFeedbackItem[];
-}) {
-  const [activeTab, setActiveTab] = useState<'all' | 'resolved' | 'unresolved'>('all');
-
-  // 重置 tab 当弹窗打开时
-  useEffect(() => {
-    if (isOpen) setActiveTab('all');
-  }, [isOpen]);
-
-  if (!isOpen) return null;
-
-  const resolved = feedbacks.filter(f => f.handleStatus === 'resolved');
-  const unresolved = feedbacks.filter(f => f.handleStatus === 'unresolved');
-
-  const displayFeedbacks = activeTab === 'all' ? feedbacks : activeTab === 'resolved' ? resolved : unresolved;
-
-  const urgencyLabel = (u: string) => {
-    const opt = URGENCY_OPTIONS.find(o => o.value === u);
-    return opt?.label || u;
-  };
-
-  const urgencyColor = (u: string) => {
-    const opt = URGENCY_OPTIONS.find(o => o.value === u);
-    return opt?.color || '#8A817A';
-  };
-
-  const categoryLabel = (c: string) => {
-    const opt = CATEGORY_OPTIONS.find(o => o.value === c);
-    return opt?.label || c;
-  };
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={onClose}>
-      {/* 背景遮罩 */}
-      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" style={{ animation: 'fadeIn 0.2s ease' }} />
-
-      {/* 弹窗内容 */}
-      <div
-        className="relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[80vh] overflow-hidden flex flex-col"
-        style={{ animation: 'slideUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)' }}
-        onClick={e => e.stopPropagation()}
-      >
-        {/* 头部 */}
-        <div className="px-6 py-4 border-b border-[#F0EDE8] flex items-center justify-between flex-shrink-0">
-          <div className="flex items-center gap-3">
-            <div className="w-4 h-4 rounded-full" style={{ backgroundColor: color }} />
-            <h2 className="text-lg font-semibold text-[#3D3632]">{title}</h2>
-            <span className="text-sm text-[#8A817A]">共 {feedbacks.length} 条</span>
-          </div>
-          <button
-            onClick={onClose}
-            className="w-8 h-8 rounded-full flex items-center justify-center text-[#8A817A] hover:bg-[#F5F2EE] hover:text-[#3D3632] transition-colors"
-          >
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <path d="M4 4L12 12M12 4L4 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-            </svg>
-          </button>
-        </div>
-
-        {/* Tab 切换 */}
-        <div className="px-6 pt-4 flex gap-2 flex-shrink-0">
-          {([
-            { key: 'all', label: '全部', count: feedbacks.length },
-            { key: 'resolved', label: '已处理', count: resolved.length, color: '#7FB5B0' },
-            { key: 'unresolved', label: '未处理', count: unresolved.length, color: '#E8917A' },
-          ] as { key: 'all' | 'resolved' | 'unresolved'; label: string; count: number; color?: string }[]).map(tab => (
-            <button
-              key={tab.key}
-              onClick={() => setActiveTab(tab.key)}
-              className={`px-4 py-1.5 rounded-full text-sm transition-all flex items-center gap-1.5 ${
-                activeTab === tab.key
-                  ? 'bg-[#3D3632] text-white'
-                  : 'bg-[#F5F2EE] text-[#8A817A] hover:bg-[#EBE7E1]'
-              }`}
-            >
-              {tab.label}
-              <span className={`text-xs px-1.5 py-0.5 rounded-full ${
-                activeTab === tab.key ? 'bg-white/20' : 'bg-[#E8E4DE]'
-              }`}>
-                {tab.count}
-              </span>
-            </button>
-          ))}
-        </div>
-
-        {/* 列表内容 */}
-        <div className="flex-1 overflow-y-auto px-6 py-4">
-          {displayFeedbacks.length === 0 ? (
-            <div className="text-center py-12 text-[#8A817A]">
-              <p className="text-lg mb-1">暂无数据</p>
-              <p className="text-sm">该分类下没有相关反馈</p>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {displayFeedbacks.map(item => (
-                <div
-                  key={item.id}
-                  className="rounded-xl border border-[#F0EDE8] p-4 hover:shadow-md transition-shadow"
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1.5">
-                        <span
-                          className="text-xs px-2 py-0.5 rounded-full font-medium"
-                          style={{
-                            backgroundColor: urgencyColor(item.urgency) + '15',
-                            color: urgencyColor(item.urgency),
-                          }}
-                        >
-                          {urgencyLabel(item.urgency)}
-                        </span>
-                        <span className="text-xs px-2 py-0.5 rounded-full bg-[#F5F2EE] text-[#8A817A]">
-                          {categoryLabel(item.category)}
-                        </span>
-                        <span className="text-xs text-[#8A817A]">{item.factory}</span>
-                      </div>
-                      <h4 className="font-medium text-[#3D3632] text-sm">{item.title}</h4>
-                      <p className="text-xs text-[#8A817A] mt-1 line-clamp-2">{item.description}</p>
-                    </div>
-                    <div className="flex-shrink-0">
-                      {item.handleStatus === 'resolved' ? (
-                        <span className="text-xs px-2 py-1 rounded-full bg-[#7FB5B0]/10 text-[#7FB5B0] font-medium">
-                          已处理
-                        </span>
-                      ) : (
-                        <span className="text-xs px-2 py-1 rounded-full bg-[#E8917A]/10 text-[#E8917A] font-medium">
-                          未处理
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                  {/* 处理信息 */}
-                  {item.handleStatus === 'resolved' && item.result && (
-                    <div className="mt-3 pt-3 border-t border-[#F0EDE8]">
-                      <div className="flex items-start gap-2">
-                        <span className="text-xs text-[#7FB5B0] font-medium flex-shrink-0">处理结果：</span>
-                        <span className="text-xs text-[#8A817A] line-clamp-2">{item.result}</span>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+          className="h-full rounded-full transition-all duration-700 ease-out group-hover:opacity-80"
+          style={{ width: `${pct}%`, backgroundColor: color }}
+        />
       </div>
     </div>
   );
 }
 
-// 带悬停联动的饼图+图例组合组件
-function PieChartWithLegend({
-  data,
-  title,
-  subtitle,
-  onSliceClick,
-}: {
-  data: PieDataItem[];
-  title: string;
-  subtitle?: string;
-  onSliceClick?: (item: PieDataItem) => void;
-}) {
-  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+function CategoryPieChart({ byCategory }: { byCategory: Record<string, number> }) {
+  const total = Object.values(byCategory).reduce((a, b) => a + b, 0);
 
-  // 找到 hoveredIndex 对应的 data 项（考虑过滤后索引变化）
-  const validData = data.filter(d => d.value > 0);
+  const slices = useMemo(() => {
+    if (total === 0) return [];
+    const entries = Object.entries(byCategory)
+      .filter(([, c]) => c > 0)
+      .sort(([, a], [, b]) => b - a);
+    const cumulative = entries.map(([, count], i) => entries.slice(0, i).reduce((s, [, c]) => s + c, 0));
+    return entries.map(([key, count], i) => {
+      const catInfo = CATEGORY_MAP[key as VoiceCategory];
+      return { key, count, start: cumulative[i], end: cumulative[i] + count, color: catInfo?.pieColor || '#999', label: catInfo?.label || key, icon: catInfo?.icon || '📌' };
+    });
+  }, [byCategory, total]);
+
+  if (total === 0) return null;
+
+  const radius = 80;
+  const center = 100;
+
+  function describeArc(startAngle: number, endAngle: number) {
+    const startRad = ((startAngle - 90) * Math.PI) / 180;
+    const endRad = ((endAngle - 90) * Math.PI) / 180;
+    const x1 = center + radius * Math.cos(startRad);
+    const y1 = center + radius * Math.sin(startRad);
+    const x2 = center + radius * Math.cos(endRad);
+    const y2 = center + radius * Math.sin(endRad);
+    const largeArc = endAngle - startAngle > 180 ? 1 : 0;
+    return `M ${center} ${center} L ${x1} ${y1} A ${radius} ${radius} 0 ${largeArc} 1 ${x2} ${y2} Z`;
+  }
 
   return (
-    <div>
-      <h2 className="text-lg font-semibold text-[#3D3632] mb-4">{title}</h2>
-      <div className="flex items-center gap-6 mb-4">
-        <InteractivePieChart data={data} size={180} onSliceClick={onSliceClick} />
-        <div className="flex-1">
-          {subtitle && <h3 className="text-sm font-medium text-[#3D3632] mb-3">{subtitle}</h3>}
-          <InteractiveLegend data={data} hoveredIndex={hoveredIndex} onHover={setHoveredIndex} onClick={(item) => onSliceClick?.(item)} />
-        </div>
+    <div className="flex flex-col md:flex-row items-center gap-6">
+      <svg viewBox="0 0 200 200" className="w-48 h-48 flex-shrink-0">
+        {slices.map((slice) => {
+          const angle = (slice.count / total) * 360;
+          if (angle >= 360) {
+            return <circle key={slice.key} cx={center} cy={center} r={radius} fill={slice.color} />;
+          }
+          const startAngle = (slice.start / total) * 360;
+          const endAngle = startAngle + angle;
+          return <path key={slice.key} d={describeArc(startAngle, endAngle)} fill={slice.color} stroke="white" strokeWidth="1.5" />;
+        })}
+        <circle cx={center} cy={center} r="40" fill="white" />
+        <text x={center} y={center - 6} textAnchor="middle" className="text-2xl font-bold" fill="#3D3632">{total}</text>
+        <text x={center} y={center + 12} textAnchor="middle" className="text-[10px]" fill="#8A817A">总反馈</text>
+      </svg>
+      <div className="grid grid-cols-2 gap-x-6 gap-y-2 flex-1">
+        {slices.map((slice) => (
+          <div key={slice.key} className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded-sm flex-shrink-0" style={{ backgroundColor: slice.color }} />
+            <span className="text-sm text-stone-600 truncate">{slice.icon} {slice.label}</span>
+            <span className="text-sm font-semibold text-stone-800 ml-auto">{slice.count}</span>
+          </div>
+        ))}
       </div>
     </div>
   );
 }
+
+function DeptPieChart({ byDepartment }: { byDepartment: Record<string, number> }) {
+  const total = Object.values(byDepartment).reduce((a, b) => a + b, 0);
+
+  const slices = useMemo(() => {
+    if (total === 0) return [];
+    const entries = Object.entries(byDepartment).sort(([, a], [, b]) => b - a);
+    const cumulative = entries.map(([, count], i) => entries.slice(0, i).reduce((s, [, c]) => s + c, 0));
+    return entries.map(([dept, count], i) => {
+      const start = (cumulative[i] / total) * 360;
+      const end = ((cumulative[i] + count) / total) * 360;
+      return { dept, count, start, end, color: DEPT_COLORS[dept] || '#999' };
+    });
+  }, [byDepartment, total]);
+
+  if (total === 0) return null;
+
+  const radius = 80;
+  const center = 100;
+
+  function describeArc(startAngle: number, endAngle: number) {
+    const startRad = ((startAngle - 90) * Math.PI) / 180;
+    const endRad = ((endAngle - 90) * Math.PI) / 180;
+    const x1 = center + radius * Math.cos(startRad);
+    const y1 = center + radius * Math.sin(startRad);
+    const x2 = center + radius * Math.cos(endRad);
+    const y2 = center + radius * Math.sin(endRad);
+    const largeArc = endAngle - startAngle > 180 ? 1 : 0;
+    return `M ${center} ${center} L ${x1} ${y1} A ${radius} ${radius} 0 ${largeArc} 1 ${x2} ${y2} Z`;
+  }
+
+  return (
+    <div className="flex flex-col md:flex-row items-center gap-6">
+      <svg viewBox="0 0 200 200" className="w-48 h-48 flex-shrink-0">
+        {slices.map((slice) => {
+          const angle = slice.end - slice.start;
+          if (angle >= 360) {
+            return <circle key={slice.dept} cx={center} cy={center} r={radius} fill={slice.color} />;
+          }
+          return <path key={slice.dept} d={describeArc(slice.start, slice.end)} fill={slice.color} stroke="white" strokeWidth="1.5" />;
+        })}
+        <circle cx={center} cy={center} r="40" fill="white" />
+        <text x={center} y={center - 6} textAnchor="middle" className="text-2xl font-bold" fill="#3D3632">{total}</text>
+        <text x={center} y={center + 12} textAnchor="middle" className="text-[10px]" fill="#8A817A">总反馈</text>
+      </svg>
+      <div className="flex-1 space-y-2">
+        {slices.map((slice) => {
+          const pct = ((slice.count / total) * 100).toFixed(1);
+          return (
+            <div key={slice.dept} className="flex items-center gap-3">
+              <div className="w-3 h-3 rounded-sm flex-shrink-0" style={{ backgroundColor: slice.color }} />
+              <span className="text-sm text-stone-700 flex-1">{slice.dept}</span>
+              <span className="text-sm font-bold text-stone-800">{slice.count}</span>
+              <span className="text-xs text-stone-400 w-14 text-right">{pct}%</span>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// ─── Main Page ───────────────────────────────────────────────────
 
 export default function DashboardPage() {
-  const [stats, setStats] = useState<StatsData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [analyzing, setAnalyzing] = useState(false);
-  const [analysis, setAnalysis] = useState('');
-  const [viewType, setViewType] = useState<ViewType>('category');
-  const [allFeedbacks, setAllFeedbacks] = useState<ModalFeedbackItem[]>([]);
+  const [stats, setStats] = useState<Stats | null>(null);
+  const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [analysisError, setAnalysisError] = useState('');
+  const [isLive, setIsLive] = useState(true);
 
-  // 弹窗状态
-  const [modalOpen, setModalOpen] = useState(false);
-  const [modalTitle, setModalTitle] = useState('');
-  const [modalColor, setModalColor] = useState('#D4A574');
-  const [modalFeedbacks, setModalFeedbacks] = useState<ModalFeedbackItem[]>([]);
-
-  const fetchData = useCallback(async () => {
+  const fetchStats = useCallback(async () => {
     try {
-      const [statsRes, voicesRes] = await Promise.all([
-        fetch('/api/stats'),
-        fetch('/api/voices'),
-      ]);
-      const statsJson = await statsRes.json();
-      const voicesJson = await voicesRes.json();
-
-      if (statsJson.success) {
-        setStats(statsJson.data);
-      }
-
-      if (voicesJson.success) {
-        setAllFeedbacks(voicesJson.data);
-      }
-    } catch (error) {
-      console.error('Failed to fetch data:', error);
-    } finally {
-      setLoading(false);
-    }
+      const res = await fetch('/api/stats');
+      const json = await res.json();
+      if (json.success) setStats(json.data);
+    } catch { /* silent */ }
   }, []);
 
+  useEffect(() => { fetchStats(); }, [fetchStats]);
+
   useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+    if (!isLive) return;
+    const id = setInterval(fetchStats, 3000);
+    return () => clearInterval(id);
+  }, [isLive, fetchStats]);
 
-  const handleAnalysis = async () => {
-    setAnalyzing(true);
-    setAnalysis('');
+  const runAnalysis = useCallback(async () => {
+    setIsAnalyzing(true);
+    setAnalysisError('');
+    setAnalysis(null);
     try {
-      const res = await fetch('/api/analysis', { method: 'POST' });
-      if (!res.ok) throw new Error('分析请求失败');
-      if (!res.body) throw new Error('无法获取响应流');
-
+      const res = await fetch('/api/analysis', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' });
+      if (!res.ok || !res.body) throw new Error('分析请求失败');
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
-      let buffer = '';
-
+      let accumulated = '';
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
-        buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split('\n');
-        buffer = lines.pop() || '';
+        const chunk = decoder.decode(value, { stream: true });
+        const lines = chunk.split('\n');
         for (const line of lines) {
-          if (line.startsWith('data: ')) {
-            const data = line.slice(6);
-            if (data === '[DONE]') break;
-            try {
-              const parsed = JSON.parse(data);
-              if (parsed.content) setAnalysis(prev => prev + parsed.content);
-            } catch { /* skip */ }
-          }
+          if (!line.startsWith('data: ')) continue;
+          try {
+            const parsed = JSON.parse(line.slice(6));
+            if (parsed.content) accumulated += parsed.content;
+          } catch { /* skip */ }
         }
       }
+      const jsonMatch = accumulated.match(/```json\s*([\s\S]*?)```/);
+      const target = jsonMatch ? jsonMatch[1].trim() : accumulated.trim();
+      const result = JSON.parse(target) as AnalysisResult;
+      setAnalysis(result);
     } catch (err) {
-      setAnalysis('分析请求失败，请稍后重试。');
+      setAnalysisError(err instanceof Error ? err.message : '分析失败');
     } finally {
-      setAnalyzing(false);
+      setIsAnalyzing(false);
     }
-  };
+  }, []);
 
-  // 处理饼图点击
-  const handlePieClick = useCallback(
-    (item: PieDataItem, source: ViewType | 'urgency') => {
-      let filtered: ModalFeedbackItem[] = [];
-
-      switch (source) {
-        case 'category':
-          filtered = allFeedbacks.filter(f => f.category === item.filterKey);
-          break;
-        case 'factory':
-          filtered = allFeedbacks.filter(f => f.factory === item.filterKey);
-          break;
-        case 'responsible':
-          filtered = allFeedbacks.filter(f => f.responsibleDept === item.filterKey);
-          break;
-        case 'status':
-          filtered = allFeedbacks.filter(f => f.handleStatus === item.filterKey);
-          break;
-        case 'urgency':
-          filtered = allFeedbacks.filter(f => f.urgency === item.filterKey);
-          break;
-      }
-
-      setModalTitle(item.label);
-      setModalColor(item.color);
-      setModalFeedbacks(filtered);
-      setModalOpen(true);
-    },
-    [allFeedbacks]
-  );
-
-  // 根据视图类型生成饼图数据
-  const getPieData = useCallback((): PieDataItem[] => {
+  const topCategories = useMemo(() => {
     if (!stats) return [];
-    switch (viewType) {
-      case 'category':
-        return CATEGORY_OPTIONS.map(opt => ({
-          label: opt.label,
-          value: stats.byCategory[opt.value] || 0,
-          color: opt.color,
-          filterKey: opt.value,
-        }));
-      case 'factory': {
-        const factoryColors = ['#D4A574', '#E8917A', '#B8A9C9', '#7FB5B0', '#E5A889', '#A8A099'];
-        return FACTORY_LIST.map((f, i) => ({
-          label: f,
-          value: stats.byFactory[f] || 0,
-          color: factoryColors[i % factoryColors.length],
-          filterKey: f,
-        }));
-      }
-      case 'responsible': {
-        const deptColors = ['#D4A574', '#E8917A', '#B8A9C9', '#7FB5B0', '#E5A889', '#9DB5A5', '#C97B6B'];
-        return RESPONSIBLE_DEPT_LIST.map((d, i) => ({
-          label: d,
-          value: stats.byResponsibleDept[d] || 0,
-          color: deptColors[i % deptColors.length],
-          filterKey: d,
-        }));
-      }
-      case 'status':
-        return [
-          { label: '已解决', value: stats.byHandleStatus.resolved || 0, color: '#7FB5B0', filterKey: 'resolved' },
-          { label: '未解决', value: stats.byHandleStatus.unresolved || 0, color: '#E8917A', filterKey: 'unresolved' },
-        ];
-      default:
-        return [];
-    }
-  }, [stats, viewType]);
-
-  // 紧急程度数据
-  const urgencyData = useMemo((): PieDataItem[] => {
-    if (!stats) return [];
-    return [
-      { label: '紧急', value: stats.byUrgency.urgent || 0, color: '#DC2626', filterKey: 'urgent' },
-      { label: '高优', value: stats.byUrgency.high || 0, color: '#EA580C', filterKey: 'high' },
-      { label: '常规', value: stats.byUrgency.normal || 0, color: '#2563EB', filterKey: 'normal' },
-    ];
+    return Object.entries(stats.byCategory).sort(([, a], [, b]) => b - a).slice(0, 3);
   }, [stats]);
-
-  const viewTitles: Record<ViewType, string> = {
-    category: '按问题类别分类',
-    factory: '按厂区/部门分类',
-    responsible: '按责任部门分类',
-    status: '按处理状态分类',
-  };
-
-  // 紧急程度分组数据
-  const urgencyGroups = useMemo(() => {
-    return {
-      urgent: allFeedbacks.filter(f => f.urgency === 'urgent'),
-      high: allFeedbacks.filter(f => f.urgency === 'high'),
-      normal: allFeedbacks.filter(f => f.urgency === 'normal'),
-    };
-  }, [allFeedbacks]);
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-[#8A817A]">加载中...</div>
-      </div>
-    );
-  }
 
   if (!stats) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-[#8A817A]">加载失败，请刷新页面</div>
+      <div className="min-h-screen bg-[#FAF8F5]">
+        <Header />
+        <div className="pt-20 flex items-center justify-center h-64">
+          <div className="animate-pulse text-stone-400">加载中...</div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen">
-      <style>{`
-        @keyframes fadeIn {
-          from { opacity: 0; }
-          to { opacity: 1; }
-        }
-        @keyframes slideUp {
-          from { opacity: 0; transform: translateY(20px) scale(0.95); }
-          to { opacity: 1; transform: translateY(0) scale(1); }
-        }
-      `}</style>
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
-        {/* 页面标题 */}
-        <div className="mb-8">
-          <h1 className="text-2xl font-bold text-[#3D3632]">数据看板</h1>
-          <p className="text-[#8A817A] mt-1">员工反馈数据可视化分析 - 点击饼图查看详情</p>
-        </div>
-
-        {/* 总览统计卡片 */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <div className="bg-white rounded-2xl p-5 shadow-sm border border-[#F0EDE8]">
-            <div className="text-[#8A817A] text-sm">总反馈数</div>
-            <div className="text-3xl font-bold text-[#3D3632] mt-1">{stats.total}</div>
-            <div className="text-xs text-[#8A817A] mt-1">条员工心声</div>
-          </div>
-          <div className="bg-white rounded-2xl p-5 shadow-sm border border-[#F0EDE8]">
-            <div className="text-[#8A817A] text-sm">已处理</div>
-            <div className="text-3xl font-bold text-[#7FB5B0] mt-1">{stats.handledCount}</div>
-            <div className="text-xs text-[#8A817A] mt-1">处理率 {stats.handleRate}%</div>
-          </div>
-          <div className="bg-white rounded-2xl p-5 shadow-sm border border-[#F0EDE8]">
-            <div className="text-[#8A817A] text-sm">待处理</div>
-            <div className="text-3xl font-bold text-[#E8917A] mt-1">{stats.byHandleStatus.unresolved || 0}</div>
-            <div className="text-xs text-[#8A817A] mt-1">需要跟进</div>
-          </div>
-          <div className="bg-white rounded-2xl p-5 shadow-sm border border-[#F0EDE8]">
-            <div className="text-[#8A817A] text-sm">平均评分</div>
-            <div className="text-3xl font-bold text-[#D4A574] mt-1">{stats.avgScore > 0 ? stats.avgScore.toFixed(1) : '-'}</div>
-            <div className="text-xs text-[#8A817A] mt-1">{stats.scoreCount > 0 ? `${stats.scoreCount} 条评价` : '暂无评价'}</div>
+    <div className="min-h-screen bg-[#FAF8F5]">
+      <Header />
+      <main className="pt-20 pb-16">
+        {/* Hero */}
+        <div className="bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50 border-b border-amber-100">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <h1 className="text-2xl font-bold text-stone-800">组织运营数据分析中心</h1>
+                  <div className="flex items-center gap-1.5 px-2.5 py-0.5 bg-emerald-50 border border-emerald-200 rounded-full">
+                    <div className={cn("w-1.5 h-1.5 rounded-full", isLive ? "bg-emerald-500 animate-pulse" : "bg-stone-400")} />
+                    <span className={cn("text-xs font-medium", isLive ? "text-emerald-700" : "text-stone-500")}>
+                      {isLive ? '实时' : '已暂停'}
+                    </span>
+                  </div>
+                </div>
+                <p className="text-stone-500 text-sm">基于 {stats.total} 条员工反馈数据，为 HR 与管理层提供数据洞察与决策支持</p>
+              </div>
+              <button
+                onClick={() => setIsLive(!isLive)}
+                className={cn(
+                  "px-3 py-1.5 rounded-lg text-xs font-medium border transition-all",
+                  isLive ? "bg-emerald-50 border-emerald-200 text-emerald-700 hover:bg-emerald-100" : "bg-stone-50 border-stone-200 text-stone-500 hover:bg-stone-100"
+                )}
+              >
+                {isLive ? '暂停刷新' : '恢复刷新'}
+              </button>
+            </div>
           </div>
         </div>
 
-        {/* 分类分布 + 紧急程度 */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          {/* 分类分布 - 支持切换 */}
-          <div className="bg-white rounded-2xl p-6 shadow-sm border border-[#F0EDE8]">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-[#3D3632]">反馈分类分布</h2>
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 space-y-8 mt-8">
+          {/* ═══ Section 1: 整体概览 ═══ */}
+          <section>
+            <SectionTitle num="1" title="整体概览" subtitle="反馈总量、新增趋势与参与情况" />
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <StatCard label="总反馈量" value={stats.total} sub="累计收集" icon="📊" accent="bg-blue-50 text-blue-600" />
+              <StatCard label="本周新增" value={stats.recentWeek} sub="近7天" icon="📈" accent="bg-emerald-50 text-emerald-600" />
+              <StatCard label="匿名反馈" value={stats.anonymousCount} sub={`${((stats.anonymousCount / stats.total) * 100).toFixed(0)}% 匿名率`} icon="🔒" accent="bg-violet-50 text-violet-600" />
+              <StatCard label="共鸣次数" value={stats.totalLikes} sub="点赞总计" icon="💬" accent="bg-amber-50 text-amber-600" />
             </div>
-            {/* 分类切换标签 */}
-            <div className="flex flex-wrap gap-2 mb-6">
-              {([
-                { key: 'category', label: '问题类别' },
-                { key: 'factory', label: '厂区/部门' },
-                { key: 'responsible', label: '责任部门' },
-                { key: 'status', label: '处理状态' },
-              ] as { key: ViewType; label: string }[]).map(tab => (
-                <button
-                  key={tab.key}
-                  onClick={() => setViewType(tab.key)}
-                  className={`px-4 py-1.5 rounded-full text-sm transition-all ${
-                    viewType === tab.key
-                      ? 'bg-[#D4A574] text-white shadow-sm'
-                      : 'bg-[#F5F2EE] text-[#8A817A] hover:bg-[#EBE7E1]'
-                  }`}
-                >
-                  {tab.label}
-                </button>
-              ))}
+            {/* 反馈活跃趋势 + 问题处理状态 */}
+            <div className="mt-4 grid grid-cols-1 lg:grid-cols-5 gap-6">
+              {/* 折线图：反馈活跃趋势 */}
+              <div className="lg:col-span-3 bg-white rounded-2xl p-5 border border-stone-200/60 shadow-sm">
+                <h3 className="text-sm font-semibold text-stone-700 mb-1">反馈活跃趋势</h3>
+                <p className="text-xs text-stone-400 mb-4">按周统计反馈数量，判断员工反馈意愿与集中爆发点</p>
+                <WeeklyTrendChart data={stats.weeklyTrend || []} />
+              </div>
+              {/* 问题处理状态分布 */}
+              <div className="lg:col-span-2 bg-white rounded-2xl p-5 border border-stone-200/60 shadow-sm">
+                <h3 className="text-sm font-semibold text-stone-700 mb-1">问题处理状态</h3>
+                <p className="text-xs text-stone-400 mb-4">已解决与未解决问题占比</p>
+                <StatusChart byStatus={stats.byStatus || {}} total={stats.total} />
+              </div>
             </div>
-            <PieChartWithLegend
-              data={getPieData()}
-              title=""
-              subtitle={viewTitles[viewType]}
-              onSliceClick={(item) => handlePieClick(item, viewType)}
-            />
-          </div>
+          </section>
 
-          {/* 紧急程度分布 */}
-          <div className="bg-white rounded-2xl p-6 shadow-sm border border-[#F0EDE8]">
-            <PieChartWithLegend
-              data={urgencyData}
-              title="紧急程度分布"
-              subtitle="按紧急程度分类"
-              onSliceClick={(item) => handlePieClick(item, 'urgency')}
-            />
-            {/* 紧急程度说明 */}
-            <div className="border-t border-[#F0EDE8] pt-4 mt-4">
-              <div className="space-y-2">
-                {URGENCY_OPTIONS.map(opt => (
-                  <div key={opt.value} className="flex items-start gap-2 text-xs">
-                    <div className="w-2 h-2 rounded-full mt-1 flex-shrink-0" style={{ backgroundColor: opt.color }} />
+          {/* ═══ Section 2: 反馈分类分析 ═══ */}
+          <section>
+            <SectionTitle num="2" title="反馈分类分析" subtitle="各类别反馈数量统计与占比分布" />
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="bg-white rounded-2xl p-6 border border-stone-200/60 shadow-sm">
+                <h3 className="text-sm font-semibold text-stone-700 mb-4">分类占比</h3>
+                <CategoryPieChart byCategory={stats.byCategory} />
+              </div>
+              <div className="bg-white rounded-2xl p-6 border border-stone-200/60 shadow-sm">
+                <h3 className="text-sm font-semibold text-stone-700 mb-4">分类统计</h3>
+                <div className="space-y-3">
+                  {Object.entries(stats.byCategory)
+                    .sort(([, a], [, b]) => b - a)
+                    .map(([cat, count]) => {
+                      const info = CATEGORY_MAP[cat as VoiceCategory];
+                      return (
+                        <CategoryBar
+                          key={cat}
+                          label={info?.label || cat}
+                          count={count}
+                          total={stats.total}
+                          color={info?.pieColor || '#999'}
+                          icon={info?.icon || '📌'}
+                        />
+                      );
+                    })}
+                </div>
+              </div>
+            </div>
+            {/* TOP 3 反馈类别 */}
+            <div className="mt-4 bg-white rounded-2xl p-5 border border-stone-200/60 shadow-sm">
+              <h3 className="text-sm font-semibold text-stone-700 mb-3">TOP 3 反馈类别</h3>
+              <div className="flex flex-wrap gap-3">
+                {topCategories.map(([cat, count], i) => {
+                  const info = CATEGORY_MAP[cat as VoiceCategory];
+                  return (
+                    <div key={cat} className="flex items-center gap-2 px-3 py-2 rounded-xl bg-stone-50 border border-stone-100">
+                      <span className="w-6 h-6 rounded-md bg-gradient-to-br from-amber-400 to-orange-500 text-white text-xs font-bold flex items-center justify-center">
+                        {i + 1}
+                      </span>
+                      <span className="text-base">{info?.icon}</span>
+                      <span className="text-sm font-medium text-stone-700">{info?.label || cat}</span>
+                      <span className="text-sm font-bold text-stone-800">{count}</span>
+                      <span className="text-xs text-stone-400">({((count / stats.total) * 100).toFixed(1)}%)</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </section>
+
+          {/* ═══ Section 3: 高频问题洞察 ═══ */}
+          <section>
+            <SectionTitle num="3" title="高频问题洞察" subtitle="热点问题、趋势变化与潜在风险" />
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+              {/* 卡片1: 关注热点 */}
+              {(() => {
+                const topCat = topCategories[0];
+                if (!topCat) return null;
+                const [cat, count] = topCat;
+                const info = CATEGORY_MAP[cat as VoiceCategory];
+                const pct = ((count / stats.total) * 100).toFixed(1);
+                return (
+                  <div className="bg-white rounded-2xl p-6 border border-stone-200/60 shadow-sm relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-orange-50 to-transparent rounded-bl-full" />
+                    <div className="relative">
+                      <div className="flex items-center gap-2 mb-4">
+                        <span className="text-2xl">🔥</span>
+                        <h3 className="text-sm font-bold text-stone-800">当前热点问题</h3>
+                      </div>
+                      <div className="mb-4">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-lg">{info?.icon}</span>
+                          <span className="text-lg font-bold text-stone-800">{info?.label || cat}</span>
+                        </div>
+                        <p className="text-sm text-stone-500">反馈持续较高，为员工最关注议题</p>
+                      </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="bg-stone-50 rounded-xl p-3">
+                          <p className="text-xs text-stone-400 mb-1">占比</p>
+                          <p className="text-xl font-bold" style={{ color: info?.pieColor }}>{pct}%</p>
+                        </div>
+                        <div className="bg-stone-50 rounded-xl p-3">
+                          <p className="text-xs text-stone-400 mb-1">涉及</p>
+                          <p className="text-xl font-bold text-stone-800">{count}<span className="text-sm font-normal text-stone-400 ml-1">条反馈</span></p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
+
+              {/* 卡片2: 问题趋势 */}
+              {(() => {
+                // Calculate trend: compare recent week vs previous week
+                const trend = stats.weeklyTrend || [];
+                const currentWeek = trend[trend.length - 1]?.count || 0;
+                const prevWeek = trend[trend.length - 2]?.count || 0;
+                const change = prevWeek > 0 ? ((currentWeek - prevWeek) / prevWeek * 100) : 0;
+                const isUp = change > 0;
+                // Find second highest category as trending issue
+                const secondCat = topCategories[1];
+                const secondInfo = secondCat ? CATEGORY_MAP[secondCat[0] as VoiceCategory] : null;
+                const focusAreas: Record<string, string> = {
+                  performance: '评分标准、目标设定',
+                  housing: '宿舍环境、设施维护',
+                  attendance: '打卡异常、工时核算',
+                  management: '沟通方式、流程透明',
+                  salary: '调薪机制、奖金分配',
+                  dining: '菜品质量、就餐环境',
+                  rough_management: '管理态度、尊重员工',
+                  other: '综合建议',
+                };
+                return (
+                  <div className="bg-white rounded-2xl p-6 border border-stone-200/60 shadow-sm relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-blue-50 to-transparent rounded-bl-full" />
+                    <div className="relative">
+                      <div className="flex items-center gap-2 mb-4">
+                        <span className="text-2xl">{isUp ? '📈' : '📉'}</span>
+                        <h3 className="text-sm font-bold text-stone-800">{isUp ? '上升问题' : '下降问题'}</h3>
+                      </div>
+                      <div className="mb-4">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-lg">{secondInfo?.icon}</span>
+                          <span className="text-lg font-bold text-stone-800">{secondInfo?.label || '—'}</span>
+                        </div>
+                        <p className="text-sm text-stone-500">较上周期反馈量{isUp ? '增加' : '减少'}</p>
+                      </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className={cn("rounded-xl p-3", isUp ? "bg-red-50" : "bg-green-50")}>
+                          <p className="text-xs text-stone-400 mb-1">较上周期</p>
+                          <p className={cn("text-xl font-bold", isUp ? "text-red-500" : "text-green-500")}>
+                            {isUp ? '+' : ''}{change.toFixed(0)}%
+                          </p>
+                        </div>
+                        <div className="bg-stone-50 rounded-xl p-3">
+                          <p className="text-xs text-stone-400 mb-1">建议关注</p>
+                          <p className="text-sm font-medium text-stone-700 leading-tight mt-1">
+                            {secondCat ? (focusAreas[secondCat[0]] || '综合反馈') : '—'}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
+
+              {/* 卡片3: 潜在风险 */}
+              {(() => {
+                // Risk: rough_management is highest risk, also check unresolved rate
+                const unresolvedRate = stats.byStatus?.unresolved ? ((stats.byStatus.unresolved / stats.total) * 100).toFixed(1) : '0';
+                const roughCount = stats.byCategory.rough_management || 0;
+                const mgmtCount = stats.byCategory.management || 0;
+                const riskItems = [
+                  { label: '粗暴管理', count: roughCount, level: 'high' as const },
+                  { label: '管理问题', count: mgmtCount, level: 'medium' as const },
+                  { label: '未解决问题', count: stats.byStatus?.unresolved || 0, level: 'medium' as const },
+                ].filter(item => item.count > 0);
+                return (
+                  <div className="bg-white rounded-2xl p-6 border border-stone-200/60 shadow-sm relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-red-50 to-transparent rounded-bl-full" />
+                    <div className="relative">
+                      <div className="flex items-center gap-2 mb-4">
+                        <span className="text-2xl">⚠️</span>
+                        <h3 className="text-sm font-bold text-stone-800">潜在风险</h3>
+                      </div>
+                      <div className="mb-4">
+                        <p className="text-sm text-stone-500">
+                          未解决问题占比 <span className="font-bold text-red-500">{unresolvedRate}%</span>，需重点关注
+                        </p>
+                      </div>
+                      <div className="space-y-2.5">
+                        {riskItems.map((item) => {
+                          const colors = item.level === 'high'
+                            ? 'bg-red-50 text-red-600 border-red-100'
+                            : 'bg-amber-50 text-amber-600 border-amber-100';
+                          return (
+                            <div key={item.label} className={cn("flex items-center justify-between px-3 py-2 rounded-lg border", colors)}>
+                              <span className="text-sm font-medium">{item.label}</span>
+                              <span className="text-sm font-bold">{item.count} 条</span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
+            </div>
+          </section>
+
+          {/* ═══ Section 4: 紧急程度排序 ═══ */}
+          <section>
+            <SectionTitle num="4" title="紧急程度排序" subtitle="基于反馈分类和影响范围的紧急程度判断与责任部门映射" />
+            <div className="bg-white rounded-2xl p-6 border border-stone-200/60 shadow-sm">
+              {analysis ? (
+                <div className="space-y-4">
+                  {/* Urgency Legend */}
+                  <div className="flex flex-wrap gap-3 mb-4 p-3 rounded-xl bg-stone-50 border border-stone-100">
+                    <span className="text-xs text-stone-500">紧急程度判断规则：</span>
+                    <span className="text-xs px-2 py-0.5 rounded-full bg-red-100 text-red-700">高：涉及安全、大面积影响工作</span>
+                    <span className="text-xs px-2 py-0.5 rounded-full bg-amber-100 text-amber-700">中：影响效率但有临时替代方案</span>
+                    <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700">低：体验优化类、长期改进类</span>
+                  </div>
+                  {/* Issues sorted by urgency */}
+                  {(() => {
+                    // Sort issues by urgency (高 > 中 > 低)
+                    const urgencyOrder = { '高': 0, '中': 1, '低': 2 };
+                    const sortedIssues = [...analysis.issues].sort((a, b) => 
+                      (urgencyOrder[a.urgency as keyof typeof urgencyOrder] ?? 3) - (urgencyOrder[b.urgency as keyof typeof urgencyOrder] ?? 3)
+                    );
+                    return sortedIssues.map((issue, i) => {
+                      const urgencyColor = issue.urgency === '高' ? 'bg-red-100 text-red-700 border-red-200' : issue.urgency === '中' ? 'bg-amber-100 text-amber-700 border-amber-200' : 'bg-emerald-100 text-emerald-700 border-emerald-200';
+                      const urgencyIcon = issue.urgency === '高' ? '🔴' : issue.urgency === '中' ? '🟡' : '🟢';
+                      return (
+                        <div key={i} className="p-4 rounded-xl border border-stone-100 bg-gradient-to-r from-stone-50/80 to-white hover:shadow-sm transition-all">
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className="text-lg">{urgencyIcon}</span>
+                            <span className="font-semibold text-stone-800">{issue.title}</span>
+                            <span className={cn("text-xs px-2 py-0.5 rounded-full font-medium border", urgencyColor)}>
+                              {issue.urgency}紧急
+                            </span>
+                            <span className="text-xs text-stone-400 ml-auto">{issue.relatedCount} 条相关</span>
+                          </div>
+                          <p className="text-sm text-stone-600 mb-3 pl-7">{issue.description}</p>
+                          <div className="flex flex-wrap items-center gap-3 pl-7 text-xs">
+                            <span className="flex items-center gap-1 text-stone-500">
+                              <span className="w-4 h-4 rounded bg-blue-100 text-blue-600 flex items-center justify-center text-[10px]">📍</span>
+                              责任部门：<span className="font-medium text-stone-700">{issue.department}</span>
+                            </span>
+                            {issue.suggestions && issue.suggestions.length > 0 && (
+                              <span className="flex items-center gap-1 text-stone-500">
+                                <span className="w-4 h-4 rounded bg-orange-100 text-orange-600 flex items-center justify-center text-[10px]">💡</span>
+                                处理建议：<span className="text-stone-600">{issue.suggestions[0]}</span>
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    });
+                  })()}
+                  {analysis.issues.length === 0 && (
+                    <p className="text-center text-stone-400 py-4">暂无问题数据</p>
+                  )}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <p className="text-stone-400 text-sm mb-4">通过 AI 分析反馈数据，按紧急程度排序并匹配责任部门</p>
+                  <button
+                    onClick={runAnalysis}
+                    disabled={isAnalyzing}
+                    className="px-6 py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-xl text-sm font-medium shadow-sm hover:shadow-md transition-all disabled:opacity-50"
+                  >
+                    {isAnalyzing ? '分析中...' : analysisError ? '重试分析' : '启动 AI 紧急程度分析'}
+                  </button>
+                  {analysisError && <p className="text-red-500 text-xs mt-2">{analysisError}</p>}
+                </div>
+              )}
+            </div>
+          </section>
+
+          {/* ═══ Section 5: 责任部门分析 ═══ */}
+          <section>
+            <SectionTitle num="5" title="责任部门分析" subtitle="各部门反馈分布与占比" />
+            <div className="bg-white rounded-2xl p-6 border border-stone-200/60 shadow-sm">
+              {stats.byDepartment && Object.keys(stats.byDepartment).length > 0 ? (
+                <DeptPieChart byDepartment={stats.byDepartment} />
+              ) : (
+                <p className="text-center text-stone-400 py-8">暂无部门数据</p>
+              )}
+            </div>
+          </section>
+
+          {/* ═══ Section 6: AI 组织洞察 ═══ */}
+          <section>
+            <SectionTitle num="6" title="AI 组织洞察" subtitle="基于全部反馈数据的组织状态评估与改善方向" />
+            <div className="bg-white rounded-2xl p-6 border border-stone-200/60 shadow-sm">
+              {analysis ? (
+                <div className="space-y-6">
+                  {/* Overall Summary */}
+                  <div className="p-4 rounded-xl bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-100">
+                    <h3 className="text-sm font-bold text-amber-800 mb-2">📋 整体态势</h3>
+                    <p className="text-sm text-stone-700 leading-relaxed">{analysis.summary}</p>
+                  </div>
+                  {/* Org Insight */}
+                  {analysis.orgInsight && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="p-4 rounded-xl bg-blue-50 border border-blue-100">
+                        <h3 className="text-sm font-bold text-blue-800 mb-2">🏢 当前组织状态</h3>
+                        <p className="text-sm text-stone-700 leading-relaxed">{analysis.orgInsight.currentState}</p>
+                      </div>
+                      <div className="p-4 rounded-xl bg-violet-50 border border-violet-100">
+                        <h3 className="text-sm font-bold text-violet-800 mb-2">🎯 优先改善方向</h3>
+                        <div className="space-y-2">
+                          {analysis.orgInsight.priorities.map((p, i) => (
+                            <div key={i} className="flex items-start gap-2 text-sm text-stone-700">
+                              <span className="text-violet-500 mt-0.5">▸</span>
+                              {p}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  {/* High-frequency issues */}
+                  {analysis.issues.length > 0 && (
                     <div>
-                      <span className="font-medium text-[#3D3632]">{opt.label}</span>
-                      <span className="text-[#8A817A] ml-1">- {opt.desc}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* 紧急程度排序列表 */}
-        <div className="bg-white rounded-2xl p-6 shadow-sm border border-[#F0EDE8] mb-8">
-          <h2 className="text-lg font-semibold text-[#3D3632] mb-4">紧急程度排序</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {/* 紧急 */}
-            <div className="rounded-xl border-2 border-red-200 bg-red-50/50 p-4">
-              <div className="flex items-center gap-2 mb-3">
-                <div className="w-3 h-3 rounded-full bg-red-600" />
-                <span className="font-semibold text-red-700">紧急</span>
-                <span className="text-xs text-red-600 bg-red-100 px-2 py-0.5 rounded-full">{urgencyGroups.urgent.length}</span>
-              </div>
-              <div className="space-y-2 max-h-48 overflow-y-auto">
-                {urgencyGroups.urgent.length === 0 ? (
-                  <p className="text-sm text-red-400">暂无紧急反馈</p>
-                ) : (
-                  urgencyGroups.urgent.slice(0, 5).map(item => (
-                    <div key={item.id} className="bg-white rounded-lg p-2 text-xs border border-red-100">
-                      <p className="font-medium text-[#3D3632] truncate">{item.title}</p>
-                      <p className="text-[#8A817A] truncate mt-0.5">{item.description}</p>
-                    </div>
-                  ))
-                )}
-              </div>
-            </div>
-
-            {/* 高优 */}
-            <div className="rounded-xl border-2 border-orange-200 bg-orange-50/50 p-4">
-              <div className="flex items-center gap-2 mb-3">
-                <div className="w-3 h-3 rounded-full bg-orange-600" />
-                <span className="font-semibold text-orange-700">高优</span>
-                <span className="text-xs text-orange-600 bg-orange-100 px-2 py-0.5 rounded-full">{urgencyGroups.high.length}</span>
-              </div>
-              <div className="space-y-2 max-h-48 overflow-y-auto">
-                {urgencyGroups.high.length === 0 ? (
-                  <p className="text-sm text-orange-400">暂无高优反馈</p>
-                ) : (
-                  urgencyGroups.high.slice(0, 5).map(item => (
-                    <div key={item.id} className="bg-white rounded-lg p-2 text-xs border border-orange-100">
-                      <p className="font-medium text-[#3D3632] truncate">{item.title}</p>
-                      <p className="text-[#8A817A] truncate mt-0.5">{item.description}</p>
-                    </div>
-                  ))
-                )}
-              </div>
-            </div>
-
-            {/* 常规 */}
-            <div className="rounded-xl border-2 border-blue-200 bg-blue-50/50 p-4">
-              <div className="flex items-center gap-2 mb-3">
-                <div className="w-3 h-3 rounded-full bg-blue-600" />
-                <span className="font-semibold text-blue-700">常规</span>
-                <span className="text-xs text-blue-600 bg-blue-100 px-2 py-0.5 rounded-full">{urgencyGroups.normal.length}</span>
-              </div>
-              <div className="space-y-2 max-h-48 overflow-y-auto">
-                {urgencyGroups.normal.length === 0 ? (
-                  <p className="text-sm text-blue-400">暂无常规反馈</p>
-                ) : (
-                  urgencyGroups.normal.slice(0, 5).map(item => (
-                    <div key={item.id} className="bg-white rounded-lg p-2 text-xs border border-blue-100">
-                      <p className="font-medium text-[#3D3632] truncate">{item.title}</p>
-                      <p className="text-[#8A817A] truncate mt-0.5">{item.description}</p>
-                    </div>
-                  ))
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* 高频问题摘要 */}
-        <div className="bg-white rounded-2xl p-6 shadow-sm border border-[#F0EDE8] mb-8">
-          <h2 className="text-lg font-semibold text-[#3D3632] mb-4">高频问题摘要</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {stats.topIssues.slice(0, 4).map((issue, i) => {
-              const catInfo = CATEGORY_OPTIONS.find(c => c.value === issue.category);
-              return (
-                <div key={i} className="rounded-xl p-4 border border-[#F0EDE8] hover:shadow-md transition-shadow">
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className="w-2 h-2 rounded-full" style={{ backgroundColor: catInfo?.color || '#A8A099' }} />
-                    <span className="text-sm font-medium text-[#3D3632]">{catInfo?.label || issue.category}</span>
-                  </div>
-                  <div className="text-2xl font-bold text-[#3D3632]">{issue.count}<span className="text-sm font-normal text-[#8A817A] ml-1">条</span></div>
-                  <div className="text-xs text-[#8A817A] mt-1">占比 {issue.percentage}%</div>
-                  {issue.samples.length > 0 && (
-                    <div className="mt-3 pt-3 border-t border-[#F0EDE8]">
-                      <p className="text-xs text-[#8A817A] line-clamp-2">&ldquo;{issue.samples[0]}&rdquo;</p>
+                      <h3 className="text-sm font-bold text-stone-700 mb-3">🔥 高频问题详情</h3>
+                      <div className="space-y-3">
+                        {analysis.issues.map((issue, i) => {
+                          const urgencyColor = issue.urgency === '高' ? 'bg-red-100 text-red-700' : issue.urgency === '中' ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700';
+                          return (
+                            <div key={i} className="p-4 rounded-xl border border-stone-100 bg-stone-50/50">
+                              <div className="flex items-center gap-2 mb-2">
+                                <span className="font-semibold text-stone-800">{issue.title}</span>
+                                <span className={cn("text-xs px-2 py-0.5 rounded-full font-medium", urgencyColor)}>
+                                  {issue.urgency}紧急
+                                </span>
+                                <span className="text-xs text-stone-400 ml-auto">{issue.relatedCount} 条相关</span>
+                              </div>
+                              <p className="text-sm text-stone-600 mb-2">{issue.description}</p>
+                              <div className="flex items-center gap-2 text-xs text-stone-500">
+                                <span>📍 责任部门：{issue.department}</span>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
                     </div>
                   )}
                 </div>
-              );
-            })}
-          </div>
-        </div>
+              ) : (
+                <div className="text-center py-8">
+                  <p className="text-stone-400 text-sm mb-4">AI 将综合分析所有反馈数据，生成组织洞察报告</p>
+                  <button
+                    onClick={runAnalysis}
+                    disabled={isAnalyzing}
+                    className="px-6 py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-xl text-sm font-medium shadow-sm hover:shadow-md transition-all disabled:opacity-50"
+                  >
+                    {isAnalyzing ? '正在分析...' : analysisError ? '重试分析' : '生成 AI 组织洞察'}
+                  </button>
+                  {analysisError && <p className="text-red-500 text-xs mt-2">{analysisError}</p>}
+                </div>
+              )}
+            </div>
+          </section>
 
-        {/* 责任部门工作量分布 */}
-        <div className="bg-white rounded-2xl p-6 shadow-sm border border-[#F0EDE8] mb-8">
-          <h2 className="text-lg font-semibold text-[#3D3632] mb-4">责任部门工作量</h2>
-          <div className="space-y-3">
-            {RESPONSIBLE_DEPT_LIST.map((dept, i) => {
-              const count = stats.byResponsibleDept[dept] || 0;
-              const percentage = stats.total > 0 ? Math.round((count / stats.total) * 100) : 0;
-              const colors = ['#D4A574', '#E8917A', '#B8A9C9', '#7FB5B0', '#E5A889', '#9DB5A5', '#C97B6B'];
-              return (
-                <div key={dept} className="flex items-center gap-4">
-                  <div className="w-24 text-sm text-[#3D3632] truncate">{dept}</div>
-                  <div className="flex-1 h-6 bg-[#F5F2EE] rounded-full overflow-hidden">
-                    <div
-                      className="h-full rounded-full transition-all duration-500"
-                      style={{ width: `${percentage}%`, backgroundColor: colors[i % colors.length] }}
-                    />
+          {/* ═══ Section 7: 管理优化建议 ═══ */}
+          <section>
+            <SectionTitle num="7" title="管理优化建议" subtitle="短期措施与长期建设方向" />
+            <div className="bg-white rounded-2xl p-6 border border-stone-200/60 shadow-sm">
+              {analysis?.managementAdvice ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <h3 className="text-sm font-bold text-stone-700 mb-3 flex items-center gap-2">
+                      <span className="w-6 h-6 rounded-md bg-orange-100 text-orange-600 flex items-center justify-center text-xs">⚡</span>
+                      短期措施（1-4 周）
+                    </h3>
+                    <div className="space-y-2">
+                      {analysis.managementAdvice.shortTerm.map((item, i) => (
+                        <div key={i} className="flex items-start gap-3 p-3 rounded-lg bg-orange-50/50 border border-orange-100">
+                          <span className="w-5 h-5 rounded-full bg-orange-100 text-orange-600 text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">{i + 1}</span>
+                          <p className="text-sm text-stone-700">{item}</p>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                  <div className="w-16 text-right text-sm">
-                    <span className="font-medium text-[#3D3632]">{count}</span>
-                    <span className="text-[#8A817A] ml-1">({percentage}%)</span>
+                  <div>
+                    <h3 className="text-sm font-bold text-stone-700 mb-3 flex items-center gap-2">
+                      <span className="w-6 h-6 rounded-md bg-blue-100 text-blue-600 flex items-center justify-center text-xs">🏗️</span>
+                      长期建设（1-6 个月）
+                    </h3>
+                    <div className="space-y-2">
+                      {analysis.managementAdvice.longTerm.map((item, i) => (
+                        <div key={i} className="flex items-start gap-3 p-3 rounded-lg bg-blue-50/50 border border-blue-100">
+                          <span className="w-5 h-5 rounded-full bg-blue-100 text-blue-600 text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">{i + 1}</span>
+                          <p className="text-sm text-stone-700">{item}</p>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* AI 深度分析 */}
-        <div className="bg-white rounded-2xl p-6 shadow-sm border border-[#F0EDE8]">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-[#3D3632]">AI 深度分析</h2>
-            <button
-              onClick={handleAnalysis}
-              disabled={analyzing}
-              className="px-4 py-2 bg-[#D4A574] text-white rounded-full text-sm font-medium hover:bg-[#C49564] disabled:opacity-50 transition-colors"
-            >
-              {analyzing ? '分析中...' : analysis ? '重新分析' : '生成分析'}
-            </button>
-          </div>
-
-          {analysis ? (
-            <div className="prose prose-sm max-w-none">
-              <div className="whitespace-pre-wrap text-[#3D3632] leading-relaxed">{analysis}</div>
+              ) : (
+                <div className="text-center py-8">
+                  <p className="text-stone-400 text-sm">
+                    {analysis ? '管理建议已包含在 AI 组织洞察中' : '请先在上方生成 AI 组织洞察'}
+                  </p>
+                </div>
+              )}
             </div>
-          ) : (
-            <div className="text-center py-8 text-[#8A817A]">
-              <p>点击「生成分析」按钮，AI 将基于所有反馈数据生成深度分析报告</p>
-              <p className="text-sm mt-2">包括：紧急程度判断、责任部门建议、处理建议、员工回复话术</p>
-            </div>
-          )}
+          </section>
         </div>
-
-        {/* 数据洞察 */}
-        <div className="mt-8 bg-gradient-to-r from-[#D4A574]/10 to-[#B8A9C9]/10 rounded-2xl p-6 border border-[#F0EDE8]">
-          <h3 className="text-sm font-semibold text-[#3D3632] mb-2">数据洞察</h3>
-          <p className="text-sm text-[#8A817A] leading-relaxed">
-            当前共收到 <span className="font-medium text-[#3D3632]">{stats.total}</span> 条员工反馈，
-            其中 <span className="font-medium text-[#E8917A]">{stats.byCategory.performance || 0}</span> 条涉及绩效问题（占比最高），
-            <span className="font-medium text-[#D4A574]">{stats.byCategory.accommodation || 0}</span> 条涉及住宿问题。
-            已处理 <span className="font-medium text-[#7FB5B0]">{stats.handledCount}</span> 条，处理率 {stats.handleRate}%。
-            {stats.byUrgency.urgent > 0 && (
-              <> 需要特别关注的是，有 <span className="font-medium text-red-600">{stats.byUrgency.urgent}</span> 条紧急反馈需要优先处理。</>
-            )}
-          </p>
-        </div>
-      </div>
-
-      {/* 详情弹窗 */}
-      <DetailModal
-        isOpen={modalOpen}
-        onClose={() => setModalOpen(false)}
-        title={modalTitle}
-        color={modalColor}
-        feedbacks={modalFeedbacks}
-      />
+      </main>
     </div>
   );
 }

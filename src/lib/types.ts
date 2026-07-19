@@ -1,109 +1,60 @@
-// 反馈分类类型（基于反馈问题列表_20260712_164911.xlsx）
-export type FeedbackCategory =
-  | 'performance'    // 绩效问题
-  | 'accommodation'  // 住宿问题
-  | 'attendance'     // 考勤问题
-  | 'management'     // 管理问题
-  | 'salary'         // 工资问题
-  | 'dining'         // 用餐问题
-  | 'rough_manage'   // 粗暴管理
-  | 'other';         // 其他
+export type VoiceCategory =
+  | 'performance'
+  | 'housing'
+  | 'attendance'
+  | 'management'
+  | 'salary'
+  | 'dining'
+  | 'rough_management'
+  | 'training'
+  | 'office'
+  | 'commute'
+  | 'other';
 
-// 紧急程度（基于反馈分类与处理原则.txt）
-export type UrgencyLevel = 'urgent' | 'high' | 'normal';
+export const CATEGORY_MAP: Record<VoiceCategory, { label: string; color: string; bgColor: string; icon: string; pieColor: string }> = {
+  performance:       { label: '绩效问题', color: 'text-amber-700',  bgColor: 'bg-amber-50 border-amber-200',   icon: '📊', pieColor: '#D97706' },
+  housing:           { label: '住宿问题', color: 'text-blue-700',   bgColor: 'bg-blue-50 border-blue-200',     icon: '🏠', pieColor: '#2563EB' },
+  attendance:        { label: '考勤问题', color: 'text-purple-700', bgColor: 'bg-purple-50 border-purple-200', icon: '⏰', pieColor: '#7C3AED' },
+  management:        { label: '管理问题', color: 'text-indigo-700', bgColor: 'bg-indigo-50 border-indigo-200', icon: '📋', pieColor: '#4F46E5' },
+  salary:            { label: '工资问题', color: 'text-green-700',  bgColor: 'bg-green-50 border-green-200',   icon: '💰', pieColor: '#059669' },
+  dining:            { label: '用餐问题', color: 'text-orange-700', bgColor: 'bg-orange-50 border-orange-200', icon: '🍽️', pieColor: '#EA580C' },
+  rough_management:  { label: '粗暴管理', color: 'text-red-700',    bgColor: 'bg-red-50 border-red-200',       icon: '⚠️', pieColor: '#DC2626' },
+  training:          { label: '培训问题', color: 'text-teal-700',   bgColor: 'bg-teal-50 border-teal-200',     icon: '🎓', pieColor: '#0D9488' },
+  office:            { label: '办公问题', color: 'text-cyan-700',   bgColor: 'bg-cyan-50 border-cyan-200',     icon: '🖥️', pieColor: '#0891B2' },
+  commute:           { label: '通勤问题', color: 'text-pink-700',   bgColor: 'bg-pink-50 border-pink-200',     icon: '🚌', pieColor: '#DB2777' },
+  other:             { label: '其他',    color: 'text-stone-600',  bgColor: 'bg-stone-50 border-stone-200',   icon: '💬', pieColor: '#78716C' },
+};
 
-// 处理状态
-export type HandleStatus = 'resolved' | 'unresolved';
+export const CATEGORY_KEYS = Object.keys(CATEGORY_MAP) as VoiceCategory[];
 
-// 责任部门
-export type ResponsibleDept =
-  | '人力资源部'
-  | '行政部'
-  | '生产管理部'
-  | '质量管理部'
-  | '供应链管理部'
-  | '厂长办公室'
-  | '工会/员工关系';
+export type VoiceStatus = 'resolved' | 'unresolved';
 
-// 反馈数据项
-export interface Feedback {
+export interface Voice {
   id: string;
-  name: string;
-  department: string;
-  category: FeedbackCategory;
-  title: string;
-  description: string;
-  handler: string;
-  result: string;
-  score: string;
-  scoreContent: string;
-  factory: string;
-  urgency: UrgencyLevel;
-  responsibleDept: ResponsibleDept;
-  handleStatus: HandleStatus;
+  content: string;
+  category: VoiceCategory;
+  department?: string;
+  author: string;
+  isAnonymous: boolean;
+  likes: number;
+  aiReply: string | null;
   createdAt: string;
+  isBatch?: boolean;
+  status?: VoiceStatus;
 }
 
-// 分类选项
-export const CATEGORY_OPTIONS: { value: FeedbackCategory; label: string; color: string }[] = [
-  { value: 'performance', label: '绩效问题', color: '#E8917A' },
-  { value: 'accommodation', label: '住宿问题', color: '#D4A574' },
-  { value: 'attendance', label: '考勤问题', color: '#B8A9C9' },
-  { value: 'management', label: '管理问题', color: '#7FB5B0' },
-  { value: 'salary', label: '工资问题', color: '#E5A889' },
-  { value: 'dining', label: '用餐问题', color: '#9DB5A5' },
-  { value: 'rough_manage', label: '粗暴管理', color: '#C97B6B' },
-  { value: 'other', label: '其他', color: '#A8A099' },
-];
+export interface WeeklyTrend {
+  week: string;
+  count: number;
+}
 
-// 紧急程度选项
-export const URGENCY_OPTIONS: { value: UrgencyLevel; label: string; color: string; desc: string }[] = [
-  { value: 'urgent', label: '紧急', color: '#DC2626', desc: '涉及人身安全、群体性事件、违法违纪、媒体曝光风险' },
-  { value: 'high', label: '高优', color: '#EA580C', desc: '涉及薪资、绩效、住宿安全等核心权益' },
-  { value: 'normal', label: '常规', color: '#2563EB', desc: '管理沟通、流程建议、设施报修等' },
-];
-
-// 厂区列表
-export const FACTORY_LIST = [
-  '智能总装一厂',
-  '智能总装二厂',
-  '注塑厂',
-  '质量及运营',
-  '供应链',
-  '其他部门',
-];
-
-// 责任部门列表
-export const RESPONSIBLE_DEPT_LIST: ResponsibleDept[] = [
-  '人力资源部',
-  '行政部',
-  '生产管理部',
-  '质量管理部',
-  '供应链管理部',
-  '厂长办公室',
-  '工会/员工关系',
-];
-
-// 分类映射（用于组件）
-export const CATEGORY_MAP: Record<FeedbackCategory, { label: string; color: string; bgColor: string }> = {
-  performance: { label: '绩效问题', color: '#E8917A', bgColor: '#FEF2F0' },
-  accommodation: { label: '住宿问题', color: '#D4A574', bgColor: '#FDF6EE' },
-  attendance: { label: '考勤问题', color: '#B8A9C9', bgColor: '#F5F0F8' },
-  management: { label: '管理问题', color: '#7FB5B0', bgColor: '#EFF7F6' },
-  salary: { label: '工资问题', color: '#E5A889', bgColor: '#FDF3EE' },
-  dining: { label: '用餐问题', color: '#9DB5A5', bgColor: '#F0F5F2' },
-  rough_manage: { label: '粗暴管理', color: '#C97B6B', bgColor: '#F8EFED' },
-  other: { label: '其他', color: '#A8A099', bgColor: '#F5F3F1' },
-};
-
-// 分类对应的责任部门
-export const DEPARTMENT_RESPONSIBILITY: Record<FeedbackCategory, string[]> = {
-  performance: ['人力资源部', '生产管理部'],
-  accommodation: ['行政部'],
-  attendance: ['生产管理部', '人力资源部'],
-  management: ['厂长办公室', '工会/员工关系'],
-  salary: ['人力资源部'],
-  dining: ['行政部'],
-  rough_manage: ['工会/员工关系', '厂长办公室'],
-  other: ['行政部'],
-};
+export interface Stats {
+  total: number;
+  byCategory: Record<string, number>;
+  byDepartment?: Record<string, number>;
+  byStatus?: Record<string, number>;
+  weeklyTrend?: WeeklyTrend[];
+  totalLikes: number;
+  anonymousCount: number;
+  recentWeek: number;
+}

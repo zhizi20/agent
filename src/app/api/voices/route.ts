@@ -1,33 +1,43 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getAllFeedbacks, createFeedback, getFeedbackStats, getTopIssues, getFeedbacksByCategory } from '@/lib/store';
-import type { FeedbackCategory } from '@/lib/types';
+import { getAllVoices, createVoice, likeVoice, getVoiceById, updateAiReply } from '@/lib/store';
+import { CATEGORY_KEYS } from '@/lib/types';
+import type { VoiceCategory } from '@/lib/types';
 
-const VALID_CATEGORIES: FeedbackCategory[] = ['performance', 'accommodation', 'attendance', 'management', 'salary', 'dining', 'rough_manage', 'other'];
+const VALID_CATEGORIES = CATEGORY_KEYS;
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const category = searchParams.get('category');
-  const factory = searchParams.get('factory');
 
-  let feedbacks = getAllFeedbacks();
-
-  if (category && VALID_CATEGORIES.includes(category as FeedbackCategory)) {
-    feedbacks = feedbacks.filter((f) => f.category === category);
+  if (category && VALID_CATEGORIES.includes(category as VoiceCategory)) {
+    const voices = getAllVoices().filter((v) => v.category === category);
+    return NextResponse.json({ success: true, data: voices });
   }
 
-  if (factory) {
-    feedbacks = feedbacks.filter((f) => f.factory === factory);
-  }
-
-  return NextResponse.json({ success: true, data: feedbacks });
+  const voices = getAllVoices();
+  return NextResponse.json({ success: true, data: voices });
 }
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { category, title, description, department } = body;
+    const { content, category, author, isAnonymous, action } = body;
 
-    if (!description || !description.trim()) {
+    // Like action
+    if (action === 'like') {
+      const { id } = body;
+      if (!id) {
+        return NextResponse.json({ success: false, error: '缺少 id 参数' }, { status: 400 });
+      }
+      const voice = likeVoice(id);
+      if (!voice) {
+        return NextResponse.json({ success: false, error: '心声不存在' }, { status: 404 });
+      }
+      return NextResponse.json({ success: true, data: voice });
+    }
+
+    // Create voice
+    if (!content || !content.trim()) {
       return NextResponse.json({ success: false, error: '内容不能为空' }, { status: 400 });
     }
 
@@ -35,14 +45,43 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: '无效的分类' }, { status: 400 });
     }
 
-    const feedback = createFeedback({
+    if (content.trim().length > 500) {
+      return NextResponse.json({ success: false, error: '内容不能超过500字' }, { status: 400 });
+    }
+
+    const voice = createVoice({
+      content: content.trim(),
       category,
-      title: title || '',
-      description: description.trim(),
-      department: department || '',
+      author: isAnonymous ? '' : (author || '匿名'),
+      isAnonymous: !!isAnonymous,
     });
 
-    return NextResponse.json({ success: true, data: feedback }, { status: 201 });
+    return NextResponse.json({ success: true, data: voice }, { status: 201 });
+  } catch {
+    return NextResponse.json({ success: false, error: '请求解析失败' }, { status: 400 });
+  }
+}
+
+export async function PUT(request: NextRequest) {
+  try {
+    const body = await request.json();
+    const { id, aiReply } = body;
+
+    if (!id) {
+      return NextResponse.json({ success: false, error: '缺少 id 参数' }, { status: 400 });
+    }
+
+    const voice = getVoiceById(id);
+    if (!voice) {
+      return NextResponse.json({ success: false, error: '心声不存在' }, { status: 404 });
+    }
+
+    if (aiReply !== undefined) {
+      const updated = updateAiReply(id, aiReply);
+      return NextResponse.json({ success: true, data: updated });
+    }
+
+    return NextResponse.json({ success: false, error: '无效的操作' }, { status: 400 });
   } catch {
     return NextResponse.json({ success: false, error: '请求解析失败' }, { status: 400 });
   }
