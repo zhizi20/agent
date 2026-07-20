@@ -1,10 +1,13 @@
 'use client';
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { Header } from '@/components/header';
+import Link from 'next/link';
 import { CATEGORY_MAP } from '@/lib/types';
 import type { VoiceCategory } from '@/lib/types';
 import { cn } from '@/lib/utils';
+import { useRole } from '@/contexts/role-context';
+import { RoleVerificationDialog } from '@/components/role-verification-dialog';
+import { Header } from '@/components/header';
 
 // ─── Types ───────────────────────────────────────────────────────
 
@@ -413,12 +416,22 @@ function DeptPieChart({ byDepartment }: { byDepartment: Record<string, number> }
 // ─── Main Page ───────────────────────────────────────────────────
 
 export default function DashboardPage() {
+  const { role, isVerified, setRole } = useRole();
+  const [showVerification, setShowVerification] = useState(false);
   const [stats, setStats] = useState<Stats | null>(null);
   const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisError, setAnalysisError] = useState('');
   const [isLive, setIsLive] = useState(true);
 
+  // Show verification dialog if not verified
+  useEffect(() => {
+    if (!isVerified) {
+      setShowVerification(true);
+    }
+  }, [isVerified]);
+
+  // All hooks must be before any early returns
   const fetchStats = useCallback(async () => {
     try {
       const res = await fetch('/api/stats');
@@ -473,6 +486,31 @@ export default function DashboardPage() {
     if (!stats) return [];
     return Object.entries(stats.byCategory).sort(([, a], [, b]) => b - a).slice(0, 3);
   }, [stats]);
+
+  // Role-based access control - after all hooks
+  if (isVerified && role === 'employee') {
+    return (
+      <div className="min-h-screen bg-[#FAF8F5]">
+        <div className="flex flex-col items-center justify-center min-h-screen px-4">
+          <div className="max-w-md w-full bg-white rounded-2xl shadow-sm border border-[#EDE8E3] p-8 text-center">
+            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-[#FFF5F2] flex items-center justify-center">
+              <span className="text-3xl">🔒</span>
+            </div>
+            <h2 className="text-xl font-semibold text-[#3D3632] mb-3">权限受限</h2>
+            <p className="text-[#8A817A] leading-relaxed mb-6">
+              您好，数据看板为管理层专属权限，仅管理人员可查看全量心声统计与分析内容。您可以使用员工心声墙提交、浏览公开心声。
+            </p>
+            <Link
+              href="/"
+              className="inline-flex items-center justify-center px-6 py-3 rounded-xl bg-[#D4A574] text-white font-medium hover:bg-[#C99560] transition-colors"
+            >
+              返回心声墙
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (!stats) {
     return (
