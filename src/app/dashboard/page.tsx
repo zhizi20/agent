@@ -7,7 +7,6 @@ import type { VoiceCategory } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { useRole } from '@/contexts/role-context';
 import { RoleVerificationDialog } from '@/components/role-verification-dialog';
-import { Header } from '@/components/header';
 import { BatchInput } from '@/components/batch-input';
 
 // ─── Types ───────────────────────────────────────────────────────
@@ -517,7 +516,6 @@ export default function DashboardPage() {
   if (!stats) {
     return (
       <div className="min-h-screen bg-[#FAF8F5]">
-        <Header />
         <div className="pt-20 flex items-center justify-center h-64">
           <div className="animate-pulse text-stone-400">加载中...</div>
         </div>
@@ -527,7 +525,6 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-[#FAF8F5]">
-      <Header />
       <main className="pt-20 pb-16">
         {/* Hero */}
         <div className="bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50 border-b border-amber-100">
