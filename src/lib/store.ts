@@ -1,17 +1,29 @@
 import type { Voice, VoiceCategory } from './types';
 import { SEED_VOICES } from './seed-data';
 
-// In-memory store (server-side only) - initialized with 238 real feedback entries
-let voices: Voice[] = [...SEED_VOICES];
+// Use globalThis to persist the in-memory store across HMR re-evaluations in dev mode.
+// Without this, Next.js dev server HMR resets `voices` back to SEED_VOICES on every
+// module re-evaluation, causing newly created voices to disappear.
+declare global {
+  // eslint-disable-next-line no-var
+  var __voicesStore: Voice[] | undefined;
+}
+
+function getStore(): Voice[] {
+  if (!globalThis.__voicesStore) {
+    globalThis.__voicesStore = [...SEED_VOICES];
+  }
+  return globalThis.__voicesStore;
+}
 
 export function getAllVoices(): Voice[] {
-  return [...voices].sort(
+  return [...getStore()].sort(
     (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
   );
 }
 
 export function getVoiceById(id: string): Voice | undefined {
-  return voices.find((v) => v.id === id);
+  return getStore().find((v) => v.id === id);
 }
 
 export function createVoice(data: {
@@ -33,7 +45,8 @@ export function createVoice(data: {
     createdAt: new Date().toISOString(),
     isBatch: data.isBatch ?? false,
   };
-  voices = [voice, ...voices];
+  // Mutate the global store in-place instead of reassigning
+  getStore().unshift(voice);
   return voice;
 }
 
@@ -48,7 +61,7 @@ export function addVoice(data: {
 }
 
 export function likeVoice(id: string): Voice | undefined {
-  const voice = voices.find((v) => v.id === id);
+  const voice = getStore().find((v) => v.id === id);
   if (voice) {
     voice.likes += 1;
   }
@@ -56,7 +69,7 @@ export function likeVoice(id: string): Voice | undefined {
 }
 
 export function updateAiReply(id: string, reply: string): Voice | undefined {
-  const voice = voices.find((v) => v.id === id);
+  const voice = getStore().find((v) => v.id === id);
   if (voice) {
     voice.aiReply = reply;
   }
@@ -64,7 +77,7 @@ export function updateAiReply(id: string, reply: string): Voice | undefined {
 }
 
 export function updateVoice(id: string, data: { content?: string; category?: VoiceCategory; department?: string; status?: Voice['status'] }): Voice | undefined {
-  const voice = voices.find((v) => v.id === id);
+  const voice = getStore().find((v) => v.id === id);
   if (voice) {
     if (data.content !== undefined) voice.content = data.content;
     if (data.category !== undefined) voice.category = data.category;
@@ -75,16 +88,18 @@ export function updateVoice(id: string, data: { content?: string; category?: Voi
 }
 
 export function deleteVoice(id: string): boolean {
-  const index = voices.findIndex((v) => v.id === id);
+  const store = getStore();
+  const index = store.findIndex((v) => v.id === id);
   if (index !== -1) {
-    voices.splice(index, 1);
+    store.splice(index, 1);
     return true;
   }
   return false;
 }
 
 export function getVoiceStats() {
-  const total = voices.length;
+  const store = getStore();
+  const total = store.length;
   const byCategory: Record<string, number> = {};
   const byDepartment: Record<string, number> = {};
   const byStatus: Record<string, number> = { resolved: 0, unresolved: 0 };
@@ -96,7 +111,7 @@ export function getVoiceStats() {
   // Weekly trend: group by ISO week
   const weeklyMap: Record<string, number> = {};
 
-  for (const v of voices) {
+  for (const v of store) {
     byCategory[v.category] = (byCategory[v.category] || 0) + 1;
     if (v.department) {
       byDepartment[v.department] = (byDepartment[v.department] || 0) + 1;
