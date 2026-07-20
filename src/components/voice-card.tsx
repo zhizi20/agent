@@ -10,9 +10,11 @@ interface VoiceCardProps {
   index: number;
   onLike: (id: string) => void;
   onRequestAiReply: (id: string) => void;
+  onDelete?: (id: string) => void;
+  onUpdate?: (id: string, updates: { content: string; category: VoiceCategory; status?: 'resolved' | 'unresolved' }) => Promise<void>;
 }
 
-export function VoiceCard({ voice, index, onLike, onRequestAiReply }: VoiceCardProps) {
+export function VoiceCard({ voice, index, onLike, onRequestAiReply, onDelete, onUpdate }: VoiceCardProps) {
   const [aiReplyText, setAiReplyText] = useState(voice.aiReply || '');
   const [isStreaming, setIsStreaming] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
@@ -112,9 +114,33 @@ export function VoiceCard({ voice, index, onLike, onRequestAiReply }: VoiceCardP
           </span>
           <span className="text-xs text-muted-foreground">{timeAgo}</span>
         </div>
-        <span className="text-xs text-muted-foreground">
-          {voice.isAnonymous ? '匿名' : voice.author}
-        </span>
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-muted-foreground">
+            {voice.isAnonymous ? '匿名' : voice.author}
+          </span>
+          {(onDelete || onUpdate) && (
+            <div className="flex items-center gap-1">
+              {onUpdate && (
+                <button
+                  onClick={() => onUpdate(voice.id, { content: voice.content, category: voice.category, status: voice.status })}
+                  className="rounded p-1 text-muted-foreground/60 transition-colors hover:bg-muted hover:text-foreground"
+                  title="编辑"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+                </button>
+              )}
+              {onDelete && (
+                <button
+                  onClick={() => onDelete(voice.id)}
+                  className="rounded p-1 text-muted-foreground/60 transition-colors hover:bg-red-50 hover:text-red-500"
+                  title="删除"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                </button>
+              )}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Content */}

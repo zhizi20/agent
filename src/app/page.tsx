@@ -100,6 +100,39 @@ export default function HomePage() {
     // Handled inside VoiceCard
   };
 
+  const handleDelete = async (id: string) => {
+    if (!confirm('确定要删除这条心声吗？')) return;
+    try {
+      const res = await fetch('/api/voices', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setVoices((prev) => prev.filter((v) => v.id !== id));
+      }
+    } catch {
+      throw new Error('删除失败');
+    }
+  };
+
+  const handleUpdate = async (id: string, updates: { content: string; category: VoiceCategory; status?: 'resolved' | 'unresolved' }) => {
+    try {
+      const res = await fetch('/api/voices', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, ...updates }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setVoices((prev) => prev.map((v) => v.id === id ? { ...v, ...updates } : v));
+      }
+    } catch {
+      throw new Error('更新失败');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -217,6 +250,8 @@ export default function HomePage() {
                 index={index}
                 onLike={handleLike}
                 onRequestAiReply={handleRequestAiReply}
+                onDelete={handleDelete}
+                onUpdate={handleUpdate}
               />
             ))}
           </div>

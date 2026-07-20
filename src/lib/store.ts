@@ -62,6 +62,26 @@ export function updateAiReply(id: string, reply: string): Voice | undefined {
   return voice;
 }
 
+export function updateVoice(id: string, data: { content?: string; category?: VoiceCategory; department?: string; status?: Voice['status'] }): Voice | undefined {
+  const voice = voices.find((v) => v.id === id);
+  if (voice) {
+    if (data.content !== undefined) voice.content = data.content;
+    if (data.category !== undefined) voice.category = data.category;
+    if (data.department !== undefined) voice.department = data.department;
+    if (data.status !== undefined) voice.status = data.status;
+  }
+  return voice;
+}
+
+export function deleteVoice(id: string): boolean {
+  const index = voices.findIndex((v) => v.id === id);
+  if (index !== -1) {
+    voices.splice(index, 1);
+    return true;
+  }
+  return false;
+}
+
 export function getVoiceStats() {
   const total = voices.length;
   const byCategory: Record<string, number> = {};
