@@ -5,30 +5,13 @@ import { Header } from '@/components/header';
 import { VoiceCard } from '@/components/voice-card';
 import { VoiceForm } from '@/components/voice-form';
 import { CategoryFilter } from '@/components/category-filter';
-import { BatchInput, BatchResultChart } from '@/components/batch-input';
 import type { Voice, VoiceCategory } from '@/lib/types';
-
-interface BatchResult {
-  voices: Array<{
-    id: string;
-    content: string;
-    category: string;
-  }>;
-  distribution: Array<{
-    category: string;
-    count: number;
-    percentage: number;
-  }>;
-  total: number;
-}
 
 export default function HomePage() {
   const [voices, setVoices] = useState<Voice[]>([]);
   const [category, setCategory] = useState<VoiceCategory | 'all'>('all');
   const [isLoading, setIsLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
-  const [showBatchInput, setShowBatchInput] = useState(false);
-  const [batchResult, setBatchResult] = useState<BatchResult | null>(null);
 
   const fetchVoices = useCallback(async (silent = false) => {
     if (!silent) setIsLoading(true);
@@ -161,18 +144,6 @@ export default function HomePage() {
           <CategoryFilter selected={category} onChange={setCategory} />
           <div className="flex shrink-0 gap-2">
             <button
-              onClick={() => setShowBatchInput(true)}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-border bg-card px-4 py-2.5 text-sm font-medium text-foreground shadow-sm transition-all hover:bg-muted hover:shadow-md active:scale-[0.97]"
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                <polyline points="14 2 14 8 20 8" />
-                <line x1="16" y1="13" x2="8" y2="13" />
-                <line x1="16" y1="17" x2="8" y2="17" />
-              </svg>
-              批量输入
-            </button>
-            <button
               onClick={() => setShowForm(!showForm)}
               className="inline-flex items-center gap-1.5 rounded-xl bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground shadow-sm transition-all hover:shadow-md hover:brightness-105 active:scale-[0.97]"
             >
@@ -184,29 +155,6 @@ export default function HomePage() {
             </button>
           </div>
         </div>
-
-        {/* Batch result chart */}
-        {batchResult && (
-          <div className="mb-8 animate-fade-in-up rounded-2xl border border-border/60 bg-card p-6 shadow-sm">
-            <div className="mb-4 flex items-center justify-between">
-              <div>
-                <h3 className="text-base font-semibold text-foreground">批量输入结果</h3>
-                <p className="text-xs text-muted-foreground">
-                  成功导入 {batchResult.total} 条心声，AI 已自动分类
-                </p>
-              </div>
-              <button
-                onClick={() => setBatchResult(null)}
-                className="rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-              >
-                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-            <BatchResultChart distribution={batchResult.distribution} total={batchResult.total} />
-          </div>
-        )}
 
         {/* Voice form (collapsible) */}
         {showForm && (
@@ -256,18 +204,6 @@ export default function HomePage() {
           </div>
         )}
       </main>
-
-      {/* Batch input modal */}
-      {showBatchInput && (
-        <BatchInput
-          onSuccess={async (result) => {
-            setBatchResult(result);
-            setShowBatchInput(false);
-            await fetchVoices();
-          }}
-          onClose={() => setShowBatchInput(false)}
-        />
-      )}
     </div>
   );
 }

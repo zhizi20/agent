@@ -8,6 +8,7 @@ import { cn } from '@/lib/utils';
 import { useRole } from '@/contexts/role-context';
 import { RoleVerificationDialog } from '@/components/role-verification-dialog';
 import { Header } from '@/components/header';
+import { BatchInput } from '@/components/batch-input';
 
 // ─── Types ───────────────────────────────────────────────────────
 
@@ -423,6 +424,7 @@ export default function DashboardPage() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisError, setAnalysisError] = useState('');
   const [isLive, setIsLive] = useState(true);
+  const [showBatchInput, setShowBatchInput] = useState(false);
 
   // Show verification dialog if not verified
   useEffect(() => {
@@ -551,6 +553,12 @@ export default function DashboardPage() {
                 )}
               >
                 {isLive ? '暂停刷新' : '恢复刷新'}
+              </button>
+              <button
+                onClick={() => setShowBatchInput(true)}
+                className="px-4 py-1.5 rounded-lg text-xs font-medium bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-sm hover:shadow-md transition-all"
+              >
+                批量导入
               </button>
             </div>
           </div>
@@ -976,6 +984,17 @@ export default function DashboardPage() {
           </section>
         </div>
       </main>
+
+      {/* Batch Input Modal */}
+      {showBatchInput && (
+        <BatchInput
+          onConfirm={() => {
+            setShowBatchInput(false);
+            fetchStats();
+          }}
+          onClose={() => setShowBatchInput(false)}
+        />
+      )}
     </div>
   );
 }
