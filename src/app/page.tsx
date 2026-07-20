@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Header } from '@/components/header';
 import { VoiceCard } from '@/components/voice-card';
 import { VoiceForm } from '@/components/voice-form';
 import { CategoryFilter } from '@/components/category-filter';
@@ -117,8 +116,6 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
-
       <main className="mx-auto max-w-5xl px-6 py-8">
         {/* Hero section */}
         <div className="mb-8 text-center">
