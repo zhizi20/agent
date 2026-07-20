@@ -78,7 +78,6 @@ export default function HomePage() {
     content: string;
     category: VoiceCategory;
     author: string;
-    isAnonymous: boolean;
   }) => {
     try {
       const res = await fetch('/api/voices', {

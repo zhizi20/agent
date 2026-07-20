@@ -120,7 +120,7 @@ export function VoiceCard({ voice, index, onLike, onRequestAiReply, onDelete, on
         </div>
         <div className="flex items-center gap-2">
           <span className="text-xs text-muted-foreground">
-            {voice.isAnonymous ? '匿名' : voice.author}
+            {voice.author || '未署名'}
           </span>
           {(onDelete || onUpdate) && (
             <div className="flex items-center gap-1">

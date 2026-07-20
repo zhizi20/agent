@@ -36,13 +36,17 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: true, data: voice });
     }
 
-    // Create voice
+    // Create voice - require author name (real-name policy)
     if (!content || !content.trim()) {
       return NextResponse.json({ success: false, error: '内容不能为空' }, { status: 400 });
     }
 
     if (!category || !VALID_CATEGORIES.includes(category)) {
       return NextResponse.json({ success: false, error: '无效的分类' }, { status: 400 });
+    }
+
+    if (!author || !author.trim()) {
+      return NextResponse.json({ success: false, error: '请输入您的姓名' }, { status: 400 });
     }
 
     if (content.trim().length > 500) {
@@ -52,8 +56,8 @@ export async function POST(request: NextRequest) {
     const voice = createVoice({
       content: content.trim(),
       category,
-      author: isAnonymous ? '' : (author || '匿名'),
-      isAnonymous: !!isAnonymous,
+      author: author.trim(),
+      isAnonymous: false,
     });
 
     return NextResponse.json({ success: true, data: voice }, { status: 201 });
