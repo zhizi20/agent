@@ -60,6 +60,7 @@ export default function HomePage() {
     content: string;
     category: VoiceCategory;
     author: string;
+    role: string;
   }) => {
     try {
       const res = await fetch('/api/voices', {
@@ -71,9 +72,14 @@ export default function HomePage() {
       if (data.success) {
         setVoices((prev) => [data.data, ...prev]);
         setShowForm(false);
+        return { success: true };
+      } else if (data.isDuplicate) {
+        return { success: false, error: data.error, isDuplicate: true };
+      } else {
+        return { success: false, error: data.error };
       }
     } catch {
-      throw new Error('发布失败');
+      return { success: false, error: '发布失败' };
     }
   };
 

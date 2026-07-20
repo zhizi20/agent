@@ -9,7 +9,7 @@ declare global {
   var __voicesStore: Voice[] | undefined;
 }
 
-function getStore(): Voice[] {
+export function getStore(): Voice[] {
   if (!globalThis.__voicesStore) {
     globalThis.__voicesStore = [...SEED_VOICES];
   }

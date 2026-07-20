@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getAllVoices, createVoice, likeVoice, getVoiceById, updateAiReply, updateVoice, deleteVoice } from '@/lib/store';
 import { CATEGORY_KEYS } from '@/lib/types';
 import type { VoiceCategory } from '@/lib/types';
+import { checkDuplicate } from '@/lib/deduplication';
 
 const VALID_CATEGORIES = CATEGORY_KEYS;
 
@@ -51,6 +52,22 @@ export async function POST(request: NextRequest) {
 
     if (content.trim().length > 500) {
       return NextResponse.json({ success: false, error: '内容不能超过500字' }, { status: 400 });
+    }
+
+    // 去重检查（仅对普通员工生效）
+    const role = body.role || 'employee';
+    const dedupResult = checkDuplicate(author.trim(), content.trim(), category, role);
+    
+    if (dedupResult.isDuplicate) {
+      return NextResponse.json(
+        { 
+          success: false, 
+          error: dedupResult.message,
+          isDuplicate: true,
+          existingVoiceId: dedupResult.existingVoiceId
+        }, 
+        { status: 409 }
+      );
     }
 
     const voice = createVoice({

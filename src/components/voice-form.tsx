@@ -10,7 +10,8 @@ interface VoiceFormProps {
     content: string;
     category: VoiceCategory;
     author: string;
-  }) => Promise<void>;
+    role: string;
+  }) => Promise<{ success: boolean; error?: string; isDuplicate?: boolean }>;
 }
 
 export function VoiceForm({ onSubmit }: VoiceFormProps) {
@@ -19,23 +20,37 @@ export function VoiceForm({ onSubmit }: VoiceFormProps) {
   const [author, setAuthor] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [duplicateError, setDuplicateError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!content.trim() || !author.trim() || isSubmitting) return;
 
     setIsSubmitting(true);
+    setDuplicateError(null);
     try {
-      await onSubmit({
+      // Get role from localStorage (set by role verification dialog)
+      const role = typeof window !== 'undefined' 
+        ? (localStorage.getItem('userRole') || 'employee')
+        : 'employee';
+      
+      const result = await onSubmit({
         content: content.trim(),
         category,
         author: author.trim(),
+        role,
       });
-      setContent('');
-      setCategory('performance');
-      setAuthor('');
-      setShowSuccess(true);
-      setTimeout(() => setShowSuccess(false), 3000);
+      
+      if (result.success) {
+        setContent('');
+        setCategory('performance');
+        setAuthor('');
+        setShowSuccess(true);
+        setTimeout(() => setShowSuccess(false), 3000);
+      } else if (result.isDuplicate && result.error) {
+        // Show duplicate error message
+        setDuplicateError(result.error);
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -116,6 +131,13 @@ export function VoiceForm({ onSubmit }: VoiceFormProps) {
           {content.length}/500
         </div>
       </div>
+
+      {/* Duplicate error message */}
+      {duplicateError && (
+        <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 p-4">
+          <p className="text-sm text-amber-800">{duplicateError}</p>
+        </div>
+      )}
 
       {/* Submit */}
       <button
