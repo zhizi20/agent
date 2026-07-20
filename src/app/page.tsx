@@ -122,10 +122,7 @@ export default function HomePage() {
       <main className="mx-auto max-w-5xl px-6 py-8">
         {/* Hero section */}
         <div className="mb-8 text-center">
-          <h1 className="mb-2 text-2xl font-bold tracking-tight text-foreground">
-            员工心声墙
-          </h1>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center justify-center gap-2">
             <p className="text-sm text-muted-foreground">
               每一个声音都值得被听见，每一份心声都会被温柔以待
             </p>
