@@ -18,6 +18,10 @@ export function VoiceCard({ voice, index, onLike, onRequestAiReply, onDelete, on
   const [aiReplyText, setAiReplyText] = useState(voice.aiReply || '');
   const [isStreaming, setIsStreaming] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editContent, setEditContent] = useState(voice.content);
+  const [editCategory, setEditCategory] = useState<VoiceCategory>(voice.category);
+  const [editStatus, setEditStatus] = useState<'resolved' | 'unresolved'>(voice.status || 'unresolved');
 
   const category = CATEGORY_MAP[voice.category];
   const staggerClass = `stagger-${Math.min(index + 1, 6)}`;
@@ -121,15 +125,44 @@ export function VoiceCard({ voice, index, onLike, onRequestAiReply, onDelete, on
           {(onDelete || onUpdate) && (
             <div className="flex items-center gap-1">
               {onUpdate && (
-                <button
-                  onClick={() => onUpdate(voice.id, { content: voice.content, category: voice.category, status: voice.status })}
-                  className="rounded p-1 text-muted-foreground/60 transition-colors hover:bg-muted hover:text-foreground"
-                  title="编辑"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
-                </button>
+                <>
+                  {isEditing ? (
+                    <>
+                      <button
+                        onClick={async () => {
+                          await onUpdate(voice.id, { content: editContent, category: editCategory, status: editStatus });
+                          setIsEditing(false);
+                        }}
+                        className="rounded p-1 text-green-600 transition-colors hover:bg-green-50"
+                        title="保存"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                      </button>
+                      <button
+                        onClick={() => {
+                          setIsEditing(false);
+                          setEditContent(voice.content);
+                          setEditCategory(voice.category);
+                          setEditStatus(voice.status || 'unresolved');
+                        }}
+                        className="rounded p-1 text-muted-foreground/60 transition-colors hover:bg-muted"
+                        title="取消"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                      </button>
+                    </>
+                  ) : (
+                    <button
+                      onClick={() => setIsEditing(true)}
+                      className="rounded p-1 text-muted-foreground/60 transition-colors hover:bg-muted hover:text-foreground"
+                      title="编辑"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+                    </button>
+                  )}
+                </>
               )}
-              {onDelete && (
+              {onDelete && !isEditing && (
                 <button
                   onClick={() => onDelete(voice.id)}
                   className="rounded p-1 text-muted-foreground/60 transition-colors hover:bg-red-50 hover:text-red-500"
@@ -144,9 +177,59 @@ export function VoiceCard({ voice, index, onLike, onRequestAiReply, onDelete, on
       </div>
 
       {/* Content */}
-      <p className="mb-4 leading-relaxed text-foreground/90 text-[15px]">
-        {voice.content}
-      </p>
+      {isEditing ? (
+        <div className="mb-4 space-y-3">
+          <textarea
+            value={editContent}
+            onChange={(e) => setEditContent(e.target.value)}
+            className="w-full rounded-lg border border-border/50 bg-background/50 p-3 text-sm text-foreground/90 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/30 resize-none"
+            rows={3}
+          />
+          <div className="flex flex-wrap gap-2">
+            {(Object.entries(CATEGORY_MAP) as [VoiceCategory, { label: string; icon: string }][]).map(([key, { label, icon }]) => (
+              <button
+                key={key}
+                onClick={() => setEditCategory(key)}
+                className={`rounded-full px-3 py-1 text-xs transition-all ${
+                  editCategory === key
+                    ? 'bg-primary text-primary-foreground shadow-sm'
+                    : 'bg-muted/50 text-muted-foreground hover:bg-muted'
+                }`}
+              >
+                {icon} {label}
+              </button>
+            ))}
+          </div>
+          <div className="flex gap-2">
+            <button
+              onClick={async () => {
+                if (onUpdate) {
+                  await onUpdate(voice.id, { content: editContent, category: editCategory, status: editStatus });
+                }
+                setIsEditing(false);
+              }}
+              className="rounded-lg bg-primary px-4 py-1.5 text-xs text-primary-foreground hover:bg-primary/90"
+            >
+              保存
+            </button>
+            <button
+              onClick={() => {
+                setIsEditing(false);
+                setEditContent(voice.content);
+                setEditCategory(voice.category);
+                setEditStatus(voice.status || 'unresolved');
+              }}
+              className="rounded-lg bg-muted px-4 py-1.5 text-xs text-muted-foreground hover:bg-muted/80"
+            >
+              取消
+            </button>
+          </div>
+        </div>
+      ) : (
+        <p className="mb-4 leading-relaxed text-foreground/90 text-[15px]">
+          {voice.content}
+        </p>
+      )}
 
       {/* AI Reply */}
       {(aiReplyText || isStreaming) && (

@@ -29,6 +29,7 @@ export function createVoice(data: {
     isAnonymous: data.isAnonymous,
     likes: 0,
     aiReply: null,
+    status: 'unresolved',
     createdAt: new Date().toISOString(),
     isBatch: data.isBatch ?? false,
   };
