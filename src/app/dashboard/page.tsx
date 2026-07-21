@@ -568,10 +568,9 @@ export default function DashboardPage() {
           {/* ═══ Section 1: 整体概览 ═══ */}
           <section>
             <SectionTitle num="1" title="整体概览" subtitle="反馈总量、新增趋势与参与情况" />
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               <StatCard label="总反馈量" value={stats.total} sub="累计收集" icon="📊" accent="bg-blue-50 text-blue-600" />
               <StatCard label="本周新增" value={stats.recentWeek} sub="近7天" icon="📈" accent="bg-emerald-50 text-emerald-600" />
-              <StatCard label="匿名反馈" value={stats.anonymousCount} sub={`${((stats.anonymousCount / stats.total) * 100).toFixed(0)}% 匿名率`} icon="🔒" accent="bg-violet-50 text-violet-600" />
               <StatCard label="共鸣次数" value={stats.totalLikes} sub="点赞总计" icon="💬" accent="bg-amber-50 text-amber-600" />
             </div>
             {/* 反馈活跃趋势 + 问题处理状态 */}
