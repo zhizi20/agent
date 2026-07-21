@@ -129,8 +129,8 @@ export function BatchInput({ onConfirm, onClose }: BatchInputProps) {
         }
       }
 
-      if (texts.length > 50) {
-        setError('单次最多处理 50 条心声，当前有 ' + texts.length + ' 条');
+      if (texts.length > 300) {
+        setError('单次最多处理 300 条心声，当前有 ' + texts.length + ' 条');
         setIsProcessing(false);
         return;
       }
@@ -246,7 +246,7 @@ export function BatchInput({ onConfirm, onClose }: BatchInputProps) {
                 className="h-48 w-full resize-none rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
               />
               <p className="mt-1.5 text-xs text-muted-foreground">
-                已识别 {parseTexts(batchText).length} 条心声（最多 50 条）
+                已识别 {parseTexts(batchText).length} 条心声（最多 300 条）
               </p>
             </div>
           )}
