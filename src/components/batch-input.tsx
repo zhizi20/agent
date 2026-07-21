@@ -175,8 +175,14 @@ export function BatchInput({ onConfirm, onClose }: BatchInputProps) {
       });
 
       const data = await res.json();
-      if (data.success) {
-        setAnalysis(data.data);
+      if (data.success && data.data) {
+        setAnalysis({
+          voices: data.data.voices || [],
+          distribution: data.data.distribution || [],
+          urgencyDistribution: data.data.urgencyDistribution || { high: 0, medium: 0, low: 0 },
+          deptDistribution: data.data.deptDistribution || {},
+          total: data.data.total || 0,
+        });
         setPhase('analysis');
       } else {
         setError(data.error || '批量分类失败');
@@ -189,14 +195,14 @@ export function BatchInput({ onConfirm, onClose }: BatchInputProps) {
   };
 
   const handleConfirm = async () => {
-    if (!analysis) return;
+    if (!analysis || !analysis.voices) return;
     setIsConfirming(true);
     try {
       const res = await fetch('/api/batch-input/confirm', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          voices: analysis.voices.map((v) => ({
+          voices: (analysis?.voices || []).map((v) => ({
             content: v.content,
             category: v.category,
             department: v.department,
@@ -426,7 +432,7 @@ export function BatchInput({ onConfirm, onClose }: BatchInputProps) {
           {/* Category Distribution Pie */}
           <div className="rounded-xl bg-stone-50 border border-stone-100 p-4">
             <h4 className="text-sm font-semibold text-stone-700 mb-3">分类分布</h4>
-            <BatchPieChart distribution={analysis.distribution} />
+            <BatchPieChart distribution={analysis.distribution || []} />
           </div>
 
           {/* Department Distribution */}
@@ -455,7 +461,7 @@ export function BatchInput({ onConfirm, onClose }: BatchInputProps) {
         <div className="rounded-xl bg-stone-50 border border-stone-100 p-4 mb-6 max-h-64 overflow-y-auto">
           <h4 className="text-sm font-semibold text-stone-700 mb-3">心声明细</h4>
           <div className="space-y-2">
-            {analysis.voices.map((voice, i) => {
+            {(analysis.voices || []).map((voice, i) => {
               const catInfo = CATEGORY_MAP[voice.category];
               const urgencyColor = voice.urgency === '高' ? 'bg-red-100 text-red-700' : voice.urgency === '中' ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700';
               return (
@@ -533,7 +539,7 @@ function BatchPieChart({ distribution }: { distribution: Array<{ category: strin
   const centerY = 90;
 
   const slices = useMemo(() => {
-    const filtered = distribution.filter((d) => d.count > 0);
+    const filtered = (distribution || []).filter((d) => d.count > 0);
     const sliceStartAngles = filtered.map((_, i) =>
       filtered.slice(0, i).reduce((sum, d) => sum + (d.percentage / 100) * 360, -90)
     );
