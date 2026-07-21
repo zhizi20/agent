@@ -55,6 +55,30 @@ export function BatchInput({ onConfirm, onClose }: BatchInputProps) {
   };
 
   const parseTexts = (text: string): string[] => {
+    // 检查是否为"反馈 #N"格式
+    const hasFeedbackFormat = /^反馈\s*#\d+/m.test(text);
+
+    if (hasFeedbackFormat) {
+      // 按"反馈 #N"分割，提取每个反馈的问题描述
+      const blocks = text.split(/(?=^反馈\s*#\d+)/m).filter((b) => b.trim().length > 0);
+      return blocks
+        .map((block) => {
+          // 提取"问题描述："后的内容
+          const match = block.match(/问题描述[：:]\s*([\s\S]*?)(?:\n(?:处理人|评价分数|评价内容|----------------------------------)|$)/);
+          if (match) {
+            return match[1].trim();
+          }
+          // 如果没有"问题描述"字段，尝试提取"标题："后的内容
+          const titleMatch = block.match(/标题[：:]\s*(.+?)(?:\n|$)/);
+          if (titleMatch) {
+            return titleMatch[1].trim();
+          }
+          return null;
+        })
+        .filter((content): content is string => content !== null && content.length > 0);
+    }
+
+    // 默认格式：一行一条
     return text
       .split(/[\n\r]+/)
       .map((line) => line.trim())
