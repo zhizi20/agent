@@ -2,8 +2,9 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import Link from 'next/link';
-import { CATEGORY_MAP } from '@/lib/types';
+import { CATEGORY_MAP, CATEGORY_KEYS } from '@/lib/types';
 import type { VoiceCategory } from '@/lib/types';
+import InteractivePieChart from '@/components/interactive-pie-chart';
 import { cn } from '@/lib/utils';
 import { useRole } from '@/contexts/role-context';
 import { RoleVerificationDialog } from '@/components/role-verification-dialog';
@@ -56,6 +57,7 @@ const DEPT_COLORS: Record<string, string> = {
   '质量及运营中心': '#D97706',
   '供应链': '#EA580C',
   '其他部门': '#78716C',
+  '未分配': '#A8A29E',
 };
 
 const RISK_COLORS = {
@@ -201,6 +203,26 @@ function StatusChart({ byStatus, total }: { byStatus: Record<string, number>; to
   const resolvedPct = total > 0 ? ((resolved / total) * 100).toFixed(1) : '0';
   const unresolvedPct = total > 0 ? ((unresolved / total) * 100).toFixed(1) : '0';
 
+  const [activeStatus, setActiveStatus] = useState<'resolved' | 'unresolved' | null>(null);
+  const [statusVoices, setStatusVoices] = useState<Array<{ id: string; content: string; category: string; department?: string; author: string; status: string; createdAt: string }>>([]);
+  const [statusLoading, setStatusLoading] = useState(false);
+  const [statusPage, setStatusPage] = useState(0);
+  const statusPerPage = 10;
+
+  const handleStatusClick = useCallback((status: 'resolved' | 'unresolved') => {
+    setActiveStatus((prev) => (prev === status ? null : status));
+    setStatusPage(0);
+    setStatusLoading(true);
+    fetch('/api/voices')
+      .then((r) => r.json())
+      .then((res) => {
+        if (res.success) {
+          setStatusVoices(res.data.filter((v: { status: string; isSensitive?: boolean }) => v.status === status && !v.isSensitive));
+        }
+      })
+      .finally(() => setStatusLoading(false));
+  }, []);
+
   // Donut chart
   const size = 140;
   const cx = size / 2;
@@ -219,35 +241,100 @@ function StatusChart({ byStatus, total }: { byStatus: Record<string, number>; to
     ? `M ${cx} ${cy - r} A ${r} ${r} 0 1 1 ${cx - 0.01} ${cy - r}`
     : `M ${cx} ${cy - r} A ${r} ${r} 0 ${largeArc} 1 ${resolvedX} ${resolvedY}`;
 
+  const statusTotalPages = Math.ceil(statusVoices.length / statusPerPage);
+  const paginatedStatusVoices = statusVoices.slice(statusPage * statusPerPage, (statusPage + 1) * statusPerPage);
+
   return (
-    <div className="flex flex-col items-center">
-      <svg viewBox={`0 0 ${size} ${size}`} className="w-32 h-32">
-        {/* Background ring */}
-        <circle cx={cx} cy={cy} r={r} fill="none" stroke="#e7e5e4" strokeWidth={strokeW} />
-        {/* Resolved arc */}
-        {resolved > 0 && (
-          <path d={resolvedPath} fill="none" stroke="#059669" strokeWidth={strokeW} strokeLinecap="round" />
+    <div>
+      <div className="flex flex-col items-center">
+        <svg viewBox={`0 0 ${size} ${size}`} className="w-32 h-32">
+          {/* Background ring - clickable for unresolved */}
+          <circle
+            cx={cx} cy={cy} r={r} fill="none" stroke={activeStatus === 'unresolved' ? '#f59e0b' : '#e7e5e4'}
+            strokeWidth={strokeW} className="cursor-pointer" onClick={() => handleStatusClick('unresolved')}
+          />
+          {/* Resolved arc - clickable */}
+          {resolved > 0 && (
+            <path
+              d={resolvedPath} fill="none" stroke={activeStatus === 'resolved' ? '#10b981' : '#059669'}
+              strokeWidth={strokeW} strokeLinecap="round" className="cursor-pointer"
+              onClick={() => handleStatusClick('resolved')}
+            />
+          )}
+          {/* Center text */}
+          <text x={cx} y={cy - 6} textAnchor="middle" className="text-lg font-bold fill-stone-800">{total}</text>
+          <text x={cx} y={cy + 10} textAnchor="middle" className="text-[9px] fill-stone-400">总计</text>
+        </svg>
+        <div className="flex gap-6 mt-3">
+          <button
+            onClick={() => handleStatusClick('resolved')}
+            className={`flex items-center gap-2 px-2 py-1 rounded-md transition-colors ${activeStatus === 'resolved' ? 'bg-emerald-50 ring-1 ring-emerald-200' : 'hover:bg-stone-50'}`}
+          >
+            <span className="w-3 h-3 rounded-full bg-emerald-600" />
+            <div className="text-left">
+              <p className="text-sm font-bold text-stone-800">{resolved} <span className="text-xs font-normal text-stone-400">({resolvedPct}%)</span></p>
+              <p className="text-xs text-stone-500">已解决</p>
+            </div>
+          </button>
+          <button
+            onClick={() => handleStatusClick('unresolved')}
+            className={`flex items-center gap-2 px-2 py-1 rounded-md transition-colors ${activeStatus === 'unresolved' ? 'bg-amber-50 ring-1 ring-amber-200' : 'hover:bg-stone-50'}`}
+          >
+            <span className="w-3 h-3 rounded-full bg-stone-300" />
+            <div className="text-left">
+              <p className="text-sm font-bold text-stone-800">{unresolved} <span className="text-xs font-normal text-stone-400">({unresolvedPct}%)</span></p>
+              <p className="text-xs text-stone-500">未解决</p>
+            </div>
+          </button>
+        </div>
+        {!activeStatus && (
+          <p className="text-xs text-stone-400 text-center mt-2">点击查看详细反馈内容</p>
         )}
-        {/* Center text */}
-        <text x={cx} y={cy - 6} textAnchor="middle" className="text-lg font-bold fill-stone-800">{total}</text>
-        <text x={cx} y={cy + 10} textAnchor="middle" className="text-[9px] fill-stone-400">总计</text>
-      </svg>
-      <div className="flex gap-6 mt-3">
-        <div className="flex items-center gap-2">
-          <span className="w-3 h-3 rounded-full bg-emerald-600" />
-          <div>
-            <p className="text-sm font-bold text-stone-800">{resolved} <span className="text-xs font-normal text-stone-400">({resolvedPct}%)</span></p>
-            <p className="text-xs text-stone-500">已解决</p>
-          </div>
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="w-3 h-3 rounded-full bg-stone-300" />
-          <div>
-            <p className="text-sm font-bold text-stone-800">{unresolved} <span className="text-xs font-normal text-stone-400">({unresolvedPct}%)</span></p>
-            <p className="text-xs text-stone-500">未解决</p>
-          </div>
-        </div>
       </div>
+
+      {/* Status detail panel */}
+      {activeStatus && (
+        <div className="mt-4 bg-white rounded-xl border border-stone-200 p-5 shadow-sm animate-in fade-in slide-in-from-top-2 duration-300">
+          <div className="flex items-center justify-between mb-4">
+            <h4 className="font-semibold text-stone-800">
+              {activeStatus === 'resolved' ? '✅ 已解决' : '⏳ 未解决'} 反馈列表
+              <span className="text-sm text-stone-500 ml-2">({statusVoices.length} 条)</span>
+            </h4>
+            <button onClick={() => setActiveStatus(null)} className="text-stone-400 hover:text-stone-600 p-1 rounded-md hover:bg-stone-100">
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+          {statusLoading ? (
+            <div className="text-center py-8 text-stone-400 text-sm">加载中...</div>
+          ) : statusVoices.length === 0 ? (
+            <div className="text-center py-8 text-stone-400 text-sm">暂无反馈内容</div>
+          ) : (
+            <div className="space-y-2 max-h-80 overflow-y-auto pr-1">
+              {paginatedStatusVoices.map((v) => (
+                <div key={v.id} className="flex items-start gap-3 p-3 rounded-lg bg-stone-50 hover:bg-stone-100 transition-colors">
+                  <div className={`mt-1 w-2 h-2 rounded-full flex-shrink-0 ${v.status === 'resolved' ? 'bg-emerald-500' : 'bg-amber-500'}`} />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm text-stone-700 line-clamp-2">{v.content}</p>
+                    <div className="flex items-center gap-2 mt-1">
+                      {v.author && <span className="text-xs text-stone-400">{v.author}</span>}
+                      <span className="text-xs text-stone-300">{new Date(v.createdAt).toLocaleDateString('zh-CN')}</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+          {statusTotalPages > 1 && (
+            <div className="flex items-center justify-center gap-2 mt-3 pt-3 border-t border-stone-100">
+              <button onClick={() => setStatusPage((p) => Math.max(0, p - 1))} disabled={statusPage === 0} className="text-xs px-3 py-1 rounded-md bg-stone-100 text-stone-600 hover:bg-stone-200 disabled:opacity-40 transition-colors">上一页</button>
+              <span className="text-xs text-stone-500">{statusPage + 1} / {statusTotalPages}</span>
+              <button onClick={() => setStatusPage((p) => Math.min(statusTotalPages - 1, p + 1))} disabled={statusPage >= statusTotalPages - 1} className="text-xs px-3 py-1 rounded-md bg-stone-100 text-stone-600 hover:bg-stone-200 disabled:opacity-40 transition-colors">下一页</button>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -287,127 +374,6 @@ function CategoryBar({ label, count, total, color, icon }: {
           className="h-full rounded-full transition-all duration-700 ease-out group-hover:opacity-80"
           style={{ width: `${pct}%`, backgroundColor: color }}
         />
-      </div>
-    </div>
-  );
-}
-
-function CategoryPieChart({ byCategory }: { byCategory: Record<string, number> }) {
-  const total = Object.values(byCategory).reduce((a, b) => a + b, 0);
-
-  const slices = useMemo(() => {
-    if (total === 0) return [];
-    const entries = Object.entries(byCategory)
-      .filter(([, c]) => c > 0)
-      .sort(([, a], [, b]) => b - a);
-    const cumulative = entries.map(([, count], i) => entries.slice(0, i).reduce((s, [, c]) => s + c, 0));
-    return entries.map(([key, count], i) => {
-      const catInfo = CATEGORY_MAP[key as VoiceCategory];
-      return { key, count, start: cumulative[i], end: cumulative[i] + count, color: catInfo?.pieColor || '#999', label: catInfo?.label || key, icon: catInfo?.icon || '📌' };
-    });
-  }, [byCategory, total]);
-
-  if (total === 0) return null;
-
-  const radius = 80;
-  const center = 100;
-
-  function describeArc(startAngle: number, endAngle: number) {
-    const startRad = ((startAngle - 90) * Math.PI) / 180;
-    const endRad = ((endAngle - 90) * Math.PI) / 180;
-    const x1 = center + radius * Math.cos(startRad);
-    const y1 = center + radius * Math.sin(startRad);
-    const x2 = center + radius * Math.cos(endRad);
-    const y2 = center + radius * Math.sin(endRad);
-    const largeArc = endAngle - startAngle > 180 ? 1 : 0;
-    return `M ${center} ${center} L ${x1} ${y1} A ${radius} ${radius} 0 ${largeArc} 1 ${x2} ${y2} Z`;
-  }
-
-  return (
-    <div className="flex flex-col md:flex-row items-center gap-6">
-      <svg viewBox="0 0 200 200" className="w-48 h-48 flex-shrink-0">
-        {slices.map((slice) => {
-          const angle = (slice.count / total) * 360;
-          if (angle >= 360) {
-            return <circle key={slice.key} cx={center} cy={center} r={radius} fill={slice.color} />;
-          }
-          const startAngle = (slice.start / total) * 360;
-          const endAngle = startAngle + angle;
-          return <path key={slice.key} d={describeArc(startAngle, endAngle)} fill={slice.color} stroke="white" strokeWidth="1.5" />;
-        })}
-        <circle cx={center} cy={center} r="40" fill="white" />
-        <text x={center} y={center - 6} textAnchor="middle" className="text-2xl font-bold" fill="#3D3632">{total}</text>
-        <text x={center} y={center + 12} textAnchor="middle" className="text-[10px]" fill="#8A817A">总反馈</text>
-      </svg>
-      <div className="grid grid-cols-2 gap-x-6 gap-y-2 flex-1">
-        {slices.map((slice) => (
-          <div key={slice.key} className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-sm flex-shrink-0" style={{ backgroundColor: slice.color }} />
-            <span className="text-sm text-stone-600 truncate">{slice.icon} {slice.label}</span>
-            <span className="text-sm font-semibold text-stone-800 ml-auto">{slice.count}</span>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function DeptPieChart({ byDepartment }: { byDepartment: Record<string, number> }) {
-  const total = Object.values(byDepartment).reduce((a, b) => a + b, 0);
-
-  const slices = useMemo(() => {
-    if (total === 0) return [];
-    const entries = Object.entries(byDepartment).sort(([, a], [, b]) => b - a);
-    const cumulative = entries.map(([, count], i) => entries.slice(0, i).reduce((s, [, c]) => s + c, 0));
-    return entries.map(([dept, count], i) => {
-      const start = (cumulative[i] / total) * 360;
-      const end = ((cumulative[i] + count) / total) * 360;
-      return { dept, count, start, end, color: DEPT_COLORS[dept] || '#999' };
-    });
-  }, [byDepartment, total]);
-
-  if (total === 0) return null;
-
-  const radius = 80;
-  const center = 100;
-
-  function describeArc(startAngle: number, endAngle: number) {
-    const startRad = ((startAngle - 90) * Math.PI) / 180;
-    const endRad = ((endAngle - 90) * Math.PI) / 180;
-    const x1 = center + radius * Math.cos(startRad);
-    const y1 = center + radius * Math.sin(startRad);
-    const x2 = center + radius * Math.cos(endRad);
-    const y2 = center + radius * Math.sin(endRad);
-    const largeArc = endAngle - startAngle > 180 ? 1 : 0;
-    return `M ${center} ${center} L ${x1} ${y1} A ${radius} ${radius} 0 ${largeArc} 1 ${x2} ${y2} Z`;
-  }
-
-  return (
-    <div className="flex flex-col md:flex-row items-center gap-6">
-      <svg viewBox="0 0 200 200" className="w-48 h-48 flex-shrink-0">
-        {slices.map((slice) => {
-          const angle = slice.end - slice.start;
-          if (angle >= 360) {
-            return <circle key={slice.dept} cx={center} cy={center} r={radius} fill={slice.color} />;
-          }
-          return <path key={slice.dept} d={describeArc(slice.start, slice.end)} fill={slice.color} stroke="white" strokeWidth="1.5" />;
-        })}
-        <circle cx={center} cy={center} r="40" fill="white" />
-        <text x={center} y={center - 6} textAnchor="middle" className="text-2xl font-bold" fill="#3D3632">{total}</text>
-        <text x={center} y={center + 12} textAnchor="middle" className="text-[10px]" fill="#8A817A">总反馈</text>
-      </svg>
-      <div className="flex-1 space-y-2">
-        {slices.map((slice) => {
-          const pct = ((slice.count / total) * 100).toFixed(1);
-          return (
-            <div key={slice.dept} className="flex items-center gap-3">
-              <div className="w-3 h-3 rounded-sm flex-shrink-0" style={{ backgroundColor: slice.color }} />
-              <span className="text-sm text-stone-700 flex-1">{slice.dept}</span>
-              <span className="text-sm font-bold text-stone-800">{slice.count}</span>
-              <span className="text-xs text-stone-400 w-14 text-right">{pct}%</span>
-            </div>
-          );
-        })}
       </div>
     </div>
   );
@@ -631,7 +597,15 @@ export default function DashboardPage() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <div className="bg-white rounded-2xl p-6 border border-stone-200/60 shadow-sm">
                 <h3 className="text-sm font-semibold text-stone-700 mb-4">分类占比</h3>
-                <CategoryPieChart byCategory={stats.byCategory} />
+                <InteractivePieChart
+                  slices={CATEGORY_KEYS.filter((k) => (stats.byCategory[k] || 0) > 0).sort((a, b) => (stats.byCategory[b] || 0) - (stats.byCategory[a] || 0)).map((key) => {
+                    const catInfo = CATEGORY_MAP[key as VoiceCategory];
+                    return { key, label: catInfo?.label || key, count: stats.byCategory[key] || 0, color: catInfo?.pieColor || '#999', icon: catInfo?.icon };
+                  })}
+                  total={Object.values(stats.byCategory).reduce((a, b) => a + b, 0)}
+                  title="分类占比"
+                  filterType="category"
+                />
               </div>
               <div className="bg-white rounded-2xl p-6 border border-stone-200/60 shadow-sm">
                 <h3 className="text-sm font-semibold text-stone-700 mb-4">分类统计</h3>
@@ -891,7 +865,17 @@ export default function DashboardPage() {
             <SectionTitle num="5" title="责任部门分析" subtitle="各部门反馈分布与占比" />
             <div className="bg-white rounded-2xl p-6 border border-stone-200/60 shadow-sm">
               {stats.byDepartment && Object.keys(stats.byDepartment).length > 0 ? (
-                <DeptPieChart byDepartment={stats.byDepartment} />
+                <InteractivePieChart
+                  slices={Object.entries(stats.byDepartment).sort(([, a], [, b]) => b - a).map(([dept, count]) => ({
+                    key: dept,
+                    label: dept,
+                    count,
+                    color: DEPT_COLORS[dept] || '#999',
+                  }))}
+                  total={Object.values(stats.byDepartment).reduce((a, b) => a + b, 0)}
+                  title="部门分布"
+                  filterType="department"
+                />
               ) : (
                 <p className="text-center text-stone-400 py-8">暂无部门数据</p>
               )}

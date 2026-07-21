@@ -10,13 +10,18 @@ const VALID_CATEGORIES = CATEGORY_KEYS;
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const category = searchParams.get('category');
+  const department = searchParams.get('department');
+
+  let voices = getAllVoices();
 
   if (category && VALID_CATEGORIES.includes(category as VoiceCategory)) {
-    const voices = getAllVoices().filter((v) => v.category === category);
-    return NextResponse.json({ success: true, data: voices });
+    voices = voices.filter((v) => v.category === category);
   }
 
-  const voices = getAllVoices();
+  if (department) {
+    voices = voices.filter((v) => (v.department || '未分配') === department);
+  }
+
   return NextResponse.json({ success: true, data: voices });
 }
 
