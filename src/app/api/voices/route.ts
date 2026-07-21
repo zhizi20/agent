@@ -154,8 +154,20 @@ export async function PUT(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
-    const id = searchParams.get('id');
+    let id: string | null = null;
+
+    // Try body first, then query params
+    try {
+      const body = await request.json();
+      id = body.id;
+    } catch {
+      // ignore JSON parse error, try query params
+    }
+
+    if (!id) {
+      const { searchParams } = new URL(request.url);
+      id = searchParams.get('id');
+    }
 
     if (!id) {
       return NextResponse.json({ success: false, error: '缺少 id 参数' }, { status: 400 });
