@@ -419,9 +419,12 @@ export default function DashboardPage() {
   const { role, isVerified, setRole } = useRole();
   const [showVerification, setShowVerification] = useState(false);
   const [stats, setStats] = useState<Stats | null>(null);
-  const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [analysisError, setAnalysisError] = useState('');
+  const [urgencyAnalysis, setUrgencyAnalysis] = useState<AnalysisResult | null>(null);
+  const [insightAnalysis, setInsightAnalysis] = useState<AnalysisResult | null>(null);
+  const [isUrgencyAnalyzing, setIsUrgencyAnalyzing] = useState(false);
+  const [isInsightAnalyzing, setIsInsightAnalyzing] = useState(false);
+  const [urgencyError, setUrgencyError] = useState('');
+  const [insightError, setInsightError] = useState('');
   const [isLive, setIsLive] = useState(true);
   const [showBatchInput, setShowBatchInput] = useState(false);
 
@@ -449,10 +452,10 @@ export default function DashboardPage() {
     return () => clearInterval(id);
   }, [isLive, fetchStats]);
 
-  const runAnalysis = useCallback(async () => {
-    setIsAnalyzing(true);
-    setAnalysisError('');
-    setAnalysis(null);
+  const runUrgencyAnalysis = useCallback(async () => {
+    setIsUrgencyAnalyzing(true);
+    setUrgencyError('');
+    setUrgencyAnalysis(null);
     try {
       const res = await fetch('/api/analysis', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' });
       if (!res.ok || !res.body) throw new Error('分析请求失败');
@@ -475,11 +478,45 @@ export default function DashboardPage() {
       const jsonMatch = accumulated.match(/```json\s*([\s\S]*?)```/);
       const target = jsonMatch ? jsonMatch[1].trim() : accumulated.trim();
       const result = JSON.parse(target) as AnalysisResult;
-      setAnalysis(result);
+      setUrgencyAnalysis(result);
     } catch (err) {
-      setAnalysisError(err instanceof Error ? err.message : '分析失败');
+      setUrgencyError(err instanceof Error ? err.message : '分析失败');
     } finally {
-      setIsAnalyzing(false);
+      setIsUrgencyAnalyzing(false);
+    }
+  }, []);
+
+  const runInsightAnalysis = useCallback(async () => {
+    setIsInsightAnalyzing(true);
+    setInsightError('');
+    setInsightAnalysis(null);
+    try {
+      const res = await fetch('/api/analysis', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' });
+      if (!res.ok || !res.body) throw new Error('分析请求失败');
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let accumulated = '';
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        const chunk = decoder.decode(value, { stream: true });
+        const lines = chunk.split('\n');
+        for (const line of lines) {
+          if (!line.startsWith('data: ')) continue;
+          try {
+            const parsed = JSON.parse(line.slice(6));
+            if (parsed.content) accumulated += parsed.content;
+          } catch { /* skip */ }
+        }
+      }
+      const jsonMatch = accumulated.match(/```json\s*([\s\S]*?)```/);
+      const target = jsonMatch ? jsonMatch[1].trim() : accumulated.trim();
+      const result = JSON.parse(target) as AnalysisResult;
+      setInsightAnalysis(result);
+    } catch (err) {
+      setInsightError(err instanceof Error ? err.message : '分析失败');
+    } finally {
+      setIsInsightAnalyzing(false);
     }
   }, []);
 
@@ -783,7 +820,7 @@ export default function DashboardPage() {
           <section>
             <SectionTitle num="4" title="紧急程度排序" subtitle="基于反馈分类和影响范围的紧急程度判断与责任部门映射" />
             <div className="bg-white rounded-2xl p-6 border border-stone-200/60 shadow-sm">
-              {analysis ? (
+              {urgencyAnalysis ? (
                 <div className="space-y-4">
                   {/* Urgency Legend */}
                   <div className="flex flex-wrap gap-3 mb-4 p-3 rounded-xl bg-stone-50 border border-stone-100">
@@ -796,7 +833,7 @@ export default function DashboardPage() {
                   {(() => {
                     // Sort issues by urgency (高 > 中 > 低)
                     const urgencyOrder = { '高': 0, '中': 1, '低': 2 };
-                    const sortedIssues = [...analysis.issues].sort((a, b) => 
+                    const sortedIssues = [...urgencyAnalysis.issues].sort((a, b) => 
                       (urgencyOrder[a.urgency as keyof typeof urgencyOrder] ?? 3) - (urgencyOrder[b.urgency as keyof typeof urgencyOrder] ?? 3)
                     );
                     return sortedIssues.map((issue, i) => {
@@ -829,7 +866,7 @@ export default function DashboardPage() {
                       );
                     });
                   })()}
-                  {analysis.issues.length === 0 && (
+                  {urgencyAnalysis.issues.length === 0 && (
                     <p className="text-center text-stone-400 py-4">暂无问题数据</p>
                   )}
                 </div>
@@ -837,13 +874,13 @@ export default function DashboardPage() {
                 <div className="text-center py-8">
                   <p className="text-stone-400 text-sm mb-4">通过 AI 分析反馈数据，按紧急程度排序并匹配责任部门</p>
                   <button
-                    onClick={runAnalysis}
-                    disabled={isAnalyzing}
+                    onClick={runUrgencyAnalysis}
+                    disabled={isUrgencyAnalyzing}
                     className="px-6 py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-xl text-sm font-medium shadow-sm hover:shadow-md transition-all disabled:opacity-50"
                   >
-                    {isAnalyzing ? '分析中...' : analysisError ? '重试分析' : '启动 AI 紧急程度分析'}
+                    {isUrgencyAnalyzing ? '分析中...' : urgencyError ? '重试分析' : '启动 AI 紧急程度分析'}
                   </button>
-                  {analysisError && <p className="text-red-500 text-xs mt-2">{analysisError}</p>}
+                  {urgencyError && <p className="text-red-500 text-xs mt-2">{urgencyError}</p>}
                 </div>
               )}
             </div>
@@ -865,24 +902,24 @@ export default function DashboardPage() {
           <section>
             <SectionTitle num="6" title="AI 组织洞察" subtitle="基于全部反馈数据的组织状态评估与改善方向" />
             <div className="bg-white rounded-2xl p-6 border border-stone-200/60 shadow-sm">
-              {analysis ? (
+              {insightAnalysis ? (
                 <div className="space-y-6">
                   {/* Overall Summary */}
                   <div className="p-4 rounded-xl bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-100">
                     <h3 className="text-sm font-bold text-amber-800 mb-2">📋 整体态势</h3>
-                    <p className="text-sm text-stone-700 leading-relaxed">{analysis.summary}</p>
+                    <p className="text-sm text-stone-700 leading-relaxed">{insightAnalysis.summary}</p>
                   </div>
                   {/* Org Insight */}
-                  {analysis.orgInsight && (
+                  {insightAnalysis.orgInsight && (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="p-4 rounded-xl bg-blue-50 border border-blue-100">
                         <h3 className="text-sm font-bold text-blue-800 mb-2">🏢 当前组织状态</h3>
-                        <p className="text-sm text-stone-700 leading-relaxed">{analysis.orgInsight.currentState}</p>
+                        <p className="text-sm text-stone-700 leading-relaxed">{insightAnalysis.orgInsight.currentState}</p>
                       </div>
                       <div className="p-4 rounded-xl bg-violet-50 border border-violet-100">
                         <h3 className="text-sm font-bold text-violet-800 mb-2">🎯 优先改善方向</h3>
                         <div className="space-y-2">
-                          {analysis.orgInsight.priorities.map((p, i) => (
+                          {insightAnalysis.orgInsight.priorities.map((p, i) => (
                             <div key={i} className="flex items-start gap-2 text-sm text-stone-700">
                               <span className="text-violet-500 mt-0.5">▸</span>
                               {p}
@@ -893,11 +930,11 @@ export default function DashboardPage() {
                     </div>
                   )}
                   {/* High-frequency issues */}
-                  {analysis.issues.length > 0 && (
+                  {insightAnalysis.issues.length > 0 && (
                     <div>
                       <h3 className="text-sm font-bold text-stone-700 mb-3">🔥 高频问题详情</h3>
                       <div className="space-y-3">
-                        {analysis.issues.map((issue, i) => {
+                        {insightAnalysis.issues.map((issue, i) => {
                           const urgencyColor = issue.urgency === '高' ? 'bg-red-100 text-red-700' : issue.urgency === '中' ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700';
                           return (
                             <div key={i} className="p-4 rounded-xl border border-stone-100 bg-stone-50/50">
@@ -923,13 +960,13 @@ export default function DashboardPage() {
                 <div className="text-center py-8">
                   <p className="text-stone-400 text-sm mb-4">AI 将综合分析所有反馈数据，生成组织洞察报告</p>
                   <button
-                    onClick={runAnalysis}
-                    disabled={isAnalyzing}
+                    onClick={runInsightAnalysis}
+                    disabled={isInsightAnalyzing}
                     className="px-6 py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-xl text-sm font-medium shadow-sm hover:shadow-md transition-all disabled:opacity-50"
                   >
-                    {isAnalyzing ? '正在分析...' : analysisError ? '重试分析' : '生成 AI 组织洞察'}
+                    {isInsightAnalyzing ? '正在分析...' : insightError ? '重试分析' : '生成 AI 组织洞察'}
                   </button>
-                  {analysisError && <p className="text-red-500 text-xs mt-2">{analysisError}</p>}
+                  {insightError && <p className="text-red-500 text-xs mt-2">{insightError}</p>}
                 </div>
               )}
             </div>
@@ -939,7 +976,7 @@ export default function DashboardPage() {
           <section>
             <SectionTitle num="7" title="管理优化建议" subtitle="短期措施与长期建设方向" />
             <div className="bg-white rounded-2xl p-6 border border-stone-200/60 shadow-sm">
-              {analysis?.managementAdvice ? (
+              {insightAnalysis?.managementAdvice ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <h3 className="text-sm font-bold text-stone-700 mb-3 flex items-center gap-2">
@@ -947,7 +984,7 @@ export default function DashboardPage() {
                       短期措施（1-4 周）
                     </h3>
                     <div className="space-y-2">
-                      {analysis.managementAdvice.shortTerm.map((item, i) => (
+                      {insightAnalysis.managementAdvice.shortTerm.map((item, i) => (
                         <div key={i} className="flex items-start gap-3 p-3 rounded-lg bg-orange-50/50 border border-orange-100">
                           <span className="w-5 h-5 rounded-full bg-orange-100 text-orange-600 text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">{i + 1}</span>
                           <p className="text-sm text-stone-700">{item}</p>
@@ -961,7 +998,7 @@ export default function DashboardPage() {
                       长期建设（1-6 个月）
                     </h3>
                     <div className="space-y-2">
-                      {analysis.managementAdvice.longTerm.map((item, i) => (
+                      {insightAnalysis.managementAdvice.longTerm.map((item, i) => (
                         <div key={i} className="flex items-start gap-3 p-3 rounded-lg bg-blue-50/50 border border-blue-100">
                           <span className="w-5 h-5 rounded-full bg-blue-100 text-blue-600 text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">{i + 1}</span>
                           <p className="text-sm text-stone-700">{item}</p>
@@ -973,7 +1010,7 @@ export default function DashboardPage() {
               ) : (
                 <div className="text-center py-8">
                   <p className="text-stone-400 text-sm">
-                    {analysis ? '管理建议已包含在 AI 组织洞察中' : '请先在上方生成 AI 组织洞察'}
+                    {insightAnalysis ? '管理建议已包含在 AI 组织洞察中' : '请先在上方生成 AI 组织洞察'}
                   </p>
                 </div>
               )}
