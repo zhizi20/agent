@@ -23,8 +23,13 @@ export async function GET(request: NextRequest) {
     voices = voices.filter((v) => (v.department || '未分配') === department);
   }
 
+  // 管理层看板可请求包含敏感内容的数据
+  const includeSensitive = searchParams.get('includeSensitive') === 'true';
+
   // 过滤掉违规内容（不展示给前台），兼容旧的 isSensitive 标记
-  const visibleVoices = voices.filter((v) => !v.isViolation && !v.isSensitive);
+  const visibleVoices = includeSensitive
+    ? voices.filter((v) => !v.isViolation)
+    : voices.filter((v) => !v.isViolation && !v.isSensitive);
 
   // 对展示内容进行敏感信息脱敏
   const desensitizedVoices = visibleVoices.map(desensitizeVoice);

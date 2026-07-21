@@ -29,6 +29,33 @@ interface InteractivePieChartProps {
   filterType: 'category' | 'department';
 }
 
+/* ─── Category metadata for cross-dimension display ─── */
+const CATEGORY_LABELS: Record<string, { label: string; color: string }> = {
+  performance: { label: '绩效问题', color: '#E8917A' },
+  housing: { label: '住宿问题', color: '#7C9A5E' },
+  attendance: { label: '考勤问题', color: '#6B8DB5' },
+  management: { label: '管理问题', color: '#B8A9C9' },
+  salary: { label: '工资问题', color: '#D4A574' },
+  dining: { label: '用餐问题', color: '#E0A458' },
+  rough_management: { label: '粗暴管理', color: '#C75B5B' },
+  training: { label: '培训问题', color: '#0D9488' },
+  office: { label: '办公问题', color: '#0891B2' },
+  commute: { label: '通勤问题', color: '#DB2777' },
+  other: { label: '其他', color: '#9CA3AF' },
+};
+
+const DEPT_COLORS: Record<string, string> = {
+  '智能总装一厂': '#D4A574',
+  '智能总装二厂': '#B8A9C9',
+  '注塑厂': '#7C9A5E',
+  '质量及运营中心': '#6B8DB5',
+  '供应链': '#E0A458',
+  '其他部门': '#9CA3AF',
+  '行政部/后勤部': '#C75B5B',
+  '人力资源部/培训部': '#0D9488',
+  '未分配': '#D1D5DB',
+};
+
 /* ─── Arc helper ─── */
 function describeArc(startAngle: number, endAngle: number, center: number, radius: number) {
   const startRad = ((startAngle - 90) * Math.PI) / 180;
@@ -64,6 +91,7 @@ function SliceDetailPanel({
     } else {
       params.set('department', slice.key);
     }
+    params.set('includeSensitive', 'true');
     fetch(`/api/voices?${params.toString()}`)
       .then((r) => r.json())
       .then((res) => {
@@ -76,6 +104,46 @@ function SliceDetailPanel({
   const unresolved = voices.filter((v) => v.status === 'unresolved').length;
   const resolvedPct = voices.length > 0 ? ((resolved / voices.length) * 100).toFixed(1) : '0';
   const unresolvedPct = voices.length > 0 ? ((unresolved / voices.length) * 100).toFixed(1) : '0';
+
+  /* ─── Cross-dimension breakdown ─── */
+  const crossBreakdown = useMemo(() => {
+    if (voices.length === 0) return [];
+    if (filterType === 'category') {
+      // Show department breakdown within this category
+      const deptMap = new Map<string, number>();
+      for (const v of voices) {
+        const dept = v.department || '未分配';
+        deptMap.set(dept, (deptMap.get(dept) || 0) + 1);
+      }
+      return Array.from(deptMap.entries())
+        .sort(([, a], [, b]) => b - a)
+        .map(([dept, count]) => ({
+          key: dept,
+          label: dept,
+          count,
+          color: DEPT_COLORS[dept] || '#999',
+        }));
+    } else {
+      // Show category breakdown within this department
+      const catMap = new Map<string, number>();
+      for (const v of voices) {
+        catMap.set(v.category, (catMap.get(v.category) || 0) + 1);
+      }
+      return Array.from(catMap.entries())
+        .sort(([, a], [, b]) => b - a)
+        .map(([cat, count]) => {
+          const info = CATEGORY_LABELS[cat];
+          return {
+            key: cat,
+            label: info?.label || cat,
+            count,
+            color: info?.color || '#999',
+          };
+        });
+    }
+  }, [voices, filterType]);
+
+  const crossLabel = filterType === 'category' ? '部门分布' : '分类分布';
 
   const paginatedVoices = voices.slice(page * perPage, (page + 1) * perPage);
   const totalPages = Math.ceil(voices.length / perPage);
@@ -117,22 +185,39 @@ function SliceDetailPanel({
             <span className="text-xs text-stone-400">({unresolvedPct}%)</span>
           </div>
         </div>
-        {/* Progress bar */}
         <div className="h-2.5 rounded-full bg-stone-100 overflow-hidden flex">
           {voices.length > 0 && (
             <>
-              <div
-                className="bg-emerald-500 transition-all duration-500"
-                style={{ width: `${resolvedPct}%` }}
-              />
-              <div
-                className="bg-amber-500 transition-all duration-500"
-                style={{ width: `${unresolvedPct}%` }}
-              />
+              <div className="bg-emerald-500 transition-all duration-500" style={{ width: `${resolvedPct}%` }} />
+              <div className="bg-amber-500 transition-all duration-500" style={{ width: `${unresolvedPct}%` }} />
             </>
           )}
         </div>
       </div>
+
+      {/* Cross-dimension breakdown */}
+      {!loading && crossBreakdown.length > 0 && (
+        <div className="mb-4 pb-4 border-b border-stone-100">
+          <h5 className="text-xs font-semibold text-stone-500 uppercase tracking-wider mb-2">{crossLabel}</h5>
+          <div className="space-y-1.5">
+            {crossBreakdown.map((item) => {
+              const pct = ((item.count / voices.length) * 100).toFixed(1);
+              return (
+                <div key={item.key} className="flex items-center gap-2">
+                  <div className="w-2.5 h-2.5 rounded-sm flex-shrink-0" style={{ backgroundColor: item.color }} />
+                  <span className="text-sm text-stone-600 flex-1 truncate">{item.label}</span>
+                  <span className="text-sm font-semibold text-stone-700">{item.count}</span>
+                  <span className="text-xs text-stone-400 w-12 text-right">{pct}%</span>
+                  {/* Mini bar */}
+                  <div className="w-16 h-1.5 rounded-full bg-stone-100 overflow-hidden flex-shrink-0">
+                    <div className="h-full rounded-full transition-all duration-300" style={{ width: `${pct}%`, backgroundColor: item.color }} />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Voice list */}
       {loading ? (
@@ -154,19 +239,21 @@ function SliceDetailPanel({
               <div className="flex-1 min-w-0">
                 <p className="text-sm text-stone-700 line-clamp-2">{v.content}</p>
                 <div className="flex items-center gap-2 mt-1">
-                  {v.author && (
-                    <span className="text-xs text-stone-400">{v.author}</span>
+                  {v.author && <span className="text-xs text-stone-400">{v.author}</span>}
+                  <span className="text-xs text-stone-300">{new Date(v.createdAt).toLocaleDateString('zh-CN')}</span>
+                  {filterType === 'category' && v.department && (
+                    <span className="text-xs px-1.5 py-0.5 rounded bg-stone-200 text-stone-500">{v.department}</span>
                   )}
-                  <span className="text-xs text-stone-300">
-                    {new Date(v.createdAt).toLocaleDateString('zh-CN')}
-                  </span>
+                  {filterType === 'department' && (
+                    <span className="text-xs px-1.5 py-0.5 rounded bg-stone-200 text-stone-500">
+                      {CATEGORY_LABELS[v.category]?.label || v.category}
+                    </span>
+                  )}
                 </div>
               </div>
               <span
                 className={`text-xs px-2 py-0.5 rounded-full flex-shrink-0 ${
-                  v.status === 'resolved'
-                    ? 'bg-emerald-100 text-emerald-700'
-                    : 'bg-amber-100 text-amber-700'
+                  v.status === 'resolved' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'
                 }`}
               >
                 {v.status === 'resolved' ? '已处理' : '未处理'}
@@ -186,9 +273,7 @@ function SliceDetailPanel({
           >
             上一页
           </button>
-          <span className="text-xs text-stone-500">
-            {page + 1} / {totalPages}
-          </span>
+          <span className="text-xs text-stone-500">{page + 1} / {totalPages}</span>
           <button
             onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
             disabled={page >= totalPages - 1}
@@ -252,7 +337,6 @@ export default function InteractivePieChart({
             const isActive = activeKey === slice.key;
             const angle = endAngle - startAngle;
 
-            // Offset active slice outward
             const midRad = ((midAngle - 90) * Math.PI) / 180;
             const offsetX = isActive ? hoverOffset * Math.cos(midRad) : 0;
             const offsetY = isActive ? hoverOffset * Math.sin(midRad) : 0;

@@ -19,8 +19,8 @@ interface BatchAnalysisResult {
     count: number;
     percentage: number;
   }>;
-  urgencyDistribution: { high: number; medium: number; low: number };
-  deptDistribution: Record<string, number>;
+  urgencyDistribution?: { high: number; medium: number; low: number };
+  deptDistribution?: Record<string, number>;
   total: number;
 }
 
@@ -409,15 +409,15 @@ export function BatchInput({ onConfirm, onClose }: BatchInputProps) {
             <p className="text-xs text-stone-500 mt-1">总条数</p>
           </div>
           <div className="rounded-xl bg-red-50 border border-red-100 p-3 text-center">
-            <p className="text-2xl font-bold text-red-600">{analysis.urgencyDistribution.high}</p>
+            <p className="text-2xl font-bold text-red-600">{analysis.urgencyDistribution?.high ?? 0}</p>
             <p className="text-xs text-stone-500 mt-1">高紧急</p>
           </div>
           <div className="rounded-xl bg-amber-50 border border-amber-100 p-3 text-center">
-            <p className="text-2xl font-bold text-amber-600">{analysis.urgencyDistribution.medium}</p>
+            <p className="text-2xl font-bold text-amber-600">{analysis.urgencyDistribution?.medium ?? 0}</p>
             <p className="text-xs text-stone-500 mt-1">中紧急</p>
           </div>
           <div className="rounded-xl bg-emerald-50 border border-emerald-100 p-3 text-center">
-            <p className="text-2xl font-bold text-emerald-600">{analysis.urgencyDistribution.low}</p>
+            <p className="text-2xl font-bold text-emerald-600">{analysis.urgencyDistribution?.low ?? 0}</p>
             <p className="text-xs text-stone-500 mt-1">低紧急</p>
           </div>
         </div>
@@ -433,18 +433,20 @@ export function BatchInput({ onConfirm, onClose }: BatchInputProps) {
           <div className="rounded-xl bg-stone-50 border border-stone-100 p-4">
             <h4 className="text-sm font-semibold text-stone-700 mb-3">责任部门分布</h4>
             <div className="space-y-2">
-              {Object.entries(analysis.deptDistribution)
-                .sort(([, a], [, b]) => b - a)
-                .map(([dept, count]) => {
-                  const pct = ((count / analysis.total) * 100).toFixed(1);
-                  return (
-                    <div key={dept} className="flex items-center gap-2">
-                      <span className="text-sm text-stone-600 flex-1 truncate">{dept}</span>
-                      <span className="text-sm font-bold text-stone-800">{count}</span>
-                      <span className="text-xs text-stone-400 w-12 text-right">{pct}%</span>
-                    </div>
-                  );
-                })}
+              {analysis.deptDistribution && Object.keys(analysis.deptDistribution).length > 0
+                ? Object.entries(analysis.deptDistribution)
+                    .sort(([, a], [, b]) => b - a)
+                    .map(([dept, count]) => {
+                      const pct = ((count / analysis.total) * 100).toFixed(1);
+                      return (
+                        <div key={dept} className="flex items-center gap-2">
+                          <span className="text-sm text-stone-600 flex-1 truncate">{dept}</span>
+                          <span className="text-sm font-bold text-stone-800">{count}</span>
+                          <span className="text-xs text-stone-400 w-12 text-right">{pct}%</span>
+                        </div>
+                      );
+                    })
+                : <p className="text-sm text-stone-400">暂无部门数据</p>}
             </div>
           </div>
         </div>
