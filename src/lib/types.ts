@@ -42,6 +42,7 @@ export interface Voice {
   isBatch?: boolean;
   status?: VoiceStatus;
   isSensitive?: boolean;
+  isViolation?: boolean;
 }
 
 export interface WeeklyTrend {

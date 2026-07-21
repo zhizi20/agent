@@ -217,7 +217,7 @@ function StatusChart({ byStatus, total }: { byStatus: Record<string, number>; to
       .then((r) => r.json())
       .then((res) => {
         if (res.success) {
-          setStatusVoices(res.data.filter((v: { status: string; isSensitive?: boolean }) => v.status === status && !v.isSensitive));
+          setStatusVoices(res.data.filter((v: { status: string; isSensitive?: boolean; isViolation?: boolean }) => v.status === status && !v.isSensitive && !v.isViolation));
         }
       })
       .finally(() => setStatusLoading(false));

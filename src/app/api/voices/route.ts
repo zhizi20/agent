@@ -3,7 +3,8 @@ import { getAllVoices, createVoice, likeVoice, getVoiceById, updateAiReply, upda
 import { CATEGORY_KEYS } from '@/lib/types';
 import type { VoiceCategory } from '@/lib/types';
 import { checkDuplicate } from '@/lib/deduplication';
-import { checkSensitiveContent, SENSITIVE_BLOCK_MESSAGE } from '@/lib/sensitive-filter';
+import { checkSensitiveContent } from '@/lib/sensitive-filter';
+import { desensitizeVoice } from '@/lib/desensitize';
 
 const VALID_CATEGORIES = CATEGORY_KEYS;
 
@@ -22,7 +23,13 @@ export async function GET(request: NextRequest) {
     voices = voices.filter((v) => (v.department || '未分配') === department);
   }
 
-  return NextResponse.json({ success: true, data: voices });
+  // 过滤掉违规内容（不展示给前台），兼容旧的 isSensitive 标记
+  const visibleVoices = voices.filter((v) => !v.isViolation && !v.isSensitive);
+
+  // 对展示内容进行敏感信息脱敏
+  const desensitizedVoices = visibleVoices.map(desensitizeVoice);
+
+  return NextResponse.json({ success: true, data: desensitizedVoices });
 }
 
 export async function POST(request: NextRequest) {
@@ -76,32 +83,29 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 敏感内容检测（所有用户都检查）
-    const sensitiveResult = checkSensitiveContent(content.trim());
-    
-    // 无论是否敏感，都入库保存（后台统计需要完整数据）
+    // 违规内容审核（所有用户都检查）
+    const violationResult = checkSensitiveContent(content.trim());
+
+    // 如果检测到违规内容，直接拦截不入库
+    if (violationResult.isViolation) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: violationResult.message || '内容包含违规信息，请修改后重新提交',
+          isViolation: true,
+          violationCategory: violationResult.category,
+        },
+        { status: 403 }
+      );
+    }
+
+    // 内容合规，入库保存
     const voice = createVoice({
       content: content.trim(),
       category,
       author: author.trim(),
       isAnonymous: false,
-      isSensitive: sensitiveResult.isSensitive,
     });
-
-    // 如果检测到敏感内容，前台拦截但后台已入库
-    if (sensitiveResult.isSensitive) {
-      return NextResponse.json(
-        { 
-          success: false, 
-          error: SENSITIVE_BLOCK_MESSAGE,
-          isSensitive: true,
-          sensitiveCategory: sensitiveResult.category,
-          // 仍然返回 voice 信息，表示数据已入库
-          data: voice
-        }, 
-        { status: 403 }
-      );
-    }
 
     return NextResponse.json({ success: true, data: voice }, { status: 201 });
   } catch {

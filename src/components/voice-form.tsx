@@ -11,7 +11,7 @@ interface VoiceFormProps {
     category: VoiceCategory;
     author: string;
     role: string;
-  }) => Promise<{ success: boolean; error?: string; isDuplicate?: boolean; isSensitive?: boolean }>;
+  }) => Promise<{ success: boolean; error?: string; isDuplicate?: boolean; isViolation?: boolean }>;
 }
 
 export function VoiceForm({ onSubmit }: VoiceFormProps) {
@@ -21,7 +21,7 @@ export function VoiceForm({ onSubmit }: VoiceFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [duplicateError, setDuplicateError] = useState<string | null>(null);
-  const [sensitiveError, setSensitiveError] = useState<string | null>(null);
+  const [violationError, setViolationError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,7 +29,7 @@ export function VoiceForm({ onSubmit }: VoiceFormProps) {
 
     setIsSubmitting(true);
     setDuplicateError(null);
-    setSensitiveError(null);
+    setViolationError(null);
     try {
       // Get role from localStorage (set by role verification dialog)
       const role = typeof window !== 'undefined' 
@@ -52,9 +52,9 @@ export function VoiceForm({ onSubmit }: VoiceFormProps) {
       } else if (result.isDuplicate && result.error) {
         // Show duplicate error message
         setDuplicateError(result.error);
-      } else if (result.isSensitive && result.error) {
-        // Show sensitive content rejection message
-        setSensitiveError(result.error);
+      } else if (result.isViolation && result.error) {
+        // Show violation rejection message
+        setViolationError(result.error);
       }
     } finally {
       setIsSubmitting(false);
@@ -144,12 +144,12 @@ export function VoiceForm({ onSubmit }: VoiceFormProps) {
         </div>
       )}
 
-      {/* Sensitive content error message */}
-      {sensitiveError && (
+      {/* Violation content error message */}
+      {violationError && (
         <div className="mb-4 rounded-xl border border-red-200 bg-red-50 p-4">
           <div className="flex items-start gap-2">
             <span className="text-lg">⚠️</span>
-            <p className="text-sm text-red-800">{sensitiveError}</p>
+            <p className="text-sm text-red-800">{violationError}</p>
           </div>
         </div>
       )}

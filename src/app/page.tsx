@@ -19,9 +19,7 @@ export default function HomePage() {
       const res = await fetch(url);
       const data = await res.json();
       if (data.success) {
-        // 前台过滤：不展示敏感内容（但后台统计包含）
-        const filteredVoices = data.data.filter((v: Voice) => !v.isSensitive);
-        setVoices(filteredVoices);
+        setVoices(data.data);
       }
     } catch {
       // silently fail
@@ -77,9 +75,8 @@ export default function HomePage() {
         return { success: true };
       } else if (data.isDuplicate) {
         return { success: false, error: data.error, isDuplicate: true };
-      } else if (data.isSensitive) {
-        // 敏感内容被拦截，不添加到前台列表，但数据已入库
-        return { success: false, error: data.error, isSensitive: true };
+      } else if (data.isViolation) {
+        return { success: false, error: data.error, isViolation: true };
       } else {
         return { success: false, error: data.error };
       }
