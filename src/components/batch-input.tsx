@@ -44,10 +44,10 @@ export function BatchInput({ onConfirm, onClose }: BatchInputProps) {
     const selectedFiles = Array.from(e.target.files || []);
     const validFiles = selectedFiles.filter((f) => {
       const ext = f.name.toLowerCase();
-      return ext.endsWith('.txt') || ext.endsWith('.docx') || ext.endsWith('.doc');
+      return ext.endsWith('.txt') || ext.endsWith('.docx') || ext.endsWith('.doc') || ext.endsWith('.xlsx') || ext.endsWith('.xls') || ext.endsWith('.csv') || ext.endsWith('.json');
     });
     if (validFiles.length !== selectedFiles.length) {
-      setError('仅支持 .txt 和 .docx 格式的文件');
+      setError('仅支持 .txt、.docx、.xlsx、.csv、.json 格式的文件');
     } else {
       setError('');
     }
@@ -120,6 +120,38 @@ export function BatchInput({ onConfirm, onClose }: BatchInputProps) {
               setIsProcessing(false);
               return;
             }
+          } else if (ext.endsWith('.csv')) {
+            const content = await file.text();
+            const lines = content.split(/[\n\r]+/).filter((line) => line.trim().length > 0);
+            // Skip header row if present
+            const startIndex = lines[0]?.includes('内容') || lines[0]?.includes('content') ? 1 : 0;
+            for (let i = startIndex; i < lines.length; i++) {
+              const line = lines[i].trim();
+              if (line.length > 0) {
+                // CSV: take the first column or the whole line
+                const parts = line.split(',');
+                const content = parts[0]?.replace(/^["']|["']$/g, '').trim();
+                if (content) texts.push(content);
+              }
+            }
+          } else if (ext.endsWith('.json')) {
+            const content = await file.text();
+            try {
+              const json = JSON.parse(content);
+              const items = Array.isArray(json) ? json : json.data || json.items || [];
+              for (const item of items) {
+                const content = typeof item === 'string' ? item : item.content || item.text || item.voice || item.message || '';
+                if (content && typeof content === 'string') texts.push(content.trim());
+              }
+            } catch {
+              setError(`文件 ${file.name} JSON 格式无效`);
+              setIsProcessing(false);
+              return;
+            }
+          } else if (ext.endsWith('.xlsx') || ext.endsWith('.xls')) {
+            setError('Excel 文件请先另存为 .csv 格式后上传');
+            setIsProcessing(false);
+            return;
           }
         }
         if (texts.length === 0) {
@@ -255,7 +287,7 @@ export function BatchInput({ onConfirm, onClose }: BatchInputProps) {
           {inputMode === 'file' && (
             <div className="mb-5">
               <label className="mb-2 block text-sm font-medium text-foreground">
-                支持 .txt 和 .docx 格式，每行一条心声
+                支持 .txt、.docx、.xlsx、.csv、.json 格式
               </label>
               <div
                 onClick={() => fileInputRef.current?.click()}
@@ -270,7 +302,7 @@ export function BatchInput({ onConfirm, onClose }: BatchInputProps) {
               <input
                 ref={fileInputRef}
                 type="file"
-                accept=".txt,.docx,.doc"
+                accept=".txt,.docx,.doc,.xlsx,.xls,.csv,.json"
                 multiple
                 onChange={handleFileChange}
                 className="hidden"

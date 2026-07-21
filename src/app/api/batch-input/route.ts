@@ -67,9 +67,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (texts.length > 50) {
+    if (texts.length > 300) {
       return NextResponse.json(
-        { success: false, error: '单次最多处理 50 条心声' },
+        { success: false, error: '单次最多处理 300 条心声' },
         { status: 400 }
       );
     }
