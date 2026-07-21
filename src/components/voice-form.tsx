@@ -11,7 +11,7 @@ interface VoiceFormProps {
     category: VoiceCategory;
     author: string;
     role: string;
-  }) => Promise<{ success: boolean; error?: string; isDuplicate?: boolean }>;
+  }) => Promise<{ success: boolean; error?: string; isDuplicate?: boolean; isSensitive?: boolean }>;
 }
 
 export function VoiceForm({ onSubmit }: VoiceFormProps) {
@@ -141,6 +141,16 @@ export function VoiceForm({ onSubmit }: VoiceFormProps) {
       {duplicateError && (
         <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 p-4">
           <p className="text-sm text-amber-800">{duplicateError}</p>
+        </div>
+      )}
+
+      {/* Sensitive content error message */}
+      {sensitiveError && (
+        <div className="mb-4 rounded-xl border border-red-200 bg-red-50 p-4">
+          <div className="flex items-start gap-2">
+            <span className="text-lg">⚠️</span>
+            <p className="text-sm text-red-800">{sensitiveError}</p>
+          </div>
         </div>
       )}
 
