@@ -3,6 +3,7 @@ import { getAllVoices, createVoice, likeVoice, getVoiceById, updateAiReply, upda
 import { CATEGORY_KEYS } from '@/lib/types';
 import type { VoiceCategory } from '@/lib/types';
 import { checkDuplicate } from '@/lib/deduplication';
+import { checkSensitiveContent, SENSITIVE_BLOCK_MESSAGE } from '@/lib/sensitive-filter';
 
 const VALID_CATEGORIES = CATEGORY_KEYS;
 
@@ -70,12 +71,32 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // 敏感内容检测（所有用户都检查）
+    const sensitiveResult = checkSensitiveContent(content.trim());
+    
+    // 无论是否敏感，都入库保存（后台统计需要完整数据）
     const voice = createVoice({
       content: content.trim(),
       category,
       author: author.trim(),
       isAnonymous: false,
+      isSensitive: sensitiveResult.isSensitive,
     });
+
+    // 如果检测到敏感内容，前台拦截但后台已入库
+    if (sensitiveResult.isSensitive) {
+      return NextResponse.json(
+        { 
+          success: false, 
+          error: SENSITIVE_BLOCK_MESSAGE,
+          isSensitive: true,
+          sensitiveCategory: sensitiveResult.category,
+          // 仍然返回 voice 信息，表示数据已入库
+          data: voice
+        }, 
+        { status: 403 }
+      );
+    }
 
     return NextResponse.json({ success: true, data: voice }, { status: 201 });
   } catch {

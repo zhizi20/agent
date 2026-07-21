@@ -41,6 +41,7 @@ export interface Voice {
   createdAt: string;
   isBatch?: boolean;
   status?: VoiceStatus;
+  isSensitive?: boolean;
 }
 
 export interface WeeklyTrend {

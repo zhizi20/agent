@@ -32,6 +32,7 @@ export function createVoice(data: {
   author: string;
   isAnonymous: boolean;
   isBatch?: boolean;
+  isSensitive?: boolean;
 }): Voice {
   const voice: Voice = {
     id: Date.now().toString() + Math.random().toString(36).slice(2, 6),
@@ -44,6 +45,7 @@ export function createVoice(data: {
     status: 'unresolved',
     createdAt: new Date().toISOString(),
     isBatch: data.isBatch ?? false,
+    isSensitive: data.isSensitive ?? false,
   };
   // Mutate the global store in-place instead of reassigning
   getStore().unshift(voice);
@@ -56,6 +58,7 @@ export function addVoice(data: {
   author: string;
   isAnonymous: boolean;
   isBatch?: boolean;
+  isSensitive?: boolean;
 }): Voice {
   return createVoice(data);
 }

@@ -21,6 +21,7 @@ export function VoiceForm({ onSubmit }: VoiceFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [duplicateError, setDuplicateError] = useState<string | null>(null);
+  const [sensitiveError, setSensitiveError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,6 +29,7 @@ export function VoiceForm({ onSubmit }: VoiceFormProps) {
 
     setIsSubmitting(true);
     setDuplicateError(null);
+    setSensitiveError(null);
     try {
       // Get role from localStorage (set by role verification dialog)
       const role = typeof window !== 'undefined' 
@@ -50,6 +52,9 @@ export function VoiceForm({ onSubmit }: VoiceFormProps) {
       } else if (result.isDuplicate && result.error) {
         // Show duplicate error message
         setDuplicateError(result.error);
+      } else if (result.isSensitive && result.error) {
+        // Show sensitive content rejection message
+        setSensitiveError(result.error);
       }
     } finally {
       setIsSubmitting(false);
