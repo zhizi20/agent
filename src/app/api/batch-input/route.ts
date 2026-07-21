@@ -74,46 +74,67 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Format texts for classification
-    const textsFormatted = texts
-      .map((t, i) => `${i}. ${t.trim()}`)
-      .join('\n');
-
     const customHeaders = HeaderUtils.extractForwardHeaders(request.headers);
     const config = new Config();
     const client = new LLMClient(config, customHeaders);
 
-    const messages: { role: 'system' | 'user' | 'assistant'; content: string }[] = [
-      { role: 'user', content: CLASSIFICATION_PROMPT + textsFormatted },
-    ];
+    // Process in batches of 50 to avoid timeout and token limits
+    const BATCH_SIZE = 50;
+    const allClassifications: { index: number; category: string; urgency: string; department: string }[] = [];
 
-    const stream = client.stream(messages, {
-      model: 'doubao-seed-2-0-mini-260215',
-      temperature: 0.3,
-    });
+    for (let batchStart = 0; batchStart < texts.length; batchStart += BATCH_SIZE) {
+      const batchEnd = Math.min(batchStart + BATCH_SIZE, texts.length);
+      const batchTexts = texts.slice(batchStart, batchEnd);
 
-    // Collect streaming response
-    let fullText = '';
-    for await (const part of stream) {
-      if (part.content) {
-        fullText += part.content;
+      const textsFormatted = batchTexts
+        .map((t, i) => `${i}. ${t.trim()}`)
+        .join('\n');
+
+      const messages: { role: 'system' | 'user' | 'assistant'; content: string }[] = [
+        { role: 'user', content: CLASSIFICATION_PROMPT + textsFormatted },
+      ];
+
+      const stream = client.stream(messages, {
+        model: 'doubao-seed-2-0-mini-260215',
+        temperature: 0.3,
+      });
+
+      // Collect streaming response
+      let fullText = '';
+      for await (const part of stream) {
+        if (part.content) {
+          fullText += part.content;
+        }
       }
+
+      // Parse classification results for this batch
+      let batchClassifications: { index: number; category: string; urgency: string; department: string }[];
+      try {
+        const jsonMatch = fullText.match(/\[[\s\S]*\]/);
+        if (jsonMatch) {
+          batchClassifications = JSON.parse(jsonMatch[0]);
+          // Adjust indices to global indices
+          batchClassifications = batchClassifications.map((c) => ({
+            ...c,
+            index: c.index + batchStart,
+          }));
+        } else {
+          throw new Error('No JSON array found in response');
+        }
+      } catch {
+        // If parsing fails for this batch, assign defaults
+        batchClassifications = batchTexts.map((_, i) => ({
+          index: i + batchStart,
+          category: 'other',
+          urgency: '低',
+          department: '综合管理部',
+        }));
+      }
+
+      allClassifications.push(...batchClassifications);
     }
 
-    // Parse classification results
-    let classifications: { index: number; category: string; urgency: string; department: string }[];
-    try {
-      // Extract JSON from the response
-      const jsonMatch = fullText.match(/\[[\s\S]*\]/);
-      if (jsonMatch) {
-        classifications = JSON.parse(jsonMatch[0]);
-      } else {
-        throw new Error('No JSON array found in response');
-      }
-    } catch {
-      // If parsing fails, assign defaults to all
-      classifications = texts.map((_, i) => ({ index: i, category: 'other', urgency: '低', department: '综合管理部' }));
-    }
+    const classifications = allClassifications;
 
     // Build voice entries (NOT saved to store yet - pending user confirmation)
     const pendingVoices: Array<{
