@@ -93,14 +93,17 @@ export default function HomePage() {
     if (!confirm('确定要删除这条心声吗？')) return;
     try {
       const res = await fetch('/api/voices', {
-        method: 'DELETE',
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id }),
+        body: JSON.stringify({ id, action: 'delete' }),
       });
       const data = await res.json();
       if (data.success) {
         setVoices((prev) => prev.filter((v) => v.id !== id));
+        return;
       }
+
+      throw new Error(data.error || '删除失败');
     } catch {
       throw new Error('删除失败');
     }

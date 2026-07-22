@@ -42,7 +42,6 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { content, category, author, isAnonymous, action } = body;
 
-    // Like action
     if (action === 'like') {
       const { id } = body;
       if (!id) {
@@ -53,6 +52,25 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ success: false, error: '心声不存在' }, { status: 404 });
       }
       return NextResponse.json({ success: true, data: voice });
+    }
+
+    if (action === 'delete') {
+      const { id } = body;
+      if (!id) {
+        return NextResponse.json({ success: false, error: '缺少 id 参数' }, { status: 400 });
+      }
+
+      const voice = getVoiceById(id);
+      if (!voice) {
+        return NextResponse.json({ success: false, error: '心声不存在' }, { status: 404 });
+      }
+
+      const deleted = deleteVoice(id);
+      if (!deleted) {
+        return NextResponse.json({ success: false, error: '删除失败' }, { status: 500 });
+      }
+
+      return NextResponse.json({ success: true, message: '删除成功' });
     }
 
     // Create voice - require author name (real-name policy)
