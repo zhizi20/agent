@@ -1,7 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import type { Voice, VoiceCategory } from './types';
-import { SEED_VOICES } from './seed-data';
 
 // JSON file path for persistent storage
 const DATA_DIR = path.join(process.cwd(), 'data');
@@ -16,7 +15,7 @@ function ensureFile(): void {
     fs.mkdirSync(DATA_DIR, { recursive: true });
   }
   if (!fs.existsSync(DATA_FILE)) {
-    fs.writeFileSync(DATA_FILE, JSON.stringify(SEED_VOICES, null, 2), 'utf-8');
+    fs.writeFileSync(DATA_FILE, JSON.stringify([], null, 2), 'utf-8');
   }
 }
 
@@ -27,9 +26,7 @@ function loadFromDisk(): Voice[] {
     const raw = fs.readFileSync(DATA_FILE, 'utf-8');
     cache = JSON.parse(raw) as Voice[];
   } catch {
-    // If file is corrupted, reset to seed data
-    cache = [...SEED_VOICES];
-    saveToDisk();
+    cache = [];
   }
   return cache;
 }

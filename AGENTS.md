@@ -100,7 +100,7 @@
 使用 JSON 文件持久化存储（data/voices.json），数据在服务重启后不会丢失。
 - 存储层：src/lib/store.ts，首次访问时从磁盘加载，每次写操作后自动同步到 JSON 文件
 - 内存缓存：运行时使用内存缓存加速读取，写操作后同时更新缓存和磁盘
-- 初始化：若 data/voices.json 不存在，自动使用种子数据（src/lib/seed-data.ts）初始化
+- 初始化：若 data/voices.json 不存在，自动创建空数组文件，不再使用种子数据初始化
 - data/ 目录已加入 .gitignore，不纳入版本控制
 
 ## 批量导入
