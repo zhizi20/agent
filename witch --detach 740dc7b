@@ -1,0 +1,51 @@
+[33mea9fde6[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m fix: read voices only from data file
+[33m740dc7b[m feat: detele assets
+[33me4ce7fb[m feat: detele
+[33m007c0a2[m[33m ([m[1;31morigin/delete-button[m[33m)[m fix: 修复 BatchInput 组件文件上传时 undefined.map 报错
+[33m126eeed[m fix: 修复 BatchInput 组件 Object.entries 空值报错
+[33m0500721[m feat: 批量导入添加去重机制和并发处理
+[33m825508a[m fix: 批量导入 AI 分类改为分批处理，避免大数据量时解析失败
+[33mbfb5d56[m feat: 批量输入上限改为300条，支持txt/docx/xlsx/csv/json格式
+[33m321c1fe[m fix: 批量输入上限从 50 条调整为 300 条
+[33me535228[m feat: 支持"反馈 #N"格式的批量文件解析
+[33m1efcf26[m fix: 删除数据看板中的"匿名反馈"统计卡片
+[33m08d3995[m feat: 实现内容安全双机制 - 敏感信息脱敏 + 违规内容审核拦截
+[33m1718013[m feat: 心声墙支持删除功能，真实删除 JSON 记录
+[33maff6f10[m feat: 数据看板饼状图可交互，点击查看反馈内容与处理状态占比
+[33m30ef089[m fix: 修复数据看板责任部门分析与总反馈不同步问题
+[33me4e03e4[m feat: 将数据存储从内存改为 JSON 文件持久化
+[33m1f5bf21[m feat: 实现敏感词过滤规则（前台屏蔽、后台留数据）
+[33mcbb2f65[m feat: 保存文件变更
+[33m153be9d[m fix: 分离紧急程度排序与AI组织洞察的独立分析状态
+[33m91a87ab[m feat: 实现普通员工发布去重强制规则
+[33me1305fe[m fix: 移除心声墙页面的重复 Header，保留布局层级的固定导航栏
+[33ma0dd683[m fix: 移除数据看板页面的重复 Header 组件，保留布局层级的单一导航栏
+[33me04ac3b[m fix: 移除心声墙页面重复的标题，保留顶部导航栏的品牌标识
+[33maded42c[m feat: 批量输入迁移至数据看板，增加分析面板与确认/放弃流程
+[33m99c3fe6[m fix: 使用 globalThis 持久化内存存储，修复 HMR 导致心声数据丢失问题
+[33m63b6fe7[m feat: 移除匿名功能，所有心声输入必须实名
+[33m2cc6258[m fix: 修复心声发布后显示不存在及数据看板同步问题
+[33ma9c479c[m feat: 实现心声墙与数据看板实时数据互通（增删改同步）
+[33m4c1fdad[m feat: 实现角色权限系统（普通员工/管理层分级访问控制）
+[33m2628132[m Restored to '792461db238f0ecca45b26ce54c7d517b153afb3'
+[33m228a1b5[m Merge branch 'wt-36650852156930-ffed' into main
+[33m792461d[m feat: 模块四由风险等级分析改为紧急程度排序，按高/中/低排列并展示责任部门与处理建议
+[33med5c547[m feat: 调整看板布局 - Top3移至模块二，模块三重构为三卡片
+[33me6cfced[m feat: 整体概览新增反馈活跃趋势折线图与问题处理状态分布
+[33m78dbf26[m feat: 重构数据看板为企业级组织运营数据分析平台
+[33m4269811[m fix: 批量输入心声立即刷新心声墙，与单个输入一致展示
+[33m1a6f120[m feat: 心声墙与数据看板支持实时数据更新（3秒轮询）
+[33m453c323[m feat: 新增培训问题、办公问题、通勤问题三个分类及对应饼状图配色
+[33ma6b9225[m feat(dashboard): 饼图增加悬停放大动画和点击弹窗交互
+[33m80e8056[m feat(dashboard): 增强数据看板，添加分类切换、饼图、紧急程度排序
+[33mab283ec[m fix: 饼状图使用独立 hex 色值区分各分类，解决 Tailwind 类名无法用于 SVG fill 的问题
+[33m9e5222f[m fix(layout): 添加 Header 导航组件，修复数据看板页面缺少导航的问题
+[33ma51b0cc[m feat: 基于238条真实员工反馈数据重构员工心声助手
+[33mf7747da[m feat(dashboard): 增强数据看板，添加趋势图、热门排行、紧急程度与责任部门分布
+[33m8bf2ea0[m feat: 更新心声分类体系为8类（绩效/住宿/考勤/管理/工资/用餐/粗暴管理/其他）
+[33m360d04e[m feat: 新增批量输入心声功能与数据看板饼状图
+[33m77e4ba6[m feat: 数据看板 AI 分析新增建议责任部门字段
+[33mf6e2726[m feat: 数据看板新增 AI 深度分析（高频问题摘要、紧急程度判断、处理建议）
+[33m56437da[m feat: 实现员工心声助手 - 心声墙、AI暖心回复、数据看板
+[33m28624e2[m chore: init env
+[33m666a0e3[m Initial commit
